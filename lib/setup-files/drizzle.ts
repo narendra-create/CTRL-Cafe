@@ -1,0 +1,1 @@
+//Yahan setup file hoga sab tailwind, drizzle, supabase, next js ka isko bhi touch nahi karna
