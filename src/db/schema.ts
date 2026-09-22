@@ -8,7 +8,6 @@ import {
     numeric,
     boolean,
 } from "drizzle-orm/pg-core";
-
 import { authUsers } from "drizzle-orm/supabase";
 
 export const genderEnum = pgEnum("gender", [
@@ -29,6 +28,11 @@ export const deviceTypeEnum = pgEnum("deviceType", [
     "pc",
     "arcade",
     "vr"
+]);
+
+export const accountTypeEnum = pgEnum("accountType", [
+    "admin",
+    "user"
 ])
 
 export const profiles = pgTable("profiles", {
@@ -46,6 +50,7 @@ export const profiles = pgTable("profiles", {
     avatarurl: text("avatar_url"),
     age: integer("age").notNull(),
     gender: genderEnum("gender"),
+    accounttype: accountTypeEnum("account_type").notNull().default("user"),
 
     /*Timestamps*/
     createdAt: timestamp("created_at", {
