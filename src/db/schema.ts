@@ -73,7 +73,7 @@ export const profiles = pgTable("profiles", {
 });
 
 export const foodItems = pgTable("food_items", {
-    id: uuid().defaultRandom().primaryKey(),
+    id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull().unique(),
     description: text("description"),
     price: numeric("price", {
@@ -91,7 +91,7 @@ export const foodItems = pgTable("food_items", {
 });
 
 export const devices = pgTable("devices", {
-    id: uuid().defaultRandom().primaryKey(),
+    id: uuid("id").defaultRandom().primaryKey(),
     deviceName: text("device_name").notNull().unique(),
     type: deviceTypeEnum("type").notNull(),
     maxPlayers: integer("max_players").notNull(),
@@ -106,7 +106,7 @@ export const devices = pgTable("devices", {
 });
 
 export const timeSlots = pgTable("time_slots", {
-    id: uuid().defaultRandom().primaryKey(),
+    id: uuid("id").defaultRandom().primaryKey(),
     startTime: timestamp("start_time", {
         withTimezone: true
     }).notNull(),
@@ -119,8 +119,8 @@ export const timeSlots = pgTable("time_slots", {
 });
 
 export const bookings = pgTable("bookings", {
-    id: uuid().defaultRandom().primaryKey(),
-    userId: uuid().notNull().references(() => profiles.id),
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("userId").notNull().references(() => profiles.id),
     totalAmount: numeric("total_amount", {
         precision: 10,
         scale: 2

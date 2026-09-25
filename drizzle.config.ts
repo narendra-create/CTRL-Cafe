@@ -11,4 +11,7 @@ export default defineConfig({
     schemaFilter: ["public"], // don't let drizzle touch Supabase's own schemas
     verbose: true,
     strict: true,
+    entities: {
+        roles: { provider: "supabase" }
+    }
 });
