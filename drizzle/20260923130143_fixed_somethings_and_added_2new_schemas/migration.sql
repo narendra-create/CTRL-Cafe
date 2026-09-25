@@ -61,3 +61,5 @@ CREATE TABLE "time_slots" (
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_userId_profiles_id_fkey" FOREIGN KEY ("userId") REFERENCES "profiles"("id");--> statement-breakpoint
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_booked_device_devices_id_fkey" FOREIGN KEY ("booked_device") REFERENCES "devices"("id");--> statement-breakpoint
 ALTER TABLE "profiles" ADD CONSTRAINT "profiles_id_users_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+-- 👇 RLS STARTS HERE
