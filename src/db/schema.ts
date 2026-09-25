@@ -112,7 +112,7 @@ export const timeSlots = pgTable("time_slots", {
     }).notNull(),
     endTime: timestamp("end_time", {
         withTimezone: true
-    }),
+    }).notNull(),
     availableDevices: deviceTypeEnum("available_devices").array().notNull(),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

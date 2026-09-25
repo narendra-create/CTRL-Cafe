@@ -1,0 +1,1 @@
+ALTER TABLE "time_slots" ALTER COLUMN "end_time" SET NOT NULL;
