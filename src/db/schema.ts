@@ -8,7 +8,8 @@ import {
     numeric,
     boolean,
     date,
-    pgPolicy
+    pgPolicy,
+    index
 } from "drizzle-orm/pg-core";
 import { authUsers, authUid, authenticatedRole } from "drizzle-orm/supabase";
 import { sql } from "drizzle-orm";
@@ -88,7 +89,9 @@ export const profiles = pgTable("profiles", {
         for: "insert",
         to: authenticatedRole,
         withCheck: sql`${authUid} = ${table.id}`
-    })
+    }),
+
+    // --- indexes ---
 ]);
 
 export const foodItems = pgTable("food_items", {
@@ -133,7 +136,10 @@ export const foodItems = pgTable("food_items", {
             WHERE id = ${authUid}
             AND account_type = 'admin'
         )`
-        })
+        }),
+
+        //Indexes
+        index("fooditems_availability_idx").on(table.isAvailable)
     ]
 );
 
@@ -191,7 +197,10 @@ export const devices = pgTable("devices", {
             WHERE id = ${authUid}
             AND account_type = 'admin'
         )`
-    })
+    }),
+
+    //Indexes
+    index("device_type_index").on(table.type)
 ]);
 
 export const timeSlots = pgTable("time_slots", {
@@ -246,7 +255,11 @@ export const timeSlots = pgTable("time_slots", {
             WHERE id = ${authUid}
             AND account_type = 'admin'
         )`
-    })
+    }),
+
+    //Indexes
+    index("time_start_idx").on(table.startTime),
+    index("time_end_idx").on(table.endTime)
 ]);
 
 export const bookings = pgTable("bookings", {
@@ -310,6 +323,11 @@ export const bookings = pgTable("bookings", {
             WHERE id = ${authUid}
             AND account_type = 'admin'
         )`
-        })
+        }),
+
+        //Indexes
+        index("booking_device_idx").on(table.bookedDevice),
+        index("booking_user_status_idx").on(table.userId, table.bookingStatus),
+        index("booking_start_idx").on(table.startTime)
     ]
 )
