@@ -8,8 +8,10 @@ import {
     numeric,
     boolean,
     date,
+    pgPolicy
 } from "drizzle-orm/pg-core";
-import { authUsers } from "drizzle-orm/supabase";
+import { authUsers, authUid, authenticatedRole } from "drizzle-orm/supabase";
+import { sql } from "drizzle-orm";
 
 export const genderEnum = pgEnum("gender", [
     "male",
@@ -70,7 +72,24 @@ export const profiles = pgTable("profiles", {
         .defaultNow()
         .notNull()
         .$onUpdate(() => new Date()),
-});
+}, (table) => [
+    pgPolicy("users_can_select_their_profile", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`${authUid} = ${table.id}`
+    }),
+    pgPolicy("users_can_update_their_profile", {
+        for: "update",
+        to: authenticatedRole,
+        using: sql`${authUid} = ${table.id}`,
+        withCheck: sql`${authUid} = ${table.id}`
+    }),
+    pgPolicy("users_insert_own_profile", {
+        for: "insert",
+        to: authenticatedRole,
+        withCheck: sql`${authUid} = ${table.id}`
+    })
+]);
 
 export const foodItems = pgTable("food_items", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -88,7 +107,35 @@ export const foodItems = pgTable("food_items", {
     createdAt: timestamp("created_at", {
         withTimezone: true,
     }).defaultNow().notNull(),
-});
+},
+    (table) => [
+        pgPolicy("all_users_can_see", {
+            for: "select",
+            to: authenticatedRole,
+            using: sql`true`
+        }),
+        pgPolicy("only_admins_can_add", {
+            for: "insert",
+            to: authenticatedRole,
+            withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        }),
+        pgPolicy("only_admins_can_delete", {
+            for: "delete",
+            to: authenticatedRole,
+            using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        })
+    ]
+);
 
 export const devices = pgTable("devices", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -103,7 +150,49 @@ export const devices = pgTable("devices", {
         precision: 5,
         scale: 2
     }),
-});
+}, (table) => [
+    pgPolicy("all_users_can_see_devices", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`true` // means no rls for select
+    }),
+    pgPolicy("only_admins_can_insert", {
+        for: "insert",
+        to: authenticatedRole,
+        withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_delete", {
+        for: "delete",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_update", {
+        for: "update",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`,
+        withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    })
+]);
 
 export const timeSlots = pgTable("time_slots", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -116,7 +205,49 @@ export const timeSlots = pgTable("time_slots", {
     availableDevices: deviceTypeEnum("available_devices").array().notNull(),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => [
+    pgPolicy("anyone_can_see", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`true`
+    }),
+    pgPolicy("only_admins_can_add", {
+        for: "insert",
+        to: authenticatedRole,
+        withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_update", {
+        for: "update",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`,
+        withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_delete", {
+        for: "delete",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    })
+]);
 
 export const bookings = pgTable("bookings", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -132,8 +263,53 @@ export const bookings = pgTable("bookings", {
     bookedDevice: uuid("booked_device").notNull().references(() => devices.id),
     playersCount: integer("players_count").notNull().default(1),
     bookingStatus: bookingStatusEnum("booking_status").notNull().default("pending"),
+    isArchived: boolean("is_archived").notNull().default(false),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull().$onUpdate(() => new Date()),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
-})
+},
+    (table) => [
+        pgPolicy("users_can_book_for_their_own", {
+            for: "insert",
+            to: authenticatedRole,
+            withCheck: sql`${authUid} = ${table.userId}`
+        }),
+        pgPolicy("users_can_see_their_bookings", {
+            for: "select",
+            to: authenticatedRole,
+            using: sql`${authUid} = ${table.userId}`
+        }),
+        pgPolicy("users_can_update_their_bookings", {
+            for: "update",
+            to: authenticatedRole,
+            using: sql`${authUid} = ${table.userId} AND ${table.bookingStatus} = 'pending'`,
+            withCheck: sql`${authUid} = ${table.userId}`
+        }),
+        pgPolicy("admins_can_see_all_bookings", {
+            for: "select",
+            to: authenticatedRole,
+            using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid} 
+            AND account_type = 'admin'
+        )`}),
+        pgPolicy("admins_can_edit_all_bookings", {
+            for: "update",
+            to: authenticatedRole,
+            using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`,
+            withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        })
+    ]
+)
