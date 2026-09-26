@@ -9,7 +9,8 @@ import {
     boolean,
     date,
     pgPolicy,
-    index
+    index,
+    check
 } from "drizzle-orm/pg-core";
 import { authUsers, authUid, authenticatedRole } from "drizzle-orm/supabase";
 import { sql } from "drizzle-orm";
@@ -139,7 +140,11 @@ export const foodItems = pgTable("food_items", {
         }),
 
         //Indexes
-        index("fooditems_availability_idx").on(table.isAvailable)
+        index("fooditems_availability_idx").on(table.isAvailable),
+
+        //Checks
+        check("food_item_price_valid", sql`${table.price} >= 0`),
+        check("food_item_serving_valid", sql`${table.serves} >= 1`)
     ]
 );
 
@@ -200,7 +205,11 @@ export const devices = pgTable("devices", {
     }),
 
     //Indexes
-    index("device_type_index").on(table.type)
+    index("device_type_index").on(table.type),
+
+    //Checks
+    check("device_price_valid", sql`${table.hourlyRate} >= 0`),
+    check("device_players_valid", sql`${table.maxPlayers} >= 0`)
 ]);
 
 export const timeSlots = pgTable("time_slots", {
@@ -259,7 +268,10 @@ export const timeSlots = pgTable("time_slots", {
 
     //Indexes
     index("time_start_idx").on(table.startTime),
-    index("time_end_idx").on(table.endTime)
+    index("time_end_idx").on(table.endTime),
+
+    //Checks
+    check("time_valid", sql`${table.startTime} < ${table.endTime}`)
 ]);
 
 export const bookings = pgTable("bookings", {
@@ -328,6 +340,11 @@ export const bookings = pgTable("bookings", {
         //Indexes
         index("booking_device_idx").on(table.bookedDevice),
         index("booking_user_status_idx").on(table.userId, table.bookingStatus),
-        index("booking_start_idx").on(table.startTime)
+        index("booking_start_idx").on(table.startTime),
+
+        //Checks
+        check("booking_time_valid", sql`${table.startTime} < ${table.endTime}`),
+        check("booking_price_valid", sql`${table.totalAmount} >= 0`),
+        check("booking_playercount_valid", sql`${table.playersCount} >= 0`)
     ]
 )
