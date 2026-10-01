@@ -40,6 +40,17 @@ export default function LoginPage() {
     });
   };
 
+  const handleDiscordSignIn = async () => {
+    setLoading(true);
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  };
+
   return (
     <div className="min-h-[100dvh] bg-[#15191a] md:bg-[#d8d1c5] dark:md:bg-[#0a0a0a] md:p-[clamp(14px,3vw,38px)] block md:grid md:place-items-center font-sans transition-colors duration-300">
       <main className="w-full max-w-[1180px] min-h-screen md:min-h-[min(760px,calc(100vh-28px))] block md:grid md:grid-cols-[1.04fr_0.96fr] bg-[#15191a] md:rounded-[28px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] relative">
@@ -279,6 +290,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   className="border border-[#d8d3ca] dark:border-white/10 bg-transparent rounded-[11px] p-[12px_9px] text-[#404641] dark:text-[#c5c4bb] text-[12px] font-[700] cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-[8px]"
+                  onClick={handleDiscordSignIn}
                 >
                   <svg
                     width="16"
