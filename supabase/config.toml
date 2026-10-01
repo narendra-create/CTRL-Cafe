@@ -357,9 +357,14 @@ enabled = false
 
 [auth.external.google]
 enabled = true
-client_id = "<client-id>"
+client_id = "341786512703-qk8tpvf8jb4s5ht6godt9cjovr7addu3.apps.googleusercontent.com"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"
 skip_nonce_check = false
+
+[auth.external.discord]
+enabled = true
+client_id = "1555163199232278551"
+secret = "env(SUPABASE_AUTH_EXTERNAL_DISCORD_SECRET)"
 
 # Use Clerk as a third-party provider alongside Supabase Auth.
 [auth.third_party.clerk]
