@@ -355,6 +355,12 @@ enabled = false
 # user_pool_id = "my-user-pool-id"
 # user_pool_region = "us-east-1"
 
+[auth.external.google]
+enabled = true
+client_id = "<client-id>"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = false
+
 # Use Clerk as a third-party provider alongside Supabase Auth.
 [auth.third_party.clerk]
 enabled = false
