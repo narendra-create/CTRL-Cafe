@@ -76,7 +76,7 @@ export default function LoginPage() {
             <p className="text-[#FACC15] text-[11px] tracking-[0.16em] uppercase font-[800] m-0 mb-[18px]">
               Your seat is waiting
             </p>
-            <h1 className="text-[38px] min-[370px]:text-[42px] md:text-[clamp(42px,5.2vw,76px)] leading-[0.93] tracking-[-0.075em] m-0 mb-[12px] md:mb-[23px] font-[850]">
+            <h1 className="text-[38px] min-[370px]:text-[42px] md:text-[clamp(42px,5.2vw,76px)] leading-[0.93] tracking-[-0.075em] m-0 mb-[12px] md:mb-[23px] font-[680]">
               Play more.
               <br />
               <em className="not-italic text-[#ff876d]">Stay awhile.</em>
