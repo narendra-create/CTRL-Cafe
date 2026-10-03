@@ -16,30 +16,36 @@ export function otpVerificationEmail({
   const digitBoxes = digits
     .map(
       (d) => `
-      <td style="padding:0 4px;">
-        <div style="
-          width:44px;
-          height:52px;
-          background:#1a2120;
-          border:1.5px solid rgba(250,204,21,0.35);
-          border-radius:10px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-size:26px;
-          font-weight:800;
-          color:#FACC15;
-          letter-spacing:0;
-          line-height:52px;
-          text-align:center;
-          font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        ">${d}</div>
+      <td style="padding:0 3px;">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td
+              width="46"
+              height="54"
+              align="center"
+              valign="middle"
+              style="
+                width:46px;
+                height:54px;
+                background:#1b211f;
+                border:1px solid rgba(250,204,21,0.22);
+                border-radius:12px;
+                color:#FACC15;
+                font-size:24px;
+                font-weight:800;
+                line-height:54px;
+                text-align:center;
+                font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+              "
+            >${d}</td>
+          </tr>
+        </table>
       </td>`
     )
     .join("");
 
   const greeting = userName
-    ? `Hey <strong style="color:#f7f3ed;">${userName}</strong>,`
+    ? `Hey <strong style="color:#f4f1e9;font-weight:650;">${userName}</strong>,`
     : `Hey there,`;
 
   const html = `<!DOCTYPE html>
@@ -51,52 +57,70 @@ export function otpVerificationEmail({
   <title>Your CTRL-CAFE verification code</title>
   <!--[if mso]>
   <noscript>
-    <xml><o:OfficeDocumentSettings>
-      <o:PixelsPerInch>96</o:PixelsPerInch>
-    </o:OfficeDocumentSettings></xml>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
   </noscript>
   <![endif]-->
 </head>
 <body style="
   margin:0;
   padding:0;
-  background-color:#0d1111;
+  background-color:#0b0f0f;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
 ">
 
   <!-- Outer wrapper -->
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0d1111;min-height:100vh;">
+  <table
+    width="100%"
+    cellpadding="0"
+    cellspacing="0"
+    border="0"
+    role="presentation"
+    style="width:100%;background-color:#0b0f0f;"
+  >
     <tr>
-      <td align="center" style="padding:40px 16px 60px;">
+      <td align="center" style="padding:34px 16px 48px;">
 
         <!-- Card -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+        <table
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+          border="0"
+          role="presentation"
+          style="width:100%;max-width:520px;"
+        >
 
           <!-- ── Logo row ── -->
           <tr>
-            <td align="center" style="padding-bottom:32px;">
-              <table cellpadding="0" cellspacing="0" border="0">
+            <td align="center" style="padding:0 0 22px;">
+              <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                 <tr>
-                  <td style="padding-right:10px;vertical-align:middle;">
+                  <td style="padding-right:9px;vertical-align:middle;">
                     <!-- Yellow icon square -->
                     <div style="
-                      width:36px;height:36px;
+                      width:32px;
+                      height:32px;
                       background:#FACC15;
-                      border-radius:10px 10px 10px 3px;
+                      border-radius:9px 9px 9px 3px;
                       display:inline-block;
                       transform:rotate(-6deg);
-                      line-height:36px;
+                      line-height:32px;
                       text-align:center;
-                      font-size:18px;
+                      font-size:16px;
+                      font-family:Arial,sans-serif;
                     ">☕</div>
                   </td>
                   <td style="vertical-align:middle;">
                     <span style="
-                      font-size:17px;
+                      font-size:16px;
                       font-weight:800;
-                      letter-spacing:-0.03em;
-                      color:#f7f3ed;
+                      letter-spacing:-0.025em;
+                      color:#f4f1e9;
                     ">CTRL-CAFE</span>
                   </td>
                 </tr>
@@ -107,105 +131,118 @@ export function otpVerificationEmail({
           <!-- ── Main card ── -->
           <tr>
             <td style="
-              background:linear-gradient(160deg,#181e1e 0%,#131919 100%);
-              border:1px solid rgba(255,255,255,0.07);
-              border-radius:22px;
+              background:#151b1a;
+              border:1px solid rgba(255,255,255,0.08);
+              border-radius:18px;
               overflow:hidden;
             ">
 
               <!-- Yellow top accent bar -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
                 <tr>
                   <td style="
                     height:3px;
-                    background:linear-gradient(90deg,transparent,#FACC15 30%,#FACC15 70%,transparent);
-                  "></td>
+                    background:#FACC15;
+                    font-size:0;
+                    line-height:0;
+                  ">&nbsp;</td>
                 </tr>
               </table>
 
               <!-- Card body -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
                 <tr>
-                  <td style="padding:40px 40px 36px;">
+                  <td style="padding:36px 38px 34px;">
 
                     <!-- Lock icon badge -->
-                    <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+                    <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:20px;">
                       <tr>
                         <td style="
-                          width:54px;height:54px;
-                          background:rgba(250,204,21,0.10);
-                          border:1.5px solid rgba(250,204,21,0.22);
-                          border-radius:14px;
+                          width:48px;
+                          height:48px;
+                          background:#1d211d;
+                          border:1px solid rgba(250,204,21,0.18);
+                          border-radius:13px;
                           text-align:center;
-                          line-height:54px;
-                          font-size:24px;
+                          line-height:48px;
+                          font-size:21px;
                         ">🔐</td>
                       </tr>
                     </table>
 
                     <!-- Eyebrow -->
                     <p style="
-                      margin:0 0 8px;
+                      margin:0 0 7px;
                       font-size:10px;
                       font-weight:800;
-                      letter-spacing:0.18em;
+                      letter-spacing:0.16em;
                       text-transform:uppercase;
                       color:#FACC15;
                     ">Email Verification</p>
 
                     <!-- Heading -->
                     <h1 style="
-                      margin:0 0 16px;
-                      font-size:28px;
-                      font-weight:850;
-                      letter-spacing:-0.05em;
-                      line-height:1.1;
-                      color:#f7f3ed;
-                    ">Verify your email<br/>to grab your seat.</h1>
+                      margin:0 0 14px;
+                      font-size:27px;
+                      font-weight:800;
+                      letter-spacing:-0.045em;
+                      line-height:1.14;
+                      color:#f4f1e9;
+                    ">Verify your email<br />to grab your seat.</h1>
 
                     <!-- Greeting -->
                     <p style="
-                      margin:0 0 28px;
-                      font-size:15px;
+                      margin:0 0 24px;
+                      font-size:14px;
                       line-height:1.65;
-                      color:#8a9490;
+                      color:#8f9894;
                     ">
-                      ${greeting} use the code below to verify your
-                      email address and finish creating your CTRL&#8209;CAFE account.
-                      This code expires in <strong style="color:#c5c4bb;">${expiresInMinutes} minutes</strong>.
+                      ${greeting} use the code below to verify your email address and
+                      finish creating your CTRL&#8209;CAFE account.
+                      This code expires in
+                      <strong style="color:#c7c7bf;font-weight:650;">${expiresInMinutes} minutes</strong>.
                     </p>
 
                     <!-- OTP boxes -->
-                    <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
-                      <tr>${digitBoxes}</tr>
+                    <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin:0 auto 26px;">
+                      <tr>
+                        ${digitBoxes}
+                      </tr>
                     </table>
 
                     <!-- Divider -->
-                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:20px;">
                       <tr>
-                        <td style="height:1px;background:rgba(255,255,255,0.07);"></td>
+                        <td style="height:1px;background:rgba(255,255,255,0.07);font-size:0;line-height:0;">&nbsp;</td>
                       </tr>
                     </table>
 
                     <!-- Warning note -->
-                    <table cellpadding="0" cellspacing="0" border="0" style="
-                      background:rgba(250,204,21,0.06);
-                      border:1px solid rgba(250,204,21,0.14);
-                      border-radius:12px;
-                      margin-bottom:28px;
-                      width:100%;
-                    ">
+                    <table
+                      cellpadding="0"
+                      cellspacing="0"
+                      border="0"
+                      role="presentation"
+                      width="100%"
+                      style="
+                        width:100%;
+                        background:#191d19;
+                        border:1px solid rgba(250,204,21,0.12);
+                        border-radius:11px;
+                        margin-bottom:24px;
+                      "
+                    >
                       <tr>
-                        <td style="padding:14px 16px;">
-                          <table cellpadding="0" cellspacing="0" border="0">
+                        <td style="padding:12px 14px;">
+                          <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                             <tr>
-                              <td style="vertical-align:top;padding-right:10px;font-size:15px;line-height:1;">⚠️</td>
+                              <td style="vertical-align:top;padding-right:9px;font-size:14px;line-height:1;">⚠️</td>
                               <td style="
-                                font-size:12px;
+                                font-size:11px;
                                 line-height:1.6;
-                                color:#9a9890;
+                                color:#8f918a;
                               ">
-                                <strong style="color:#c5c4bb;">Never share this code.</strong>
+                                <strong style="color:#c8c7bf;font-weight:650;">Never share this code.</strong>
                                 CTRL&#8209;CAFE staff will never ask for your verification code.
                                 If you didn't request this, you can safely ignore this email.
                               </td>
@@ -218,9 +255,9 @@ export function otpVerificationEmail({
                     <!-- Footer note -->
                     <p style="
                       margin:0;
-                      font-size:12px;
+                      font-size:11px;
                       line-height:1.6;
-                      color:#4a504e;
+                      color:#555d59;
                       text-align:center;
                     ">
                       This email was sent by CTRL&#8209;CAFE. If you have questions,
@@ -232,17 +269,23 @@ export function otpVerificationEmail({
               </table>
 
               <!-- Card footer bar -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="
-                background:rgba(0,0,0,0.25);
-                border-top:1px solid rgba(255,255,255,0.05);
-              ">
+              <table
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                role="presentation"
+                style="
+                  background:#111615;
+                  border-top:1px solid rgba(255,255,255,0.05);
+                "
+              >
                 <tr>
-                  <td style="padding:18px 40px;text-align:center;">
-                    <span style="font-size:11px;color:#3a403e;">
-                      © ${new Date().getFullYear()} CTRL&#8209;CAFE &nbsp;·&nbsp;
-                      <a href="#" style="color:#4a504e;text-decoration:none;">Unsubscribe</a>
+                  <td style="padding:15px 26px;text-align:center;">
+                    <span style="font-size:10px;color:#454c49;">
+                      © ${new Date().getFullYear()} CTRL&#8209;CAFE
                       &nbsp;·&nbsp;
-                      <a href="#" style="color:#4a504e;text-decoration:none;">Privacy Policy</a>
+                      <a href="#" style="color:#59615d;text-decoration:none;">Privacy Policy</a>
                     </span>
                   </td>
                 </tr>
