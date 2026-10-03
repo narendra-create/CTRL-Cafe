@@ -3,19 +3,8 @@ import { resendClient } from "@/lib/setup-files/resend-client";
 import { redis } from "@/lib/setup-files/redis";
 import { getkey, generateOTP } from "@/lib/utils/tools";
 import { otpVerificationEmail } from "@/app/components/email-templates/otp-verification";
-import { createClient } from "@/lib/supabase/serverClient";
 
-export async function sendOtp() {
-    //Getting email
-    const supabase = await createClient();
-    const { data: { user }, error } = await supabase.auth.getUser();
-
-    if (error || !user) {
-        console.log(error, "From sendOtp")
-        return { success: false }
-    };
-
-    const email = user.email!;
+export async function sendOtp(email: string, name: string): Promise<{ success: boolean; error?: string }> {
     //Checking if email is correct
     const key = email.trim().toLowerCase();
     if (!key || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key)) {
@@ -33,7 +22,7 @@ export async function sendOtp() {
     const { html, text, subject } = otpVerificationEmail({
         otp: otp,
         expiresInMinutes: 10,
-        userName: email
+        userName: name ?? email
     });
 
     try {
@@ -48,10 +37,28 @@ export async function sendOtp() {
         if (error) {
             await redis.del(rediskey);
             return { success: false, error: "Failed to send email. Try again." };
-        }
+        };
+
+        return { success: true }
     }
     catch {
         await redis.del(rediskey);
         return { success: false, error: "Failed to send email. Try again." };
     }
+};
+
+export async function verifyOtp(otp: string, email: string): Promise<{ success: boolean; error?: string }> {
+    const rediskey = getkey("otp", email);
+
+    const stored = await redis.get(rediskey);
+    if (!stored) {
+        return { success: false, error: "Code expired or was never sent. Request a new one." };
+    };
+
+    if (stored !== otp.trim()) {
+        return { success: false, error: "Incorrect code. Try again." };
+    };
+
+    await redis.del(rediskey);
+    return { success: true };
 }
