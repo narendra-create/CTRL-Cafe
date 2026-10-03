@@ -4,7 +4,7 @@ import { redis } from "@/lib/setup-files/redis";
 import { getkey, generateOTP } from "@/lib/utils/tools";
 import { otpVerificationEmail } from "@/app/components/email-templates/otp-verification";
 
-export async function sendOtp(email: string, name: string): Promise<{ success: boolean; error?: string }> {
+export async function sendOtp(email: string, name?: string): Promise<{ success: boolean; error?: string }> {
     //Checking if email is correct
     const key = email.trim().toLowerCase();
     if (!key || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key)) {
