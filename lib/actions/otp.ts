@@ -55,7 +55,7 @@ export async function verifyOtp(otp: string, email: string): Promise<{ success: 
         return { success: false, error: "Code expired or was never sent. Request a new one." };
     };
 
-    if (stored !== otp.trim()) {
+    if (String(stored) !== otp.trim()) {
         return { success: false, error: "Incorrect code. Try again." };
     };
 
