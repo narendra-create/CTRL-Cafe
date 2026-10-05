@@ -1,3 +1,4 @@
+"use server";
 import { db } from "@/src/index";
 import { createClient } from "@/lib/supabase/serverClient";
 import { profiles } from "@/src/db/schema";
@@ -16,7 +17,10 @@ export async function isLoggedIn(): Promise<boolean> {
     return true;
 };
 
-export async function isAdmin(): Promise<boolean> {
+export async function checkAccountType(): Promise<{
+    userId: string | null;
+    isAdmin: boolean;
+}> {
     const supabase = await createClient();
     const { data: user, error } = await supabase.auth.getClaims();
     if (error) {
@@ -25,10 +29,16 @@ export async function isAdmin(): Promise<boolean> {
     if (!user) {
         throw new Error("Please Log in first")
     };
-    const [account] = await db.select({ accountType: profiles.accountType }).from(profiles).where(eq(profiles.id, user.claims.sub));
+    const [account] = await db.select({ accountType: profiles.accountType, userId: profiles.id }).from(profiles).where(eq(profiles.id, user.claims.sub));
 
     if (account.accountType === "admin") {
-        return true;
+        return {
+            isAdmin: true,
+            userId: account.userId
+        };
     };
-    return false;
+    return {
+        isAdmin: false,
+        userId: null
+    };
 }
