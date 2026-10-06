@@ -89,4 +89,40 @@ export const updateDevice = async (input: updateDeviceInput): Promise<{
             message: "Server Error"
         }
     }
+};
+
+export const deleteDevice = async (id: string): Promise<{
+    success: boolean;
+    message?: string;
+    deletedDeviceId?: string;
+}> => {
+    const user = await isLoggedIn();
+    if (!user) {
+        return {
+            success: false,
+            message: "Please log in first"
+        }
+    };
+    const { isAdmin } = await checkAccountType();
+    if (!isAdmin) {
+        return {
+            success: false,
+            message: "You are not allowed to do this operation"
+        }
+    };
+
+    try {
+        const deleted = await db.delete(devices).where(eq(devices.id, id)).returning({ id: devices.id });
+        return {
+            success: true,
+            deletedDeviceId: deleted[0].id
+        };
+    }
+    catch (err) {
+        console.error("[deleteDevice]: ", err);
+        return {
+            success: false,
+            message: "Server Error"
+        }
+    }
 }
