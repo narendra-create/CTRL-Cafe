@@ -171,4 +171,3 @@ export const getDevices = async (): Promise<{
         }
     }
 };
-
