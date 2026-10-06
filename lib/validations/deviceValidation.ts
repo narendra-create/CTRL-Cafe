@@ -3,6 +3,7 @@ import z from "zod";
 
 export const deviceAddSchema = z.object({
     deviceName: z.string(),
+    units: z.number().nonnegative(),
     type: z.enum(deviceTypeEnum.enumValues),
     maxPlayers: z.number().nonnegative().min(1, "Minimum 1 player needed"),
     hourlyRate: z.number().nonnegative(),
@@ -12,6 +13,7 @@ export const deviceAddSchema = z.object({
 export const updateDeviceSchema = z.object({
     id: z.string(),
     deviceName: z.string().optional(),
+    units: z.number().nonnegative().optional(),
     type: z.enum(deviceTypeEnum.enumValues).optional(),
     maxPlayers: z.number().nonnegative().min(1, "Minimum 1 player needed").optional(),
     hourlyRate: z.number().nonnegative().optional(),

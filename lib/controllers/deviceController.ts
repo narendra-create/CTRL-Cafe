@@ -24,6 +24,7 @@ export const addDevice = async (input: deviceAddInput): Promise<{
 
     try {
         const insertedDevice = await db.insert(devices).values({
+            units: input.units,
             deviceName: input.deviceName,
             hourlyRate: String(input.hourlyRate),
             maxPlayers: input.maxPlayers,
@@ -67,6 +68,7 @@ export const updateDevice = async (input: updateDeviceInput): Promise<{
 
     try {
         const updated = await db.update(devices).set({
+            units: input.units,
             deviceName: input.deviceName,
             type: input.type,
             maxPlayers: input.maxPlayers,
@@ -125,4 +127,48 @@ export const deleteDevice = async (id: string): Promise<{
             message: "Server Error"
         }
     }
-}
+};
+
+export const getDeviceTypes = async (): Promise<{
+    data?: Array<typeof devices.$inferSelect.type>;
+    success: boolean;
+    message?: string;
+}> => {
+    try {
+        const deviceTypes = await db.selectDistinct({ type: devices.type }).from(devices);
+        const typesAvailable = deviceTypes.map(d => d.type);
+        return {
+            success: true,
+            data: typesAvailable
+        }
+    }
+    catch (err) {
+        console.error("[getDeviceTypes]: ", err);
+        return {
+            success: false,
+            message: "Server Error"
+        }
+    }
+};
+
+export const getDevices = async (): Promise<{
+    success: boolean;
+    message?: string;
+    data?: Array<typeof devices.$inferSelect>;
+}> => {
+    try {
+        const gotDevices = await db.select().from(devices);
+        return {
+            success: true,
+            data: gotDevices
+        };
+    }
+    catch (err) {
+        console.error("[getDevices]: ", err);
+        return {
+            success: false,
+            message: "Server Error"
+        }
+    }
+};
+
