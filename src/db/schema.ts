@@ -10,7 +10,8 @@ import {
     date,
     pgPolicy,
     index,
-    check
+    check,
+    time
 } from "drizzle-orm/pg-core";
 import { authUsers, authUid, authenticatedRole } from "drizzle-orm/supabase";
 import { sql } from "drizzle-orm";
@@ -215,12 +216,9 @@ export const devices = pgTable("devices", {
 
 export const timeSlots = pgTable("time_slots", {
     id: uuid("id").defaultRandom().primaryKey(),
-    startTime: timestamp("start_time", {
-        withTimezone: true
-    }).notNull(),
-    endTime: timestamp("end_time", {
-        withTimezone: true
-    }).notNull(),
+    startTime: time("start_time").notNull(),
+    endTime: time("end_time").notNull(),
+    timeZone: text("time_zone").notNull(),
     availableDevices: deviceTypeEnum("available_devices").array().notNull(),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
