@@ -52,4 +52,35 @@ export const getFoodItems = async () => {
         console.error("[getFoodItems]:", err);
         return [];
     }
-}
+};
+
+export const deleteFoodItems = async (id: string): Promise<{
+    success: boolean;
+    message?: string;
+}> => {
+    const user = await isLoggedIn();
+    if (!user) {
+        return { success: false, message: "Unauthorized" }
+    };
+
+    //Checking if user is admin
+    const { isAdmin } = await checkAccountType();
+    if (!isAdmin) {
+        return { success: false, message: "Forbidden" }
+    };
+
+    try {
+        await db.delete(foodItems).where(eq(foodItems.id, id));
+        return {
+            success: true
+        }
+    }
+
+    catch (err) {
+        console.error("[deleteFoodItems]:", err);
+        return {
+            success: false,
+            message: "Server Error"
+        }
+    }
+};
