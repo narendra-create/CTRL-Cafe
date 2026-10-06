@@ -3,6 +3,12 @@
 - [ ] make homepage ui
 - [ ] add seat booking page api's or controllers
 - [x] controller/server actions for adding new food items
-- [ ] controller/server actions for adding new devices
-- [ ] controller/server actions for adding new time slots
+- [x] controller/server actions for adding new devices
+- [x] controller/server actions for adding new time slots
 - [x] MOST IMPORTENT - Set admin account type in supabase getclaims, see the latest note
+- [ ] function for deleting, updating and getting timeslots,
+- [ ] function booking history, current bookings etc
+- [ ] cloudinary image upload system for fooditems
+- [ ] find api for seeing games
+- [ ] schema for available games
+- [ ] controller for adding available games and linking them to devices
