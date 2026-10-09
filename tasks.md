@@ -20,3 +20,4 @@
 ## Importent on 09/11/2026
 
 - [ ] check the many to many reletions new code for console and gaames linking
+- [ ] Run generate and migrate command for current changes before any new changes
