@@ -7,7 +7,7 @@
 - [x] controller/server actions for adding new time slots
 - [x] MOST IMPORTENT - Set admin account type in supabase getclaims, see the latest note
 - [x] function for deleting, updating and getting timeslots
-- [ ] function booking history, current bookings etc
+- [x] function booking history, current bookings etc
 - [ ] cloudinary image upload system for fooditems
 - [ ] find api for seeing games
 - [ ] schema for available games
