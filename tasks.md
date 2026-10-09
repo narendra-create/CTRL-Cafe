@@ -6,7 +6,7 @@
 - [x] controller/server actions for adding new devices
 - [x] controller/server actions for adding new time slots
 - [x] MOST IMPORTENT - Set admin account type in supabase getclaims, see the latest note
-- [ ] function for deleting, updating and getting timeslots,
+- [x] function for deleting, updating and getting timeslots
 - [ ] function booking history, current bookings etc
 - [ ] cloudinary image upload system for fooditems
 - [ ] find api for seeing games

@@ -8,4 +8,9 @@ export const addSlotSchema = z.object({
     timeZone: z.string().min(1)
 });
 
+export const updateSlotSchema = z.object({
+    availableDevices: z.enum(deviceTypeEnum.enumValues).array().optional()
+});
+
 export type addSlotInput = z.infer<typeof addSlotSchema>;
+export type updateSlotInput = z.infer<typeof updateSlotSchema>;
