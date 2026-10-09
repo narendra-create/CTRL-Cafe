@@ -11,7 +11,8 @@ import {
     pgPolicy,
     index,
     check,
-    time
+    time,
+    primaryKey
 } from "drizzle-orm/pg-core";
 import { authUsers, authUid, authenticatedRole } from "drizzle-orm/supabase";
 import { sql } from "drizzle-orm";
@@ -346,4 +347,25 @@ export const bookings = pgTable("bookings", {
         check("booking_price_valid", sql`${table.totalAmount} >= 0`),
         check("booking_playercount_valid", sql`${table.playersCount} >= 0`)
     ]
-)
+);
+
+export const availableGames = pgTable("available_games", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    gameName: text("game_name").notNull().unique(),
+    gameGenre: text("game_genre"),
+    imageUrl: text("image_url").notNull()
+});
+
+export const deviceGames = pgTable("device_games", {
+    deviceId: uuid("device_id").notNull().references(() => devices.id, { onDelete: "cascade" }),
+    gameId: uuid("game_id").notNull().references(() => availableGames.id, { onDelete: "cascade" })
+},
+    (table) => [
+        primaryKey({
+            columns: [table.deviceId, table.gameId]
+        }),
+        index("device_games_game_id_idx").on(table.gameId),
+        index("device_games_device_id_idx").on(table.deviceId)
+    ]
+);
+

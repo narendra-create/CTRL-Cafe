@@ -15,3 +15,8 @@
 - [ ] find api for seeing games
 - [ ] schema for available games
 - [ ] controller for adding available games and linking them to devices
+- [x] Make a sytem for linking games with devices
+
+## Importent on 09/11/2026
+
+- [ ] check the many to many reletions new code for console and gaames linking
