@@ -1,4 +1,5 @@
 # Tasks to complete
+
 - [x] add email send logic for register page
 - [ ] make homepage ui
 - [ ] add seat booking page api's or controllers
@@ -8,7 +9,9 @@
 - [x] MOST IMPORTENT - Set admin account type in supabase getclaims, see the latest note
 - [x] function for deleting, updating and getting timeslots
 - [x] function booking history, current bookings etc
-- [ ] cloudinary image upload system for fooditems
+- [x] cloudinary image upload system for fooditems
+- [ ] add cloudinary signature generate in frontend
+- [ ] add cloudinary image upload then food item upload in fooditems page of frontend
 - [ ] find api for seeing games
 - [ ] schema for available games
 - [ ] controller for adding available games and linking them to devices
