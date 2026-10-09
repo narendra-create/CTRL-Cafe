@@ -3,8 +3,9 @@ import { createClient } from "@/lib/supabase/serverClient";
 import { profiles } from "@/src/db/schema";
 import { db } from "@/src/index";
 import { eq } from "drizzle-orm";
+import { AccountType } from "@/types/helperTypes";
 
-const resolveAuthenticatedUser = async () => {
+export const resolveAuthenticatedUser = async (allowedRole: AccountType) => {
     const supabase = await createClient();
     const { data: user, error } = await supabase.auth.getClaims();
 
@@ -17,7 +18,7 @@ const resolveAuthenticatedUser = async () => {
         .where(eq(profiles.id, user.claims.sub));
 
     if (!dbuser) return { error: { success: false, message: "User account not found" } };
-    if (dbuser.accountType === "admin") return { error: { success: false, message: "This is a user-only operation" } };
+    if (dbuser.accountType !== allowedRole) return { error: { success: false, message: `This is a ${allowedRole.toLowerCase()}-only operation` } };
 
     return { dbuser };
 };
