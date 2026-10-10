@@ -12,12 +12,12 @@
 - [x] cloudinary image upload system for fooditems
 - [ ] add cloudinary signature generate in frontend
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
-- [ ] find api for seeing games
-- [ ] schema for available games
+- [x] find api for seeing games
+- [x] schema for available games
 - [ ] controller for adding available games and linking them to devices
 - [x] Make a sytem for linking games with devices
 
 ## Importent on 09/11/2026
 
-- [ ] check the many to many reletions new code for console and gaames linking
-- [ ] Run generate and migrate command for current changes before any new changes
+- [x] check the many to many reletions new code for console and gaames linking
+- [x] Run generate and migrate command for current changes before any new changes
