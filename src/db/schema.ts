@@ -290,7 +290,7 @@ export const bookings = pgTable("bookings", {
     playersCount: integer("players_count").notNull().default(1),
     bookingStatus: bookingStatusEnum("booking_status").notNull().default("pending"),
     isArchived: boolean("is_archived").notNull().default(false),
-    rewardRedeemed: boolean("reward_redeemed").notNull().default(false),
+    rewardGranted: boolean("reward_granted").notNull().default(false), //changing the name from reward redeemed to reward granted to end the confusion
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull().$onUpdate(() => new Date()),
