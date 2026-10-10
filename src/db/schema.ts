@@ -353,7 +353,9 @@ export const availableGames = pgTable("available_games", {
     id: uuid("id").defaultRandom().primaryKey(),
     gameName: text("game_name").notNull().unique(),
     gameGenre: text("game_genre"),
-    imageUrl: text("image_url").notNull()
+    imageUrl: text("image_url").notNull(),
+    releaseYear: integer("release_year"),
+    description: text("description")
 });
 
 export const deviceGames = pgTable("device_games", {
