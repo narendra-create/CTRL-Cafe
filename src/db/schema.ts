@@ -65,6 +65,7 @@ export const profiles = pgTable("profiles", {
     dateOfBirth: date("date_of_birth"),
     gender: genderEnum("gender"),
     accountType: accountTypeEnum("account_type").notNull().default("user"),
+    rewardPoints: integer("reward_points").notNull().default(0),
 
     /*Timestamps*/
     createdAt: timestamp("created_at", {
@@ -370,4 +371,3 @@ export const deviceGames = pgTable("device_games", {
         index("device_games_device_id_idx").on(table.deviceId)
     ]
 );
-

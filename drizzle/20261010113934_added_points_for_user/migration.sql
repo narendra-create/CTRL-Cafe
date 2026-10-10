@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "reward_points" integer DEFAULT 0 NOT NULL;
