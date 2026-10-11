@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" ADD COLUMN "reward_redeemed" boolean DEFAULT false NOT NULL;

@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" RENAME COLUMN "reward_redeemed" TO "reward_granted";
