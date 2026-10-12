@@ -17,6 +17,7 @@
 - [x] Make a sytem for linking games with devices
 - [x] Add point system for each user and make a server action for adding/redeeming points.
 - [x] see rewardActions and complete it
+- [ ] Add LUA scripts for booking seats
 
 ## Importent on 09/11/2026
 

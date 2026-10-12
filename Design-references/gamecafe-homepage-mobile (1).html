@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameCafe — Homepage (Mobile)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F7F7F4;
+    --paper-alt: #EFEFEA;
+    --ink: #16171B;
+    --ink-soft: #5B5D63;
+    --line: #DBDBD5;
+    --accent: #FFC300;
+    --accent-ink: #16171B;
+    --good: #1F7A4D;
+    --danger: #B8431C;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{
+    background:#E7E7E2;
+    font-family:'Space Grotesk', -apple-system, sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:'Space Mono', ui-monospace, monospace; }
+  .frame-label{
+    text-align:center;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    color:#8A8C90;
+    padding:18px 0 10px;
+  }
+  .phone{
+    width:390px;
+    max-width:94vw;
+    margin:0 auto 40px;
+    background:var(--paper);
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(20,20,25,.35);
+    border:1px solid #D8D8D2;
+  }
+  .app{ padding-bottom:84px; position:relative; }
+
+  /* Top bar */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px 14px;
+  }
+  .logo{ display:flex; align-items:center; gap:8px; }
+  .logo-mark{
+    width:26px; height:26px; background:var(--ink); border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo-mark span{ color:var(--paper); font-size:13px; font-weight:700; }
+  .logo-word{ font-weight:700; font-size:16px; letter-spacing:-.01em; }
+  .avatar{
+    width:32px; height:32px; border-radius:50%; background:var(--paper-alt);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-soft);
+  }
+  .ticker{
+    display:flex; align-items:center; gap:7px;
+    padding:0 20px 16px;
+    font-family:'Space Mono', monospace; font-size:11px; color:var(--ink-soft);
+    letter-spacing:.02em;
+  }
+  .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--good);
+    position:relative; flex-shrink:0;
+  }
+  .dot::after{
+    content:''; position:absolute; inset:-4px; border-radius:50%;
+    border:1px solid var(--good); opacity:.5;
+    animation:pulse 2.2s ease-out infinite;
+  }
+  @keyframes pulse{ 0%{ transform:scale(.6); opacity:.6; } 100%{ transform:scale(1.8); opacity:0; } }
+
+  /* Hero */
+  .hero-photo{
+    margin:0 16px; height:210px; border-radius:16px 16px 4px 4px;
+    position:relative; overflow:hidden; background:#23242A;
+  }
+  .hero-photo img, .tc-photo img, .panel-thumb img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .stub{
+    margin:-18px 16px 0;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-top:2px dashed #C7C7C0;
+    border-radius:4px 4px 14px 14px;
+    padding:20px 18px 18px;
+    position:relative;
+    z-index:2;
+  }
+  .stub::before, .stub::after{
+    content:''; position:absolute; top:-9px; width:18px; height:18px;
+    background:#E7E7E2; border-radius:50%; border:1px solid var(--line);
+  }
+  .stub::before{ left:-9px; }
+  .stub::after{ right:-9px; }
+  .stub h1{
+    font-size:26px; line-height:1.12; font-weight:700; letter-spacing:-.01em;
+    margin-bottom:8px;
+  }
+  .stub p{
+    font-size:13.5px; line-height:1.5; color:var(--ink-soft); margin-bottom:16px;
+    max-width:36ch;
+  }
+  .stub-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .live-count{ font-family:'Space Mono',monospace; font-size:11.5px; color:var(--ink-soft); }
+  .live-count b{
+    font-size:15px; color:var(--ink); font-weight:700;
+  }
+  .btn-primary{
+    background:var(--accent); color:var(--accent-ink);
+    border:none; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
+    padding:12px 18px; border-radius:9px; cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn-primary:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  /* Section shell */
+  section{ padding:28px 20px 0; }
+  .section-label{
+    font-size:11px; font-family:'Space Mono',monospace; color:var(--ink-soft);
+    letter-spacing:.02em; margin-bottom:10px;
+  }
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;
+  }
+  .section-head h2{ font-size:17px; font-weight:700; }
+  .section-head a{
+    font-size:12px; color:var(--ink-soft); text-decoration:underline;
+    text-underline-offset:3px;
+  }
+
+  /* Arena switch */
+  .switch{
+    display:flex; background:var(--paper-alt); border:1px solid var(--line);
+    border-radius:12px; padding:4px; gap:4px;
+  }
+  .switch button{
+    flex:1; border:none; background:transparent; padding:12px 10px;
+    border-radius:9px; text-align:left; cursor:pointer;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .switch button.active{ background:var(--ink); }
+  .switch button.active .sw-title, .switch button.active .sw-sub{ color:var(--paper); }
+  .sw-title{ font-size:13.5px; font-weight:700; display:block; }
+  .sw-sub{
+    font-size:10.5px; color:var(--ink-soft); font-family:'Space Mono',monospace;
+    display:block; margin-top:2px;
+  }
+
+  /* Ticket strip */
+  .h-scroll{
+    display:flex; gap:14px; overflow-x:auto; padding-bottom:6px;
+    scrollbar-width:none;
+  }
+  .h-scroll::-webkit-scrollbar{ display:none; }
+  .ticket-card{
+    flex:0 0 200px; background:var(--paper); border:1px solid var(--line);
+    border-radius:14px; overflow:hidden;
+  }
+  .tc-photo{ height:96px; overflow:hidden; background:#23242A; }
+  .tc-body{ padding:13px 14px 15px; border-top:1px dashed var(--line); }
+  .tc-price{ font-family:'Space Mono',monospace; font-size:11px; color:var(--good); margin-bottom:5px; }
+  .tc-title{ font-size:14px; font-weight:700; margin-bottom:3px; }
+  .tc-desc{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; }
+
+  /* Score / points */
+  .score-panel{
+    border:1px solid var(--line); border-radius:14px; padding:18px;
+    background:var(--paper);
+  }
+  .score-top{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px; }
+  .score-num{ font-family:'Space Mono',monospace; font-size:30px; font-weight:700; }
+  .score-goal{ font-size:11.5px; color:var(--ink-soft); font-family:'Space Mono',monospace; }
+  .meter{ display:flex; gap:3px; }
+  .meter i{
+    flex:1; height:8px; border-radius:2px; background:var(--paper-alt);
+    border:1px solid var(--line);
+  }
+  .meter i.filled{ background:var(--accent); border-color:var(--accent); }
+  .score-foot{
+    margin-top:10px; font-size:11.5px; color:var(--ink-soft);
+  }
+
+  /* Food + membership panels */
+  .panel{
+    border:1px solid var(--line); border-radius:14px; padding:16px; margin-top:14px;
+    display:flex; gap:14px; align-items:center;
+  }
+  .panel-thumb{
+    width:56px; height:56px; border-radius:10px; flex-shrink:0;
+    overflow:hidden; background:#23242A;
+  }
+  .panel-body h3{ font-size:14px; font-weight:700; margin-bottom:3px; }
+  .panel-body p{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; margin-bottom:8px; }
+  .link{ font-size:12px; font-weight:700; text-decoration:underline; text-underline-offset:3px; color:var(--ink); background:none; border:none; padding:0; cursor:pointer; font-family:'Space Grotesk',sans-serif; }
+  .btn-outline{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px;
+    background:none; border:1.5px solid var(--ink); color:var(--ink);
+    padding:8px 14px; border-radius:8px; cursor:pointer;
+  }
+
+  /* Tab bar */
+  .tabbar{
+    position:absolute; left:0; right:0; bottom:0;
+    background:var(--paper); border-top:1px solid var(--line);
+    display:flex; padding:10px 6px 14px;
+  }
+  .tab{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:#A6A7AB; background:none; border:none; font-family:'Space Grotesk',sans-serif;
+    font-size:10px; cursor:pointer; position:relative; padding-top:4px;
+  }
+  .tab svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.6; }
+  .tab.active{ color:var(--ink); }
+  .tab.active::before{
+    content:''; position:absolute; top:-2px; width:4px; height:4px;
+    border-radius:50%; background:var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .dot::after{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame-label">MOBILE — 390PX</div>
+
+<div class="phone">
+  <div class="app">
+
+    <div class="topbar">
+      <div class="logo">
+        <div class="logo-mark"><span>G</span></div>
+        <div class="logo-word">GAMECAFE</div>
+      </div>
+      <div class="avatar">NR</div>
+    </div>
+
+    <div class="ticker">
+      <span class="dot"></span>
+      <span>OPEN NOW · 10:00–02:00</span>
+    </div>
+
+    <div class="hero-photo">
+      <img src="https://images.pexels.com/photos/7915212/pexels-photo-7915212.jpeg?w=1260&h=750&dpr=1" alt="Gaming cafe interior with LED-lit stations" loading="lazy">
+    </div>
+
+    <div class="stub">
+      <h1>Your seat is waiting.</h1>
+      <p>Console and PC gaming, snacks at the counter, booked by the hour.</p>
+      <div class="stub-row">
+        <div class="live-count"><b class="mono" id="seatCount">0</b> seats free right now</div>
+        <button class="btn-primary">Reserve a seat</button>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-label">CHOOSE YOUR ARENA</div>
+      <div class="switch">
+        <button class="active">
+          <span class="sw-title">Console</span>
+          <span class="sw-sub">PS5 · XBOX</span>
+        </button>
+        <button>
+          <span class="sw-title">PC gaming</span>
+          <span class="sw-sub">RTX RIGS</span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Popular right now</h2>
+        <a href="#">See all seats</a>
+      </div>
+      <div class="h-scroll">
+        <div class="ticket-card">
+          <div class="tc-photo"><img src="https://images.pexels.com/photos/7915216/pexels-photo-7915216.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" alt="PlayStation gaming zone with monitors" loading="lazy"></div>
+          <div class="tc-body">
+            <div class="tc-price mono">₹120/HR</div>
+            <div class="tc-title">PlayStation zone</div>
+            <div class="tc-desc">Big screen, comfy seats, your pick of games.</div>
+          </div>
+        </div>
+        <div class="ticket-card">
+          <div class="tc-photo"><img src="https://images.pexels.com/photos/6125335/pexels-photo-6125335.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" alt="High-spec PC gaming rig with ambient lighting" loading="lazy"></div>
+          <div class="tc-body">
+            <div class="tc-price mono">₹150/HR</div>
+            <div class="tc-title">Pro PC arena</div>
+            <div class="tc-desc">Fast rigs, competitive play, zero lag.</div>
+          </div>
+        </div>
+        <div class="ticket-card">
+          <div class="tc-photo"><img src="https://images.pexels.com/photos/9072394/pexels-photo-9072394.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" alt="Xbox gaming lounge with RGB lighting and chairs" loading="lazy"></div>
+          <div class="tc-body">
+            <div class="tc-price mono">₹100/HR</div>
+            <div class="tc-title">Xbox lounge</div>
+            <div class="tc-desc">Split-screen friendly, extra couch seating.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Your score</h2>
+      </div>
+      <div class="score-panel">
+        <div class="score-top">
+          <div class="score-num mono" id="pointsCount">0</div>
+          <div class="score-goal">/ 120 PTS</div>
+        </div>
+        <div class="meter" id="meter"></div>
+        <div class="score-foot">40 more points gets you a free hour.</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-label" style="margin-bottom:0;">WHILE YOU PLAY</div>
+      <div class="panel">
+        <div class="panel-thumb"><img src="https://images.pexels.com/photos/9944309/pexels-photo-9944309.jpeg?cs=tinysrgb&dpr=1&w=500" alt="Loaded nachos and snacks" loading="lazy"></div>
+        <div class="panel-body">
+          <h3>Snacks & drinks</h3>
+          <p>Ordered and paid at the counter, not online.</p>
+          <button class="link">Browse the menu</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-thumb"><img src="https://images.pexels.com/photos/7915255/pexels-photo-7915255.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" alt="Friends playing together at the arcade" loading="lazy"></div>
+        <div class="panel-body">
+          <h3>Monthly or yearly</h3>
+          <p>Better hourly rates and faster points on every visit.</p>
+          <button class="btn-outline">Compare plans</button>
+        </div>
+      </div>
+    </section>
+
+    <section style="height:20px;"></section>
+
+    <div class="tabbar">
+      <button class="tab active">
+        <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"/></svg>
+        Home
+      </button>
+      <button class="tab">
+        <svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v1a1.5 1.5 0 000 3v1a2 2 0 01-2 2H6a2 2 0 01-2-2v-1a1.5 1.5 0 000-3V8z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+        Book
+      </button>
+      <button class="tab">
+        <svg viewBox="0 0 24 24"><path d="M6 4h10l-1 10a4 4 0 01-4 4 4 4 0 01-4-4L6 4z"/><path d="M8 4V2h6v2"/></svg>
+        Menu
+      </button>
+      <button class="tab">
+        <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6-4.5-3-4.5 3 1-6L4 9l5.5-.5L12 3z"/></svg>
+        Points
+      </button>
+      <button class="tab">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/></svg>
+        Profile
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Build the score meter (12 segments, filled to 80/120)
+  const total = 12, filled = Math.round(12 * (80/120));
+  const meter = document.getElementById('meter');
+  for(let i=0;i<total;i++){
+    const seg = document.createElement('i');
+    if(i < filled) seg.className = 'filled';
+    meter.appendChild(seg);
+  }
+
+  // Count-up animation for seat count + points (skipped if reduced motion)
+  function countUp(el, target, duration){
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){ el.textContent = target; return; }
+    const start = performance.now();
+    function tick(now){
+      const p = Math.min((now - start) / duration, 1);
+      el.textContent = Math.round(target * p);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  countUp(document.getElementById('seatCount'), 14, 700);
+  countUp(document.getElementById('pointsCount'), 80, 900);
+</script>
+
+</body>
+</html>
