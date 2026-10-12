@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameCafe — Homepage (Desktop)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F7F7F4;
+    --paper-alt: #EFEFEA;
+    --ink: #16171B;
+    --ink-soft: #5B5D63;
+    --line: #DBDBD5;
+    --accent: #FFC300;
+    --accent-ink: #16171B;
+    --good: #1F7A4D;
+    --danger: #B8431C;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{
+    background:#E7E7E2;
+    font-family:'Space Grotesk', -apple-system, sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:'Space Mono', ui-monospace, monospace; }
+  .frame-label{
+    text-align:center; font-family:'Space Mono', monospace; font-size:11px;
+    letter-spacing:.08em; color:#8A8C90; padding:18px 0 10px;
+  }
+  a{ color:inherit; }
+
+  .window{
+    width:1180px; max-width:96vw; margin:0 auto 48px;
+    background:var(--paper); border-radius:14px; overflow:hidden;
+    box-shadow:0 40px 80px -30px rgba(20,20,25,.35); border:1px solid #D8D8D2;
+  }
+  .chrome{
+    display:flex; align-items:center; gap:6px; padding:12px 16px;
+    background:var(--paper-alt); border-bottom:1px solid var(--line);
+  }
+  .chrome i{ width:9px; height:9px; border-radius:50%; background:#D6D6CF; display:block; }
+
+  /* Top nav */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 40px;
+  }
+  .logo{ display:flex; align-items:center; gap:10px; }
+  .logo-mark{
+    width:30px; height:30px; background:var(--ink); border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo-mark span{ color:var(--paper); font-size:14px; font-weight:700; }
+  .logo-word{ font-weight:700; font-size:17px; letter-spacing:-.01em; }
+  .navlinks{ display:flex; gap:36px; font-size:14px; font-weight:500; }
+  .navlinks a.active{ font-weight:700; }
+  .nav-right{ display:flex; align-items:center; gap:22px; }
+  .ticker{
+    display:flex; align-items:center; gap:7px;
+    font-family:'Space Mono', monospace; font-size:11.5px; color:var(--ink-soft);
+  }
+  .dot{ width:6px; height:6px; border-radius:50%; background:var(--good); position:relative; flex-shrink:0; }
+  .dot::after{
+    content:''; position:absolute; inset:-4px; border-radius:50%;
+    border:1px solid var(--good); opacity:.5; animation:pulse 2.2s ease-out infinite;
+  }
+  @keyframes pulse{ 0%{ transform:scale(.6); opacity:.6; } 100%{ transform:scale(1.8); opacity:0; } }
+  .avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--paper-alt);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-soft);
+  }
+
+  /* Hero */
+  .hero{
+    display:grid; grid-template-columns:1.1fr 1fr; gap:0; align-items:end;
+    padding:0 40px 0; margin-top:8px;
+  }
+  .hero-photo{
+    grid-column:1 / 3; grid-row:1; height:380px; border-radius:16px;
+    overflow:hidden; position:relative; background:#23242A;
+  }
+  .hero-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .stub{
+    grid-column:1; grid-row:1; align-self:end;
+    width:440px; margin:0 0 -34px 36px;
+    background:var(--paper); border:1px solid var(--line);
+    border-top:2px dashed #C7C7C0; border-radius:4px 4px 16px 16px;
+    padding:28px 30px 26px; position:relative; z-index:2;
+  }
+  .stub::before, .stub::after{
+    content:''; position:absolute; top:-9px; width:18px; height:18px;
+    background:#E7E7E2; border-radius:50%; border:1px solid var(--line);
+  }
+  .stub::before{ left:-9px; } .stub::after{ right:-9px; }
+  .stub h1{ font-size:34px; line-height:1.1; font-weight:700; letter-spacing:-.01em; margin-bottom:10px; }
+  .stub p{ font-size:14.5px; line-height:1.55; color:var(--ink-soft); margin-bottom:20px; max-width:38ch; }
+  .stub-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .live-count{ font-family:'Space Mono',monospace; font-size:12px; color:var(--ink-soft); }
+  .live-count b{ font-size:16px; color:var(--ink); font-weight:700; }
+  .btn-primary{
+    background:var(--accent); color:var(--accent-ink); border:none;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+    padding:13px 22px; border-radius:9px; cursor:pointer; white-space:nowrap;
+  }
+  .btn-primary:hover{ filter:brightness(0.96); }
+  .btn-primary:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  /* Section shell */
+  section{ padding:80px 40px 0; }
+  section:first-of-type{ padding-top:72px; }
+  .section-label{
+    font-size:11.5px; font-family:'Space Mono',monospace; color:var(--ink-soft);
+    letter-spacing:.02em; margin-bottom:12px;
+  }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; }
+  .section-head h2{ font-size:22px; font-weight:700; }
+  .section-head a{ font-size:13px; color:var(--ink-soft); text-decoration:underline; text-underline-offset:3px; }
+
+  /* Arena + stats row */
+  .arena-row{ display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:stretch; }
+  .switch{
+    display:flex; background:var(--paper-alt); border:1px solid var(--line);
+    border-radius:12px; padding:5px; gap:5px;
+  }
+  .switch button{
+    flex:1; border:none; background:transparent; padding:18px 20px;
+    border-radius:9px; text-align:left; cursor:pointer; font-family:'Space Grotesk',sans-serif;
+  }
+  .switch button.active{ background:var(--ink); }
+  .switch button.active .sw-title, .switch button.active .sw-sub{ color:var(--paper); }
+  .sw-title{ font-size:15px; font-weight:700; display:block; }
+  .sw-sub{ font-size:11.5px; color:var(--ink-soft); font-family:'Space Mono',monospace; display:block; margin-top:3px; }
+
+  .stat-row{ display:flex; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .stat{ flex:1; padding:16px 18px; }
+  .stat + .stat{ border-left:1px solid var(--line); }
+  .stat-num{ font-family:'Space Mono',monospace; font-size:22px; font-weight:700; }
+  .stat-label{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+
+  /* Ticket grid */
+  .tc-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; }
+  .ticket-card{ background:var(--paper); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .tc-photo{ height:150px; overflow:hidden; background:#23242A; }
+  .tc-photo img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s ease; }
+  .ticket-card:hover .tc-photo img{ transform:scale(1.04); }
+  .tc-body{ padding:18px 20px 20px; border-top:1px dashed var(--line); }
+  .tc-price{ font-family:'Space Mono',monospace; font-size:12px; color:var(--good); margin-bottom:7px; }
+  .tc-title{ font-size:16px; font-weight:700; margin-bottom:5px; }
+  .tc-desc{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; }
+
+  /* Score + food + membership row */
+  .trio{ display:grid; grid-template-columns:0.9fr 1.05fr 1.05fr; gap:20px; }
+  .score-panel{ border:1px solid var(--line); border-radius:14px; padding:22px; background:var(--paper); }
+  .score-top{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; }
+  .score-num{ font-family:'Space Mono',monospace; font-size:32px; font-weight:700; }
+  .score-goal{ font-size:12px; color:var(--ink-soft); font-family:'Space Mono',monospace; }
+  .meter{ display:flex; gap:3px; }
+  .meter i{ flex:1; height:8px; border-radius:2px; background:var(--paper-alt); border:1px solid var(--line); }
+  .meter i.filled{ background:var(--accent); border-color:var(--accent); }
+  .score-foot{ margin-top:12px; font-size:12px; color:var(--ink-soft); }
+
+  .panel{ border:1px solid var(--line); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px; }
+  .panel-thumb{ height:120px; border-radius:10px; overflow:hidden; background:#23242A; }
+  .panel-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .panel-body h3{ font-size:16px; font-weight:700; margin-bottom:5px; }
+  .panel-body p{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:10px; }
+  .link{ font-size:12.5px; font-weight:700; text-decoration:underline; text-underline-offset:3px; color:var(--ink); background:none; border:none; padding:0; cursor:pointer; font-family:'Space Grotesk',sans-serif; }
+  .btn-outline{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px;
+    background:none; border:1.5px solid var(--ink); color:var(--ink);
+    padding:9px 16px; border-radius:8px; cursor:pointer; align-self:flex-start;
+  }
+  .btn-outline:hover{ background:var(--ink); color:var(--paper); }
+
+  /* Footer */
+  footer{
+    margin-top:80px; padding:26px 40px; border-top:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:12px; color:var(--ink-soft);
+  }
+  footer .logo-word{ font-size:13px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .dot::after{ animation:none; }
+    .tc-photo img{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame-label">DESKTOP — 1180PX</div>
+
+<div class="window">
+  <div class="chrome"><i></i><i></i><i></i></div>
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark"><span>G</span></div>
+      <div class="logo-word">GAMECAFE</div>
+    </div>
+    <nav class="navlinks">
+      <a class="active" href="#">Home</a>
+      <a href="#">Book</a>
+      <a href="#">Menu</a>
+      <a href="#">Points</a>
+      <a href="#">Profile</a>
+    </nav>
+    <div class="nav-right">
+      <div class="ticker"><span class="dot"></span><span>OPEN NOW · 10:00–02:00</span></div>
+      <div class="avatar">NR</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-photo">
+      <img src="https://images.pexels.com/photos/7915212/pexels-photo-7915212.jpeg?w=1600&h=900&dpr=1" alt="Gaming cafe interior with LED-lit stations" loading="lazy">
+    </div>
+    <div class="stub">
+      <h1>Your seat is waiting.</h1>
+      <p>Console and PC gaming, snacks at the counter, booked by the hour.</p>
+      <div class="stub-row">
+        <div class="live-count"><b class="mono" id="seatCount">0</b> seats free right now</div>
+        <button class="btn-primary">Reserve a seat</button>
+      </div>
+    </div>
+  </div>
+
+  <section style="padding-top:64px;">
+    <div class="section-label">CHOOSE YOUR ARENA</div>
+    <div class="arena-row">
+      <div class="switch">
+        <button class="active">
+          <span class="sw-title">Console</span>
+          <span class="sw-sub">PS5 · XBOX</span>
+        </button>
+        <button>
+          <span class="sw-title">PC gaming</span>
+          <span class="sw-sub">RTX RIGS</span>
+        </button>
+      </div>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-num mono">14</div>
+          <div class="stat-label">SEATS FREE NOW</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num mono">₹100</div>
+          <div class="stat-label">STARTING RATE / HR</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num mono">16</div>
+          <div class="stat-label">HOURS OPEN TODAY</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Popular right now</h2>
+      <a href="#">See all seats</a>
+    </div>
+    <div class="tc-grid">
+      <div class="ticket-card">
+        <div class="tc-photo"><img src="https://images.pexels.com/photos/7915216/pexels-photo-7915216.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=800" alt="PlayStation gaming zone with monitors" loading="lazy"></div>
+        <div class="tc-body">
+          <div class="tc-price mono">₹120/HR</div>
+          <div class="tc-title">PlayStation zone</div>
+          <div class="tc-desc">Big screen, comfy seats, your pick of games.</div>
+        </div>
+      </div>
+      <div class="ticket-card">
+        <div class="tc-photo"><img src="https://images.pexels.com/photos/6125335/pexels-photo-6125335.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=800" alt="High-spec PC gaming rig with ambient lighting" loading="lazy"></div>
+        <div class="tc-body">
+          <div class="tc-price mono">₹150/HR</div>
+          <div class="tc-title">Pro PC arena</div>
+          <div class="tc-desc">Fast rigs, competitive play, zero lag.</div>
+        </div>
+      </div>
+      <div class="ticket-card">
+        <div class="tc-photo"><img src="https://images.pexels.com/photos/9072394/pexels-photo-9072394.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=800" alt="Xbox gaming lounge with RGB lighting and chairs" loading="lazy"></div>
+        <div class="tc-body">
+          <div class="tc-price mono">₹100/HR</div>
+          <div class="tc-title">Xbox lounge</div>
+          <div class="tc-desc">Split-screen friendly, extra couch seating.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Your score, food, and plans</h2></div>
+    <div class="trio">
+      <div class="score-panel">
+        <div class="score-top">
+          <div class="score-num mono" id="pointsCount">0</div>
+          <div class="score-goal">/ 120 PTS</div>
+        </div>
+        <div class="meter" id="meter"></div>
+        <div class="score-foot">40 more points gets you a free hour.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-thumb"><img src="https://images.pexels.com/photos/9944309/pexels-photo-9944309.jpeg?cs=tinysrgb&dpr=1&w=700" alt="Loaded nachos and snacks" loading="lazy"></div>
+        <div class="panel-body">
+          <h3>Snacks & drinks</h3>
+          <p>Ordered and paid at the counter, not online.</p>
+          <button class="link">Browse the menu</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-thumb"><img src="https://images.pexels.com/photos/7915255/pexels-photo-7915255.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=700" alt="Friends playing together at the arcade" loading="lazy"></div>
+        <div class="panel-body">
+          <h3>Monthly or yearly</h3>
+          <p>Better hourly rates and faster points on every visit.</p>
+          <button class="btn-outline">Compare plans</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="logo-word">GAMECAFE</div>
+    <div>© placeholder — Home · Book · Menu · Points · Profile</div>
+  </footer>
+
+</div>
+
+<script>
+  const total = 12, filled = Math.round(12 * (80/120));
+  const meter = document.getElementById('meter');
+  for(let i=0;i<total;i++){
+    const seg = document.createElement('i');
+    if(i < filled) seg.className = 'filled';
+    meter.appendChild(seg);
+  }
+  function countUp(el, target, duration){
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){ el.textContent = target; return; }
+    const start = performance.now();
+    function tick(now){
+      const p = Math.min((now - start) / duration, 1);
+      el.textContent = Math.round(target * p);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  countUp(document.getElementById('seatCount'), 14, 700);
+  countUp(document.getElementById('pointsCount'), 80, 900);
+</script>
+
+</body>
+</html>
