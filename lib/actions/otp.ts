@@ -2,7 +2,7 @@
 import { resendClient } from "@/lib/setup-files/resend-client";
 import { redis } from "@/lib/setup-files/redis";
 import { getkey, generateOTP } from "@/lib/utils/tools";
-import { otpVerificationEmail } from "@/app/components/email-templates/otp-verification";
+import { otpVerificationEmail } from "@/app/custom-components/email-templates/otp-verification";
 
 export async function sendOtp(email: string, name?: string): Promise<{ success: boolean; error?: string }> {
     //Checking if email is correct
