@@ -10,4 +10,12 @@ export function getkey(type: "otp" | "seat" | "user", email: string) {
     }
 
     return `${type}:${email}:rg`
-}
+};
+
+export function getInitials(name: string) {
+    return name
+        .trim()
+        .split(" ")
+        .map(word => word[0].toUpperCase())
+        .join("");
+};
