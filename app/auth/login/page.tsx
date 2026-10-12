@@ -53,26 +53,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[100dvh] bg-[#15191a] md:bg-[#d8d1c5] dark:md:bg-[#0a0a0a] md:p-[clamp(14px,3vw,38px)] block md:grid md:place-items-center font-sans transition-colors duration-300">
-      <main className="w-full max-w-[1180px] min-h-screen md:min-h-[min(760px,calc(100vh-28px))] block md:grid md:grid-cols-[1.04fr_0.96fr] bg-[#15191a] md:rounded-[28px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] relative">
+      <main className="w-full max-w-[1180px] md:mt-20 min-h-screen md:min-h-[min(760px,calc(100vh-28px))] block md:grid md:grid-cols-[1.04fr_0.96fr] bg-[#15191a] md:rounded-[28px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] relative">
         {/* Showcase Section */}
         <section className="flex flex-col justify-between relative overflow-hidden px-[23px] pt-[25px] pb-[28px] min-h-[265px] md:p-[clamp(26px,4vw,58px)] md:min-h-[700px] bg-[radial-gradient(circle_at_83%_12%,rgba(250,204,21,0.22),transparent_30%),linear-gradient(145deg,#242c2c,#121718_70%)] text-[#f7f3ed]">
           {/* Background Rings */}
           <div className="absolute border border-[rgba(250,204,21,0.16)] rounded-full pointer-events-none w-[330px] h-[330px] -right-[175px] -bottom-[190px] md:w-[540px] md:h-[540px] md:-right-[260px] md:-bottom-[210px]"></div>
           <div className="absolute border border-[rgba(250,204,21,0.16)] rounded-full pointer-events-none w-[230px] h-[230px] -right-[115px] -bottom-[135px] md:w-[370px] md:h-[370px] md:-right-[170px] md:-bottom-[125px]"></div>
 
-          <div className="flex items-center gap-[11px] font-[800] tracking-[-0.03em] text-[18px] relative z-10">
-            <div className="w-[38px] h-[38px] bg-[#FACC15] rounded-[10px_10px_10px_3px] grid place-items-center text-[#15201b] -rotate-8 overflow-hidden relative">
-              <Image
-                src="/CTRL-CAFE-ICON.webp"
-                alt="Icon"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <span>CTRL-CAFE</span>
-          </div>
 
-          <div className="relative z-10 max-w-[490px] mt-[34px] md:mt-0">
+          <div className="relative z-10 max-w-[490px] mt-21.25 md:mt-0">
             <p className="text-[#FACC15] text-[11px] tracking-[0.16em] uppercase font-[800] m-0 mb-[18px]">
               Your seat is waiting
             </p>

@@ -48,16 +48,8 @@ export default function ForgotPasswordPage() {
       {/* Card */}
       <main className="relative z-10 w-full max-w-[460px] md:max-w-[500px] 2xl:max-w-[540px]">
 
-        {/* Logo */}
-        <div className="flex items-center gap-[10px] font-[800] tracking-[-0.03em] text-[17px] md:text-[19px] text-[#19201f] dark:text-[#f7f3ed] mb-[36px] md:mb-[42px] transition-colors">
-          <div className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] bg-[#FACC15] rounded-[10px_10px_10px_3px] grid place-items-center -rotate-6 overflow-hidden relative shrink-0">
-            <Image src="/CTRL-CAFE-ICON.webp" alt="Icon" fill className="object-cover" />
-          </div>
-          <span>CTRL-CAFE</span>
-        </div>
-
         {/* Lock Icon Badge */}
-        <div className="mb-[28px] md:mb-[32px] flex items-center gap-[14px] md:gap-[16px]">
+        <div className="mb-[28px] mt-12 md:mt-0 md:mb-[32px] flex items-center gap-[14px] md:gap-[16px]">
           <div className="w-[54px] h-[54px] md:w-[60px] md:h-[60px] rounded-[16px] bg-[rgba(250,204,21,0.12)] dark:bg-[rgba(250,204,21,0.10)] border border-[rgba(180,150,0,0.22)] dark:border-[rgba(250,204,21,0.18)] grid place-items-center shrink-0">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="md:scale-110">
               <rect x="3" y="11" width="18" height="11" rx="2.5" stroke="#FACC15" strokeWidth="1.6" />
