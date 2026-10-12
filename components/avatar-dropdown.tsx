@@ -10,25 +10,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
-export function AvatarDropdown() {
+type Props = {
+  name: string;
+  imageurl: string | undefined;
+};
+
+export function AvatarDropdown(props: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <Button variant="ghost" size="icon" className="rounded-full">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={props.imageurl} alt="shadcn" />
+              <AvatarFallback>{props.name}</AvatarFallback>
             </Avatar>
           </Button>
         }
       />
       <DropdownMenuContent className="w-32">
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Bookings</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <Link href={"/profile"}>
+            <DropdownMenuItem>Profile</DropdownMenuItem>
+          </Link>
+          <Link href={"/bookings"}>
+            <DropdownMenuItem>Bookings</DropdownMenuItem>
+          </Link>
+          <Link href={"/settings"}>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

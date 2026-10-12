@@ -1,2 +1,1 @@
-select trigger_name from information_schema.triggers 
-where trigger_name = 'on_auth_user_created';
+ALTER ROLE postgres SET app.admin_email = 'websitet457@gmail.com';
