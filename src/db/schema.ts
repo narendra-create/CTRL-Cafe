@@ -95,7 +95,8 @@ export const profiles = pgTable("profiles", {
         withCheck: sql`${authUid} = ${table.id}`
     }),
 
-    // --- indexes ---
+    // --- Checks ---
+    check("negetive_rewardpoint_check", sql`${table.rewardPoints} >= 0`)
 ]);
 
 export const foodItems = pgTable("food_items", {
@@ -358,13 +359,80 @@ export const availableGames = pgTable("available_games", {
     imageUrl: text("image_url").notNull(),
     releaseYear: integer("release_year"),
     description: text("description")
-});
+},
+    (table) => [
+        pgPolicy("only_admin_can_add_games", {
+            for: "insert",
+            to: authenticatedRole,
+            withCheck: sql`  EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        }),
+        pgPolicy("only_admins_can_update_games", {
+            for: "update",
+            to: authenticatedRole,
+            using: sql`EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`,
+            withCheck: sql`  EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        }),
+        pgPolicy("only_admins_can_delete", {
+            for: "delete",
+            to: authenticatedRole,
+            using: sql`  EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        }),
+        pgPolicy("anyone_can_see", {
+            for: "select",
+            to: authenticatedRole,
+            using: sql`true`
+        }),
+
+
+        index("game_genre_idx").on(table.gameGenre),
+        index("game_name_idx").on(table.gameName)
+    ]);
 
 export const deviceGames = pgTable("device_games", {
     deviceId: uuid("device_id").notNull().references(() => devices.id, { onDelete: "cascade" }),
     gameId: uuid("game_id").notNull().references(() => availableGames.id, { onDelete: "cascade" })
 },
     (table) => [
+        pgPolicy("admins_can_insert", {
+            for: "insert",
+            to: authenticatedRole,
+            withCheck: sql`EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        }),
+        pgPolicy("admins_can_delete", {
+            for: "delete",
+            to: authenticatedRole,
+            using: sql`EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        }),
+        pgPolicy("anyone_can_view_this_junction", {
+            for: "select",
+            to: authenticatedRole,
+            using: sql`true`
+        }),
+
         primaryKey({
             columns: [table.deviceId, table.gameId]
         }),
