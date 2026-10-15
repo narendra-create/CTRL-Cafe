@@ -1,21 +1,169 @@
 "use client";
 import AlreadyLoggedIn from "@/app/custom-components/already-logged-in";
 import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function LoginPage() {
-  /* Section: Auth Verification */
-  const isLoggedIn = false;
-
-  if (isLoggedIn) {
-    return <AlreadyLoggedIn />;
-  }
+  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<string>("user");
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  /* Section: Auth Verification */
+  const supabase = useMemo(() => createClient(), []);
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        setUser(session.user);
+        const { data } = await supabase.auth.getClaims();
+        setRole(data?.claims?.app_metadata?.account_type ?? "user");
+      } else {
+        setUser(null);
+        setRole("user");
+      }
+      setCheckingAuth(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error(error, "From login page");
+      return;
+    }
+    window.location.reload();
+  };
+  const name =
+    user?.user_metadata?.name ?? // email/password signup
+    user?.user_metadata?.full_name ?? // Google OAuth
+    user?.user_metadata?.global_name; // Discord OAuth
+  const image = user?.user_metadata?.avatar_url; // Google & Discord only
+  // null for email/password users
+
+  /* Section: Session Verification Loading State */
+  if (checkingAuth) {
+    return (
+      <div className="min-h-[100dvh] bg-[#15191a] md:bg-[#d8d1c5] dark:md:bg-[#0a0a0a] md:p-[clamp(14px,3vw,38px)] 2xl:p-14 block md:grid md:place-items-center font-sans transition-colors duration-300">
+        <main className="w-full max-w-[1180px] 2xl:max-w-[1400px] md:mt-20 min-h-screen md:min-h-[min(760px,calc(100vh-28px))] 2xl:min-h-[820px] block md:grid md:grid-cols-[1.04fr_0.96fr] 2xl:grid-cols-[1.08fr_0.92fr] bg-[#15191a] md:rounded-[28px] 2xl:rounded-[36px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] 2xl:shadow-[0_40px_120px_rgba(0,0,0,0.45)] relative">
+          {/* Showcase Section */}
+          <section className="flex flex-col justify-between relative overflow-hidden px-[23px] pt-[25px] pb-[28px] min-h-[265px] md:p-[clamp(26px,4vw,58px)] md:min-h-[700px] 2xl:p-18 2xl:min-h-[820px] bg-[radial-gradient(circle_at_83%_12%,rgba(250,204,21,0.22),transparent_30%),linear-gradient(145deg,#242c2c,#121718_70%)] text-[#f7f3ed]">
+            {/* Background Rings */}
+            <div className="absolute border border-[rgba(250,204,21,0.16)] rounded-full pointer-events-none w-[330px] h-[330px] -right-[175px] -bottom-[190px] md:w-[540px] md:h-[540px] md:-right-[260px] md:-bottom-[210px] 2xl:w-[680px] 2xl:h-[680px] 2xl:-right-[300px] 2xl:-bottom-[240px]"></div>
+            <div className="absolute border border-[rgba(250,204,21,0.16)] rounded-full pointer-events-none w-[230px] h-[230px] -right-[115px] -bottom-[135px] md:w-[370px] md:h-[370px] md:-right-[170px] md:-bottom-[125px] 2xl:w-[480px] 2xl:h-[480px] 2xl:-right-[200px] 2xl:-bottom-[140px]"></div>
+
+            {/* Showcase Content */}
+            <div className="relative z-10 max-w-[490px] 2xl:max-w-[560px] mt-21.25 md:mt-0">
+              <p className="text-[#FACC15] text-[11px] md:text-[12px] 2xl:text-[13px] tracking-[0.16em] uppercase font-[800] m-0 mb-[18px] 2xl:mb-6">
+                Your seat is waiting
+              </p>
+              <h1 className="text-[38px] min-[370px]:text-[42px] md:text-[clamp(42px,5.2vw,76px)] 2xl:text-[80px] leading-[0.93] tracking-[-0.075em] m-0 mb-[12px] md:mb-[23px] 2xl:mb-7 font-[680]">
+                Play more.
+                <br />
+                <em className="not-italic text-[#ff876d]">Stay awhile.</em>
+              </h1>
+              <p className="text-[#c5c4bb] leading-[1.65] text-[13px] md:text-[15px] 2xl:text-[17px] max-w-[310px] md:max-w-[395px] 2xl:max-w-[460px] m-0">
+                A cozy gaming lounge for big wins, friendly rivalry, and that
+                one more round feeling.
+              </p>
+            </div>
+
+            {/* Showcase Stats Section */}
+            <div className="hidden md:flex gap-[30px] 2xl:gap-12 relative z-10">
+              <div>
+                <strong className="block text-[21px] 2xl:text-[26px] tracking-[-0.04em]">
+                  24/7
+                </strong>
+                <span className="text-[11px] 2xl:text-[12px] text-[#929b97] uppercase tracking-[0.1em] mt-1 block">
+                  good vibes
+                </span>
+              </div>
+              <div>
+                <strong className="block text-[21px] 2xl:text-[26px] tracking-[-0.04em]">
+                  ∞
+                </strong>
+                <span className="text-[11px] 2xl:text-[12px] text-[#929b97] uppercase tracking-[0.1em] mt-1 block">
+                  rematches
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* Checking Session Section */}
+          <section className="bg-[#f4efe7] dark:bg-[#15191a] text-[#19201f] dark:text-[#f7f3ed] p-[31px_23px_42px] md:p-[clamp(27px,5vw,70px)] 2xl:p-18 flex items-center justify-center min-h-[calc(100dvh-265px)] md:min-h-0 transition-colors duration-300">
+            <div className="w-full max-w-[390px] 2xl:max-w-[460px] mx-auto flex flex-col items-center text-center">
+              {/* Session Loader Visual */}
+              <div className="relative mb-6 2xl:mb-8 flex items-center justify-center">
+                <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-[#FACC15]/20 animate-ping absolute"></div>
+                <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-t-[#FACC15] border-r-[#FACC15]/40 border-b-transparent border-l-transparent animate-spin"></div>
+                <div className="w-11 h-11 md:w-12 md:h-12 2xl:w-14 2xl:h-14 rounded-full bg-[#202b29] dark:bg-white/5 border border-[#FACC15]/30 flex items-center justify-center text-[#FACC15] shadow-inner">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className="2xl:w-6 2xl:h-6 animate-pulse"
+                  >
+                    <path
+                      d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FACC15]/10 border border-[#FACC15]/20 mb-3 2xl:mb-4">
+                <span className="w-2 h-2 rounded-full bg-[#FACC15] animate-pulse"></span>
+                <p className="text-[#856700] dark:text-[#FACC15] text-[11px] 2xl:text-[12px] font-[800] tracking-wide uppercase m-0">
+                  Checking your session
+                </p>
+              </div>
+
+              {/* Status Header */}
+              <h2 className="text-[24px] min-[370px]:text-[26px] md:text-[28px] 2xl:text-[34px] tracking-[-0.05em] font-[800] m-0 mb-2">
+                Connecting to CTRL-CAFE
+              </h2>
+              <p className="m-0 text-[#77766f] dark:text-[#b8b4ac] text-[13px] md:text-[14px] 2xl:text-[15px] max-w-[320px] 2xl:max-w-[360px] leading-[1.6]">
+                Verifying your credentials and checking for an active gaming
+                session...
+              </p>
+
+              {/* Progress Indicator */}
+              <div className="w-48 md:w-56 2xl:w-64 h-1.5 bg-[#ddd8ce] dark:bg-white/10 rounded-full overflow-hidden mt-6 2xl:mt-8">
+                <div className="h-full bg-gradient-to-r from-[#FACC15] via-[#ff876d] to-[#FACC15] rounded-full animate-pulse w-full"></div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <AlreadyLoggedIn
+        email={user.email}
+        onSignOut={handleLogout}
+        role={role}
+        name={name}
+        avatarUrl={image}
+      />
+    );
+  }
 
   /* Login Logic Section (Supabase) */
   const handleSubmit = async (formdata: FormData) => {
@@ -67,7 +215,6 @@ export default function LoginPage() {
           {/* Background Rings */}
           <div className="absolute border border-[rgba(250,204,21,0.16)] rounded-full pointer-events-none w-[330px] h-[330px] -right-[175px] -bottom-[190px] md:w-[540px] md:h-[540px] md:-right-[260px] md:-bottom-[210px]"></div>
           <div className="absolute border border-[rgba(250,204,21,0.16)] rounded-full pointer-events-none w-[230px] h-[230px] -right-[115px] -bottom-[135px] md:w-[370px] md:h-[370px] md:-right-[170px] md:-bottom-[125px]"></div>
-
 
           <div className="relative z-10 max-w-[490px] mt-21.25 md:mt-0">
             <p className="text-[#FACC15] text-[11px] tracking-[0.16em] uppercase font-[800] m-0 mb-[18px]">
