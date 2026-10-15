@@ -1,1 +1,0 @@
-ALTER ROLE postgres SET app.admin_email = 'websitet457@gmail.com';
