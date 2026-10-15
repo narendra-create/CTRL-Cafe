@@ -18,6 +18,7 @@
 - [x] Add point system for each user and make a server action for adding/redeeming points.
 - [x] see rewardActions and complete it
 - [ ] Add LUA scripts for booking seats
+- [x] Complete login and register page with supabase claims
 
 ## Importent on 09/11/2026
 
@@ -30,7 +31,7 @@
 - [ ] Make Game Card for showing game catalogue see schema file for more detail.
 - [ ] Make homepage UI.
 - [ ] Add a theme changing button
-- [ ] Make a minimal navbar.
+- [x] Make a minimal navbar.
 - [ ] Make the rewards page.
 - [ ] Add goodlooking react icons in all pages.
 - [ ] add cloudinary signature generate in frontend
