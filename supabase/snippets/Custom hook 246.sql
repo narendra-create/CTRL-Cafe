@@ -85,11 +85,11 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint
-    WHERE conname = 'profiles_reward_points_non_negative'
+    WHERE conname = 'negetive_rewardpoint_check'
       AND conrelid = 'public.profiles'::regclass
   ) THEN
     ALTER TABLE public.profiles
-      ADD CONSTRAINT profiles_reward_points_non_negative
+      ADD CONSTRAINT negetive_rewardpoint_check
       CHECK (reward_points >= 0);
   END IF;
 END;
