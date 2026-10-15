@@ -1,10 +1,18 @@
 "use client";
+import AlreadyLoggedIn from "@/app/custom-components/already-logged-in";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 export default function LoginPage() {
+  /* Section: Auth Verification */
+  const isLoggedIn = false;
+
+  if (isLoggedIn) {
+    return <AlreadyLoggedIn />;
+  }
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

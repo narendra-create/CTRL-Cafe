@@ -1,4 +1,5 @@
 "use client";
+import AlreadyLoggedIn from "@/app/custom-components/already-logged-in";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
@@ -9,6 +10,13 @@ import { sendOtp, verifyOtp } from "@/lib/actions/otp";
 type OtpStep = "idle" | "sent" | "verified";
 
 export default function RegisterPage() {
+  /* Section: Auth Verification */
+  const isLoggedIn = false;
+
+  if (isLoggedIn) {
+    return <AlreadyLoggedIn />;
+  }
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -344,8 +352,9 @@ export default function RegisterPage() {
                   autoComplete="name"
                   placeholder="Alex Morgan"
                   required
-                  disabled={loading || otpStep !== "idle"}
-                  className="w-full border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed"
+                  readOnly={otpStep !== "idle"}
+                  disabled={loading}
+                  className="w-full border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed read-only:opacity-70"
                 />
               </div>
 
@@ -366,8 +375,9 @@ export default function RegisterPage() {
                     autoComplete="email"
                     placeholder="you@example.com"
                     required
-                    disabled={loading || otpStep !== "idle"}
-                    className="flex-1 min-w-0 border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed"
+                    readOnly={otpStep !== "idle"}
+                    disabled={loading}
+                    className="flex-1 min-w-0 border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed read-only:opacity-70"
                   />
                   {/* Send / Verified badge */}
                   {otpStep === "verified" ? (
