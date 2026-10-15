@@ -100,21 +100,6 @@ export function otpVerificationEmail({
             <td align="center" style="padding:0 0 22px;">
               <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                 <tr>
-                  <td style="padding-right:9px;vertical-align:middle;">
-                    <!-- Yellow icon square -->
-                    <div style="
-                      width:32px;
-                      height:32px;
-                      background:#FACC15;
-                      border-radius:9px 9px 9px 3px;
-                      display:inline-block;
-                      transform:rotate(-6deg);
-                      line-height:32px;
-                      text-align:center;
-                      font-size:16px;
-                      font-family:Arial,sans-serif;
-                    ">☕</div>
-                  </td>
                   <td style="vertical-align:middle;">
                     <span style="
                       font-size:16px;
