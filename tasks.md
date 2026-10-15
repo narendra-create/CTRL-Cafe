@@ -35,3 +35,7 @@
 - [ ] Add goodlooking react icons in all pages.
 - [ ] add cloudinary signature generate in frontend
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
+
+## Run this checklist after deployement
+- [ ] Run sql code for triggers and hooks in supabase dashboard
+- [ ] Update otp verification email template - privacy policy link and ctrl cafe logo
