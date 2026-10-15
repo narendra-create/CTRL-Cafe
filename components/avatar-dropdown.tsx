@@ -1,6 +1,6 @@
 "use client";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,6 +18,17 @@ type Props = {
 };
 
 export function AvatarDropdown(props: Props) {
+  const handleLogout = async () => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.log(error, "Log out error");
+      window.location.reload()
+      return;
+    };
+    window.location.reload()
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -44,7 +55,9 @@ export function AvatarDropdown(props: Props) {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem variant="destructive">Log out</DropdownMenuItem>
+          <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+            Log out
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
