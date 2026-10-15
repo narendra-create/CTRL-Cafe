@@ -13,10 +13,10 @@ interface AlreadyLoggedInProps {
 
 /* Section: Already Logged In View */
 export default function AlreadyLoggedIn({
-  name = "Gamer Member",
+  name = "Gamer",
   email = "player@ctrlcafe.com",
   avatarUrl,
-  role = "Lounge Member",
+  role = "User",
   onSignOut,
 }: AlreadyLoggedInProps) {
   const initials = name
@@ -48,7 +48,7 @@ export default function AlreadyLoggedIn({
             <h1 className="text-[38px] min-[370px]:text-[42px] md:text-[clamp(42px,5.2vw,76px)] 2xl:text-[80px] leading-[0.93] tracking-[-0.075em] m-0 mb-[12px] md:mb-[23px] 2xl:mb-7 font-[680]">
               You&apos;re in.
               <br />
-              <em className="not-italic text-[#FACC15]">Seat reserved.</em>
+              <em className="not-italic text-[#FACC15]">Logged In.</em>
             </h1>
             <p className="text-[#c5c4bb] leading-[1.65] text-[13px] md:text-[15px] 2xl:text-[17px] max-w-[310px] md:max-w-[395px] 2xl:max-w-[460px] m-0">
               You are already logged into CTRL-CAFE. Jump back into your station, explore lounge perks, or manage your account.
@@ -226,7 +226,7 @@ export default function AlreadyLoggedIn({
               </Link>
 
               <Link
-                href="/Features/Price-list-section"
+                href="/Features/Prices"
                 className="border border-[#d8d3ca] dark:border-white/10 bg-transparent rounded-[11px] 2xl:rounded-[13px] p-[11px_10px] 2xl:p-[14px_12px] text-[#404641] dark:text-[#c5c4bb] text-[12px] 2xl:text-[13px] font-[700] hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-2 text-center"
               >
                 <svg
