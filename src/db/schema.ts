@@ -43,6 +43,7 @@ export const accountTypeEnum = pgEnum("account_type", [
 ]);
 
 export const bookingStatusEnum = pgEnum("booking_status", [
+    "hold",
     "pending",
     "confirmed",
     "cancelled",

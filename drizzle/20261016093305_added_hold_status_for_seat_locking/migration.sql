@@ -1,0 +1,1 @@
+ALTER TYPE "booking_status" ADD VALUE 'hold' BEFORE 'pending';
