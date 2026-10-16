@@ -38,5 +38,15 @@
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
 
 ## Run this checklist after deployement
+
 - [ ] Run sql code for triggers and hooks in supabase dashboard
 - [ ] Update otp verification email template - privacy policy link and ctrl cafe logo
+
+#### Version 2 update features
+
+- [ ] Subscription plans
+
+#### Version 3 update features
+
+- [ ] Smart Platform filter for adding games (admin)
+- [ ] Book By selecting your fevorite game feature
