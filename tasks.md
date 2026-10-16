@@ -13,13 +13,15 @@
 - [x] cloudinary image upload system for fooditems
 - [x] find api for seeing games
 - [x] schema for available games
-- [ ] controller for adding available games and linking them to devices
+- [x] controller for adding available games and linking them to devices
 - [x] Make a sytem for linking games with devices
 - [x] Add point system for each user and make a server action for adding/redeeming points.
 - [x] see rewardActions and complete it
 - [ ] Add LUA scripts for booking seats
 - [x] Complete login and register page with supabase claims
 - [ ] add safeparse in all controllers
+- [ ] add pagination where needed
+- [ ] make controller for unlinking/updating linked games
 
 ## Importent on 09/11/2026
 

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/serverClient";
 import { profiles } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 
+//remove this next
 export async function isLoggedIn(): Promise<boolean> {
     const supabase = await createClient();
     const { data: user, error } = await supabase.auth.getClaims();
