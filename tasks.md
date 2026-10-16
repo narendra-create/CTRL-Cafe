@@ -19,6 +19,7 @@
 - [x] see rewardActions and complete it
 - [ ] Add LUA scripts for booking seats
 - [x] Complete login and register page with supabase claims
+- [ ] add safeparse in all controllers
 
 ## Importent on 09/11/2026
 
