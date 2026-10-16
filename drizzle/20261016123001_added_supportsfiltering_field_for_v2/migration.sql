@@ -1,0 +1,1 @@
+ALTER TABLE "devices" ADD COLUMN "supports_filtering" boolean;

@@ -156,6 +156,7 @@ export const foodItems = pgTable("food_items", {
 export const devices = pgTable("devices", {
     id: uuid("id").defaultRandom().primaryKey(),
     deviceName: text("device_name").notNull().unique(),
+    supportsFiltering: boolean("supports_filtering"),
     units: integer("units").notNull().default(1),
     type: deviceTypeEnum("type").notNull(),
     maxPlayers: integer("max_players").notNull(),
