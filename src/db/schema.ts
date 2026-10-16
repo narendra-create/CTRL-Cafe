@@ -359,7 +359,6 @@ export const availableGames = pgTable("available_games", {
     gameGenre: text("game_genre"),
     imageUrl: text("image_url").notNull(),
     releaseYear: integer("release_year"),
-    description: text("description")
 },
     (table) => [
         pgPolicy("only_admin_can_add_games", {

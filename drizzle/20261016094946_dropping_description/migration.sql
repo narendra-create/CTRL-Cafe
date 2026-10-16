@@ -1,0 +1,1 @@
+ALTER TABLE "available_games" DROP COLUMN "description";
