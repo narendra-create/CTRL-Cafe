@@ -7,3 +7,13 @@ export type DeviceWithInstalledGames = {
     supportsFiltering: boolean | null;
     installedGames: string[];
 };
+
+export type gameCardProps = {
+    name: string;
+    imageUrl: string;
+    genre: string[];
+    rating: number;
+    releaseYear: number;
+    parentPlatforms: string[];
+    platforms: string[];
+}
