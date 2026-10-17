@@ -1,7 +1,7 @@
 export type deviceCardType = {
-    id?: string;
+    id: string;
     name: string;
     imageUrl: string;
     isNewDevice: boolean;
-    units?: string | number;
+    units: string | number;
 };

@@ -28,13 +28,18 @@ const testpage = () => {
     imageUrl: "/console-cutout.webp",
     isNewDevice: true,
     name: "PlayStation 5",
+    id: "1",
+    units: 5,
   };
 
   return (
     <div className="flex items-center justify-center gap-2 mt-50">
-      <GameCard {...data} />
-      <GameCard {...data} />
-      {/* <DeviceCard {...deviceData} /> */}
+      {/* <GameCard {...data} /> */}
+      {/* <GameCard {...data} /> */}
+      <DeviceCard
+        deviceDetails={deviceData}
+        onClick={(isSelected, id) => console.log("id", id, "value", isSelected)}
+      />
     </div>
   );
 };
