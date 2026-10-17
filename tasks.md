@@ -31,12 +31,13 @@
 # Frontend Tasks
 
 - [x] complete the game card ui and logic
+- [ ] check if theme change button is still in dropdown
 - [ ] add gamecard into grid in add games card
 - [x] make device card
 - [ ] Make foodItems card with image, name, description etc - see the fooditems table in schema file in src/db for more details.
 - [x] Make Game Card for showing game catalogue see schema file for more detail.
 - [ ] Make homepage UI.
-- [ ] Add a theme changing button
+- [x] Add a theme changing button
 - [x] Make a minimal navbar.
 - [ ] Make the rewards page.
 - [ ] Add goodlooking react icons in all pages.
