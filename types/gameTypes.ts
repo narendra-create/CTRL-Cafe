@@ -9,6 +9,8 @@ export type DeviceWithInstalledGames = {
 };
 
 export type gameCardProps = {
+    id?: string;
+    gameId?: string;
     name: string;
     imageUrl: string;
     genre: string[];
@@ -16,4 +18,7 @@ export type gameCardProps = {
     releaseYear: number;
     parentPlatforms: string[];
     platforms: string[];
-}
+    checked?: boolean;
+    onCheck?: (id: string, checked?: boolean) => void;
+    oncheck?: (id: string, checked?: boolean) => void;
+};
