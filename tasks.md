@@ -30,7 +30,7 @@
 
 # Frontend Tasks
 
-- [ ] complete the game card ui and logic
+- [x] complete the game card ui and logic
 - [ ] add gamecard into grid in add games card
 - [ ] make device card
 - [ ] Make foodItems card with image, name, description etc - see the fooditems table in schema file in src/db for more details.

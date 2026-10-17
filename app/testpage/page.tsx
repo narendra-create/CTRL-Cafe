@@ -1,7 +1,9 @@
-"use client"
+"use client";
 import React from "react";
 import GameCard from "@/app/custom-components/cards/gameCard";
 import { gameCardProps } from "@/types/gameTypes";
+import DeviceCard from "@/app/custom-components/cards/deviceCard";
+import type { deviceCardType } from "@/types/deviceTypes";
 
 const testpage = () => {
   const data: gameCardProps = {
@@ -22,9 +24,17 @@ const testpage = () => {
       "Xbox One",
     ],
   };
+  const deviceData: deviceCardType = {
+    imageUrl: "/console-cutout.webp",
+    isNewDevice: true,
+    name: "PlayStation 5",
+  };
+
   return (
-    <div className="flex items-center justify-center mt-50">
+    <div className="flex items-center justify-center gap-2 mt-50">
       <GameCard {...data} />
+      <GameCard {...data} />
+      {/* <DeviceCard {...deviceData} /> */}
     </div>
   );
 };
