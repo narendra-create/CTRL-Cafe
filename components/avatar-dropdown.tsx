@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import ThemeChangeButton from "@/app/custom-components/ThemeChangeButton";
 
 type Props = {
   name: string;
@@ -23,10 +24,10 @@ export function AvatarDropdown(props: Props) {
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.log(error, "Log out error");
-      window.location.reload()
+      window.location.reload();
       return;
-    };
-    window.location.reload()
+    }
+    window.location.reload();
   };
 
   return (
@@ -34,9 +35,11 @@ export function AvatarDropdown(props: Props) {
       <DropdownMenuTrigger
         render={
           <Button variant="ghost" size="icon" className="rounded-full">
-            <Avatar>
+            <Avatar className="md:w-10 md:h-10">
               <AvatarImage src={props.imageurl} alt="shadcn" />
-              <AvatarFallback>{props.name}</AvatarFallback>
+              <AvatarFallback className="bg-yellow-800 dark:bg-none text-white font-semibold dark:font-normal">
+                {props.name}
+              </AvatarFallback>
             </Avatar>
           </Button>
         }
@@ -52,6 +55,9 @@ export function AvatarDropdown(props: Props) {
           <Link href={"/settings"}>
             <DropdownMenuItem>Settings</DropdownMenuItem>
           </Link>
+          <DropdownMenuItem className="md:hidden">
+            <ThemeChangeButton />
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
