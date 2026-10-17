@@ -12,7 +12,6 @@ interface GameCardComponentProps extends Partial<gameCardProps> {
   gameId?: string;
   checked?: boolean;
   onCheck?: (id: string, checked?: boolean) => void;
-  oncheck?: (id: string, checked?: boolean) => void;
 }
 
 const GameCard = (props: GameCardComponentProps, legacyGameId?: string) => {
@@ -34,7 +33,6 @@ const GameCard = (props: GameCardComponentProps, legacyGameId?: string) => {
       setInternalChecked(nextChecked);
     }
     props.onCheck?.(cardId, nextChecked);
-    props.oncheck?.(cardId, nextChecked);
   };
 
   return (
