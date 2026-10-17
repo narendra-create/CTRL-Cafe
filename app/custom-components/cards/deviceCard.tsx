@@ -28,11 +28,11 @@ const DeviceCard = ({
         damping: 20,
       }}
       onClick={handleCardClick}
-      className="flex group/deviceCard cursor-pointer hover:scale-99 transition-all ease-out duration-200 items-center flex-col rounded-2xl relative bg-white/90 px-2.5 pb-0 h-70 md:h-110 w-full mx-2 md:mx-0 md:w-130"
+      className="flex group/deviceCard shadow-[0_3px_10px_rgb(0,0,0,0.2)] dark:shadow-[0_3px_10px_rgba(255,255,255,0.2)] cursor-pointer hover:scale-99 transition-all ease-out duration-200 items-center flex-col rounded-2xl relative bg-black/90 dark:bg-white/90 px-2.5 pb-0 h-70 md:h-110 w-full mx-2 md:mx-0 md:w-130"
     >
       <div
         className={`absolute inset-0 z-10 transition-colors ease-out duration-200 ${
-          selected ? "bg-black/30" : "group-hover/deviceCard:bg-black/20"
+          selected ? "bg-black/60 dark:bg-black/30" : "group-hover/deviceCard:bg-black/20"
         }`}
       >
         <AnimatePresence>
@@ -54,7 +54,7 @@ const DeviceCard = ({
           )}
         </AnimatePresence>
       </div>
-      <div className="relative w-full flex-8 min-h-0 bg-black/7 rounded-2xl mt-2.5">
+      <div className="relative w-full flex-8 min-h-0 bg-white/7 dark:bg-black/7 rounded-2xl mt-2.5">
         <Image
           alt="Device Image"
           src={deviceDetails?.imageUrl ?? "/new-device-cutout.webp"}
@@ -64,7 +64,7 @@ const DeviceCard = ({
           draggable={false}
         />
       </div>
-      <div className="relative z-20 flex items-center justify-center gap-3 w-[70%] text-black/80 flex-[1.5] h-fit">
+      <div className="relative z-20 flex items-center justify-center gap-3 w-[70%] text-white/90 dark:text-black/80 flex-[1.5] h-fit">
         <h5 className="text-center font-heading font-semibold tracking-wider text-2xl md:text-4xl h-fit line-clamp-1">
           {deviceDetails?.name}
         </h5>

@@ -45,7 +45,7 @@ const GameCard = (props: GameCardComponentProps, legacyGameId?: string) => {
         damping: 20,
       }}
       onClick={handleCardClick}
-      className="relative w-42 h-80 md:w-90 md:h-145 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 text-white select-none"
+      className="relative shadow-[0_3px_10px_rgb(0,0,0,0.2)] dark:shadow-[0_3px_10px_rgba(255,255,255,0.2)] w-42 h-80 md:w-90 md:h-145 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 text-white select-none"
     >
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
@@ -61,7 +61,10 @@ const GameCard = (props: GameCardComponentProps, legacyGameId?: string) => {
 
       <Checkbox
         checked={isChecked}
-        className="absolute md:w-7 md:h-7 right-3 top-3 z-40 pointer-events-none"
+        className="
+        absolute md:w-7 md:h-7 right-3 top-3 z-40 pointer-events-none data-checked:bg-yellow-500
+         data-checked:text-black  [&_svg]:size-8
+          [&_svg]:stroke-5"
       />
 
       {/* Top content section */}
@@ -133,7 +136,7 @@ const GameCard = (props: GameCardComponentProps, legacyGameId?: string) => {
               {props.platforms?.map((platform) => (
                 <span
                   key={platform}
-                  className="w-fit rounded-xl border border-white/5 bg-white/30 px-2 py-1.5 text-center font-heading text-xs font-semibold text-white md:text-lg"
+                  className="w-fit hover:bg-white/10 transition-colors ease-out duration-200 rounded-xl border border-white/5 bg-white/30 px-2 py-1.5 text-center font-heading text-xs font-semibold text-white md:text-lg"
                 >
                   {platform}
                 </span>
