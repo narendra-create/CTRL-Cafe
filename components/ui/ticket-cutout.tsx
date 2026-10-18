@@ -11,6 +11,7 @@ type TicketCutLineProps = {
   orientation?: "horizontal" | "vertical";
   iconPosition?: "start" | "center";
   className?: string;
+  iconColour?: string;
 };
 
 export function TicketCutLine({
@@ -23,6 +24,7 @@ export function TicketCutLine({
   orientation = "horizontal",
   iconPosition = "start",
   className = "",
+  iconColour
 }: TicketCutLineProps) {
   const isHorizontal = orientation === "horizontal";
 
@@ -61,16 +63,16 @@ export function TicketCutLine({
   const scissors = (
     <Scissors
       size={iconSize}
-      strokeWidth={1.8}
+      strokeWidth={2.9}
       aria-hidden="true"
-      className={`shrink-0 ${isHorizontal ? "" : "rotate-90"}`}
+      className={`shrink-0 ${isHorizontal ? "" : "rotate-90"} ${iconColour}`}
     />
   );
 
   return (
     <div
       aria-hidden="true"
-      className={`flex items-center gap-2.5 ${
+      className={`flex items-center gap-1.5 ${
         isHorizontal ? "flex-row" : "flex-col"
       } ${className}`}
       style={containerStyle}
