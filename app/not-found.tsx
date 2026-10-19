@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="min-h-[100dvh] bg-[#f4efe7] dark:bg-[#0d0f0f] flex items-center justify-center p-6 font-sans transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-[100dvh] mt-15 md:mt-0 bg-[#f4efe7] dark:bg-[#0d0f0f] flex items-center justify-center p-6 font-sans transition-colors duration-300 relative overflow-hidden">
 
       {/* Background Noise & Grid */}
       <div className="absolute inset-0 pointer-events-none">

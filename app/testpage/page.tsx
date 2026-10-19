@@ -1,11 +1,17 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import GameCard from "@/app/custom-components/cards/gameCard";
 import { gameCardProps } from "@/types/gameTypes";
 import DeviceCard from "@/app/custom-components/cards/deviceCard";
 import type { deviceCardType } from "@/types/deviceTypes";
+import {
+  DeviceFilterGrid,
+  DeviceFilterItem,
+  FrontendDeviceType,
+} from "@/app/custom-components/DeviceFilterCard";
 
 const testpage = () => {
+  const [selected, setselected] = useState<FrontendDeviceType | null>(null);
   const data: gameCardProps = {
     name: "Grand Theft Auto V",
     imageUrl:
@@ -31,14 +37,25 @@ const testpage = () => {
     id: "1",
     units: 5,
   };
+  const devices: DeviceFilterItem[] = [
+    { label: "Console", subLabel: "High end", type: "CONSOLE" },
+    { label: "PC", subLabel: "High end", type: "PC" },
+    { label: "Arcade", subLabel: "High end", type: "ARCADE" },
+    { label: "VR", subLabel: "High end", type: "VR" },
+  ];
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-50">
-      <GameCard {...data} />
+    <div className="flex items-center justify-center gap-2 mt-50 px-2">
+      {/* <GameCard {...data} />
       <GameCard {...data} />
       <DeviceCard
         deviceDetails={deviceData}
         onClick={(isSelected, id) => console.log("id", id, "value", isSelected)}
+      /> */}
+      <DeviceFilterGrid
+        devices={devices}
+        onSelectedDevice={setselected}
+        selectedDevice={selected}
       />
     </div>
   );

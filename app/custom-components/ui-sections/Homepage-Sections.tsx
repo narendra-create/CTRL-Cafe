@@ -14,7 +14,7 @@ const Herosection = () => {
           priority
           className="w-full h-full object-center object-cover rounded-t-lg"
         />
-        <div className="absolute bg-black w-full h-full hidden md:block md:opacity-30 z-10"></div>
+        <div className="absolute bg-black w-full h-full hidden md:block md:opacity-30 z-10 hover:opacity-45 transition-all ease-out duration-200"></div>
       </div>
       <TicketCutLine
         thickness={4}
@@ -51,7 +51,7 @@ const Herosection = () => {
             </span>
             <span className="hidden md:block">Seats Free Now</span>
           </div>
-          <button className="bg-accent transition-all hover:scale-105 hover:-translate-y-1.5 ease-out duration-200 dark:bg-accent/95 dark:font-bold md:font-bold text-accent-foreground px-4 py-3 text-[17px] md:text-xl font-medium tracking-wide font-sans rounded-md">
+          <button className="bg-accent hover:bg-accent/85 dark:hover:bg-accent/85 transition-all hover:scale-105 hover:-translate-y-1.2 ease-out duration-200 dark:bg-accent/95 dark:font-bold md:font-bold text-accent-foreground px-4 py-3 text-[17px] md:text-xl font-medium tracking-wide font-sans rounded-md">
             Reserve a Seat
           </button>
         </div>
