@@ -33,6 +33,7 @@
 - [x] complete the game card ui and logic
 - [ ] check if theme change button is still in dropdown
 - [x] complete second stage of homepage - Add filtergrid in homepage and detail card
+- [ ] complete the hooksection in homepage
 - [ ] add gamecard into grid in add games card
 - [x] make device card
 - [ ] Make foodItems card with image, name, description etc - see the fooditems table in schema file in src/db for more details.
