@@ -1,11 +1,19 @@
+"use client";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { TicketCutLine } from "@/components/ui/ticket-cutout";
-import { Ticket } from "lucide-react";
+import { Gamepad2, Joystick, Ticket } from "lucide-react";
+import {
+  DeviceFilterGrid,
+  DeviceFilterItem,
+  FrontendDeviceType,
+} from "@/app/custom-components/DeviceFilterCard";
+import HookCard from "@/app/custom-components/cards/HookCard";
+import type { HookCardProps } from "@/app/custom-components/cards/HookCard";
 
 const Herosection = () => {
   return (
-    <section className="w-[95%] dark:shadow-[0px_10px_20px_2px_#1a202c] shadow-[0px_10px_20px_2px_#cbd5e0] relative rounded-xl mx-auto h-135 md:h-180 md:w-[98%] border border-gray-400/50 dark:border-gray-400/25 bg-gray-100 dark:bg-black md:bg-transparent overflow-hidden">
+    <section className="w-[95%] dark:shadow-[0px_3px_15px_0px_#1a202c] shadow-[0px_3px_15px_0px_#cbd5e0] relative rounded-xl mx-auto h-135 md:h-180 md:w-[98%] border border-gray-400/50 dark:border-gray-400/25 bg-gray-100 dark:bg-black md:bg-transparent overflow-hidden">
       <div className="h-[62%] relative md:h-full md:z-0">
         <Image
           alt="hero-image"
@@ -60,4 +68,83 @@ const Herosection = () => {
   );
 };
 
-export default Herosection;
+const HookSection = () => {
+  type ArenaDescriptions = Record<FrontendDeviceType, HookCardProps>;
+  const ArenaDetails: Record<FrontendDeviceType, HookCardProps> = {
+    CONSOLE: {
+      accentText: "PLAY TOGETHER",
+      title: "Console",
+      description: "Grab a controller. Bring the rivalry.",
+      tabs: ["PS5", "Xbox", "Co-op", "Sports"],
+      bookingStyleText: "Your next rematch starts here.",
+      deviceType: "CONSOLE",
+      buttonHref: "/book/console",
+      rate: "₹50",
+    },
+
+    PC: {
+      accentText: "BUILT TO COMPETE",
+      title: "PC Gaming",
+      description: "Lock in, take aim, and own the leaderboard.",
+      tabs: ["FPS", "Racing", "Esports", "RPGs"],
+      bookingStyleText: "Ready to clutch the win?",
+      deviceType: "PC",
+      buttonHref: "/book/pc",
+      rate: "₹59",
+    },
+
+    ARCADE: {
+      accentText: "ONE MORE ROUND",
+      title: "Arcade",
+      description: "Chase high scores. Challenge your crew. Run it back.",
+      tabs: ["Racing", "Fighters", "Rhythm", "Classics"],
+      bookingStyleText: "Think you can beat the high score?",
+      deviceType: "ARCADE",
+      buttonHref: "/book/arcade",
+      rate: "₹89",
+    },
+
+    VR: {
+      accentText: "REALITY: OPTIONAL",
+      title: "VR",
+      description: "Don't just play the game. Step inside it.",
+      tabs: ["Action", "Rhythm", "Adventure", "Sports"],
+      bookingStyleText: "Step into your next adventure.",
+      deviceType: "VR",
+      buttonHref: "/book/vr",
+      rate: "₹69",
+    },
+  };
+
+  const [selected, setselected] = useState<FrontendDeviceType | null>(
+    "CONSOLE",
+  );
+
+  const DeviceFilterData: DeviceFilterItem[] = [
+    { label: "Console", subLabel: "Big-screen battles", type: "CONSOLE" },
+    { label: "PC", subLabel: "High FPS • Precision", type: "PC" },
+    { label: "Arcade", subLabel: "Beat the high score", type: "ARCADE" },
+    { label: "VR", subLabel: "Enter another world", type: "VR" },
+  ];
+
+  return (
+    <section className="w-full px-2 mt-5 md:mt-15 relative">
+      <div className="hidden absolute top-[8%] z-80 right-[8%] md:flex items-center justify-center gap-8">
+        <Joystick size={70} className="text-red-800"/>
+        <Gamepad2 size={90} className="rotate-20" strokeWidth={1.5}/>
+      </div>
+      <DeviceFilterGrid
+        devices={DeviceFilterData}
+        onSelectedDevice={setselected}
+        selectedDevice={selected}
+      />
+      {selected && (
+        <div className="mt-1 md:mt-3 md:pl-3 md:w-[91%] md:mx-auto">
+          <HookCard {...ArenaDetails[selected]} />
+        </div>
+      )}
+    </section>
+  );
+};
+
+export { Herosection, HookSection };
