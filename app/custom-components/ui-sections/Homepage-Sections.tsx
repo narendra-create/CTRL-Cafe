@@ -2,7 +2,15 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import { TicketCutLine } from "@/components/ui/ticket-cutout";
-import { Gamepad2, Joystick, Ticket } from "lucide-react";
+import {
+  Gamepad2,
+  GamepadDirectional,
+  HatGlasses,
+  Joystick,
+  Motorbike,
+  Swords,
+  Ticket,
+} from "lucide-react";
 import {
   DeviceFilterGrid,
   DeviceFilterItem,
@@ -121,9 +129,7 @@ const HookSection = () => {
     },
   };
 
-  const [selected, setselected] = useState<FrontendDeviceType | null>(
-    "CONSOLE",
-  );
+  const [selected, setselected] = useState<FrontendDeviceType>("CONSOLE");
 
   const DeviceFilterData: DeviceFilterItem[] = [
     { label: "Console", subLabel: "Big-screen battles", type: "CONSOLE" },
@@ -143,8 +149,20 @@ const HookSection = () => {
         onSelectedDevice={setselected}
         selectedDevice={selected}
       />
+      <div className="absolute hidden md:block w-[14%] place-items-center place-content-center h-[60%] right-3 bottom-5 z-50 text-blue-900 dark:text-red-300 border bg-gray-400/6 border-gray-300/70 dark:bg-gray-900/6 dark:border-gray-900 rounded-lg">
+        {/* <Image
+          alt="Ready?"
+          src={`/${ArenaDetails[selected].deviceType.toLowerCase()}-cutout.webp`}
+          fill
+          className="object-contain rounded-lg"
+        /> */}
+        {selected === "PC" && <Swords size={120} strokeWidth={1.3}/>}
+        {selected === "CONSOLE" && <GamepadDirectional size={120} strokeWidth={1.3}/>}
+        {selected === "VR" && <HatGlasses size={120} strokeWidth={1.3}/>}
+        {selected === "ARCADE" && <Motorbike size={120} strokeWidth={1.3}/>}
+      </div>
       {selected && (
-        <div className="mt-1 md:mt-3 md:pl-3 md:w-[91%] md:mx-auto">
+        <div className="mt-1 md:mt-3 md:pl-3 md:w-[80%] md:ml-[5%]">
           <HookCard {...ArenaDetails[selected]} />
         </div>
       )}
@@ -192,15 +210,6 @@ const PopularSection = () => {
       description:
         "Chase high scores and challenge your crew on classic cabinets and modern rhythm machines.",
       index: 2,
-    },
-    {
-      deviceName: "VR",
-      arenaName: "VR Void",
-      imageUrl: "/vr-zone.webp",
-      ratePerHour: 69,
-      description:
-        "Step inside the game — full immersion, zero gravity, pure adrenaline across action and adventure experiences.",
-      index: 3,
     },
   ];
 
