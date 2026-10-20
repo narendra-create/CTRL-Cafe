@@ -9,6 +9,8 @@ import {
   DeviceFilterItem,
   FrontendDeviceType,
 } from "@/app/custom-components/DeviceFilterCard";
+import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
+import { PopularSection } from "@/app/custom-components/ui-sections/Homepage-Sections";
 
 const testpage = () => {
   const [selected, setselected] = useState<FrontendDeviceType | null>(null);
@@ -52,11 +54,14 @@ const testpage = () => {
         deviceDetails={deviceData}
         onClick={(isSelected, id) => console.log("id", id, "value", isSelected)}
       /> */}
-      <DeviceFilterGrid
+      {/* <DeviceFilterGrid
         devices={devices}
         onSelectedDevice={setselected}
         selectedDevice={selected}
-      />
+      /> */}
+      <div className="pb-55 w-full">
+        <PopularSection />
+      </div>
     </div>
   );
 };

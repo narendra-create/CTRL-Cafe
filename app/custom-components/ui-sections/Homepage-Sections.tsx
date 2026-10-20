@@ -11,6 +11,9 @@ import {
 import HookCard from "@/app/custom-components/cards/HookCard";
 import type { HookCardProps } from "@/app/custom-components/cards/HookCard";
 import Link from "next/link";
+import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
+import PopularCard from "@/app/custom-components/cards/PopularCard";
+import type { PopularCardProps } from "@/app/custom-components/cards/PopularCard";
 
 const Herosection = () => {
   return (
@@ -72,7 +75,6 @@ const Herosection = () => {
 };
 
 const HookSection = () => {
-  type ArenaDescriptions = Record<FrontendDeviceType, HookCardProps>;
   const ArenaDetails: Record<FrontendDeviceType, HookCardProps> = {
     CONSOLE: {
       accentText: "PLAY TOGETHER",
@@ -81,7 +83,7 @@ const HookSection = () => {
       tabs: ["PS5", "Xbox", "Co-op", "Sports"],
       bookingStyleText: "Per Hour",
       deviceType: "CONSOLE",
-      buttonHref: "/book/console",
+      buttonHref: "/book/CONSOLE",
       rate: "₹50",
     },
 
@@ -92,7 +94,7 @@ const HookSection = () => {
       tabs: ["FPS", "Racing", "Esports", "RPGs"],
       bookingStyleText: "Per Hour",
       deviceType: "PC",
-      buttonHref: "/book/pc",
+      buttonHref: "/book/PC",
       rate: "₹59",
     },
 
@@ -103,7 +105,7 @@ const HookSection = () => {
       tabs: ["Racing", "Fighters", "Rhythm", "Classics"],
       bookingStyleText: "Per Hour/Day",
       deviceType: "ARCADE",
-      buttonHref: "/book/arcade",
+      buttonHref: "/book/ARCADE",
       rate: "₹89",
     },
 
@@ -114,7 +116,7 @@ const HookSection = () => {
       tabs: ["Action", "Rhythm", "Adventure", "Sports"],
       bookingStyleText: "Per Hour",
       deviceType: "VR",
-      buttonHref: "/book/vr",
+      buttonHref: "/book/VR",
       rate: "₹69",
     },
   };
@@ -150,4 +152,97 @@ const HookSection = () => {
   );
 };
 
-export { Herosection, HookSection };
+// Popular Section
+const PopularSection = () => {
+  const [itemDistance, setItemDistance] = React.useState(50);
+
+  React.useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    setItemDistance(mq.matches ? 90 : 50);
+    const handler = (e: MediaQueryListEvent) =>
+      setItemDistance(e.matches ? 90 : 50);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const data: PopularCardProps[] = [
+    {
+      deviceName: "CONSOLE",
+      arenaName: "Console Zone",
+      imageUrl: "/console-zone.webp",
+      ratePerHour: 50,
+      description:
+        "Grab a controller and challenge your crew on the big screen — PS5 titles, co-op battles, and sports showdowns await.",
+      index: 0,
+    },
+    {
+      deviceName: "PC",
+      arenaName: "PC Habitat",
+      imageUrl: "/pc-zone.webp",
+      ratePerHour: 59,
+      description:
+        "High-FPS rigs built for precision. Lock in, take aim, and own the leaderboard on our esports-grade setups.",
+      index: 1,
+    },
+    {
+      deviceName: "Arcade",
+      arenaName: "Arcade Bay",
+      imageUrl: "/arcade-zone.webp",
+      ratePerHour: 89,
+      description:
+        "Chase high scores and challenge your crew on classic cabinets and modern rhythm machines.",
+      index: 2,
+    },
+    {
+      deviceName: "VR",
+      arenaName: "VR Void",
+      imageUrl: "/vr-zone.webp",
+      ratePerHour: 69,
+      description:
+        "Step inside the game — full immersion, zero gravity, pure adrenaline across action and adventure experiences.",
+      index: 3,
+    },
+  ];
+
+  return (
+    <section className="w-full mt-10 md:mt-20">
+      {/* Header */}
+      <div className="px-3 md:px-10 mb-0 md:mb-2">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-yellow-700 dark:text-yellow-500 mb-1.5">
+          Pick your next session
+        </p>
+        <h2 className="font-heading font-bold text-4xl md:text-6xl text-zinc-900 dark:text-zinc-100 leading-tight">
+          Popular right now
+          <span className="text-accent">.</span>
+        </h2>
+      </div>
+
+      {/* ScrollStack wrapper — needs a fixed height to scroll inside */}
+      <div className="h-120 md:h-150 w-full md:w-[99%] md:px-15 md:mx-auto rounded-xl overflow-hidden">
+        <ScrollStack
+          itemDistance={itemDistance}
+          itemStackDistance={18}
+          stackPosition="8%"
+          itemScale={0.02}
+          baseScale={0.9}
+          dimAmount={0.18}
+          smoothScroll
+          snap
+          blurAmount={2}
+          className="scrollbar-none"
+        >
+          {data.map((card, i) => (
+            <ScrollStackItem
+              key={card.arenaName}
+              itemClassName="!rounded-lg !h-100 md:!h-120 !p-0 !bg-transparent overflow-hidden"
+            >
+              <PopularCard {...card} index={i} />
+            </ScrollStackItem>
+          ))}
+        </ScrollStack>
+      </div>
+    </section>
+  );
+};
+
+export { Herosection, HookSection, PopularSection };
