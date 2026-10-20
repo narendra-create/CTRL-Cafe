@@ -17,11 +17,12 @@
 - [x] Make a sytem for linking games with devices
 - [x] Add point system for each user and make a server action for adding/redeeming points.
 - [x] see rewardActions and complete it
-- [ ] Add LUA scripts for booking seats
 - [x] Complete login and register page with supabase claims
 - [x] add safeparse in all controllers
+- [ ] Check Seat hold controller for mistakes
 - [ ] add pagination where needed
 - [ ] make controller for unlinking/updating linked games
+- [ ] controller for booking the holded seat
 
 ## Importent on 09/11/2026
 
