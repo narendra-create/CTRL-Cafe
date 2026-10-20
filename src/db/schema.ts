@@ -298,6 +298,14 @@ export const bookings = pgTable("bookings", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull().$onUpdate(() => new Date()),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+
+    //Razorpay fields
+    razorpayOrderId: text("razorpay_order_id"),
+    razorpayPaymentId: text("razorpay_payment_id").unique(),  // unique = built-in idempotency
+    paidAmount: numeric("paid_amount", { precision: 10, scale: 2 }),
+
+    //Hold expire time
+    holdExpiresAt: timestamp("hold_expires_at", { withTimezone: true })
 },
     (table) => [
         pgPolicy("users_can_book_for_their_own", {
@@ -405,6 +413,7 @@ export const availableGames = pgTable("available_games", {
         index("game_name_idx").on(table.gameName)
     ]);
 
+//Junction Tables
 export const deviceGames = pgTable("device_games", {
     deviceId: uuid("device_id").notNull().references(() => devices.id, { onDelete: "cascade" }),
     gameId: uuid("game_id").notNull().references(() => availableGames.id, { onDelete: "cascade" })
@@ -441,3 +450,16 @@ export const deviceGames = pgTable("device_games", {
         index("device_games_device_id_idx").on(table.deviceId)
     ]
 );
+
+export const bookingItems = pgTable("booking_items", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id").notNull().references(() => bookings.id),
+    foodItemId: uuid("food_item_id").notNull().references(() => foodItems.id),
+    qty: integer("qty").notNull().default(1),
+    unitPrice: numeric("unit_price", {
+        precision: 10,
+        scale: 2
+    }).notNull()
+}, (table) => [
+    check("negetive_price_check", sql`${table.unitPrice} >= 0`)
+]);
