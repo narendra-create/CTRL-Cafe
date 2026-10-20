@@ -25,7 +25,7 @@ const HookCard = ({
 }: HookCardProps) => {
   return (
     // Card wrapper
-    <section className="flex flex-col justify-between w-full rounded-xl overflow-hidden min-h-[420px] sm:min-h-[480px] bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800">
+    <section className="flex flex-col justify-between w-full rounded-xl overflow-hidden min-h-105 md:min-h-90 bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800">
       {/* Top content */}
       <div className="px-6 pt-7 pb-0 flex flex-col gap-2">
         {/* Accent label + Rate */}
@@ -72,7 +72,7 @@ const HookCard = ({
       <div className="mt-8 px-6 pb-6 border-t border-zinc-300 dark:border-zinc-800 pt-5 flex items-end justify-between gap-4 flex-wrap">
         {/* Booking style */}
         <div className="flex flex-col gap-1">
-          <span className="text-zinc-500 dark:text-zinc-600 font-mono text-[10px] tracking-[0.2em] uppercase">
+          <span className="text-zinc-500 dark:text-zinc-500 md:font-medium md:text-[13px] font-mono text-[10px] tracking-[0.15em] uppercase">
             Booking Style
           </span>
           <p className="font-heading font-bold text-xl sm:text-2xl text-zinc-900 dark:text-zinc-100">

@@ -10,6 +10,7 @@ import {
 } from "@/app/custom-components/DeviceFilterCard";
 import HookCard from "@/app/custom-components/cards/HookCard";
 import type { HookCardProps } from "@/app/custom-components/cards/HookCard";
+import Link from "next/link";
 
 const Herosection = () => {
   return (
@@ -59,9 +60,11 @@ const Herosection = () => {
             </span>
             <span className="hidden md:block">Seats Free Now</span>
           </div>
-          <button className="bg-accent hover:bg-accent/85 dark:hover:bg-accent/85 transition-all hover:scale-105 hover:-translate-y-1.2 ease-out duration-200 dark:bg-accent/95 dark:font-bold md:font-bold text-accent-foreground px-4 py-3 text-[17px] md:text-xl font-medium tracking-wide font-sans rounded-md">
-            Reserve a Seat
-          </button>
+          <Link href={"/book"}>
+            <button className="bg-accent hover:bg-accent/85 dark:hover:bg-accent/85 transition-all hover:scale-105 hover:-translate-y-1.2 ease-out duration-200 dark:bg-accent/95 dark:font-bold md:font-bold text-accent-foreground px-4 py-3 text-[17px] md:text-xl font-medium tracking-wide font-sans rounded-md">
+              Reserve a Seat
+            </button>
+          </Link>
         </div>
       </div>
     </section>
@@ -76,7 +79,7 @@ const HookSection = () => {
       title: "Console",
       description: "Grab a controller. Bring the rivalry.",
       tabs: ["PS5", "Xbox", "Co-op", "Sports"],
-      bookingStyleText: "Your next rematch starts here.",
+      bookingStyleText: "Per Hour",
       deviceType: "CONSOLE",
       buttonHref: "/book/console",
       rate: "₹50",
@@ -87,7 +90,7 @@ const HookSection = () => {
       title: "PC Gaming",
       description: "Lock in, take aim, and own the leaderboard.",
       tabs: ["FPS", "Racing", "Esports", "RPGs"],
-      bookingStyleText: "Ready to clutch the win?",
+      bookingStyleText: "Per Hour",
       deviceType: "PC",
       buttonHref: "/book/pc",
       rate: "₹59",
@@ -98,7 +101,7 @@ const HookSection = () => {
       title: "Arcade",
       description: "Chase high scores. Challenge your crew. Run it back.",
       tabs: ["Racing", "Fighters", "Rhythm", "Classics"],
-      bookingStyleText: "Think you can beat the high score?",
+      bookingStyleText: "Per Hour/Day",
       deviceType: "ARCADE",
       buttonHref: "/book/arcade",
       rate: "₹89",
@@ -109,7 +112,7 @@ const HookSection = () => {
       title: "VR",
       description: "Don't just play the game. Step inside it.",
       tabs: ["Action", "Rhythm", "Adventure", "Sports"],
-      bookingStyleText: "Step into your next adventure.",
+      bookingStyleText: "Per Hour",
       deviceType: "VR",
       buttonHref: "/book/vr",
       rate: "₹69",
@@ -129,9 +132,9 @@ const HookSection = () => {
 
   return (
     <section className="w-full px-2 mt-5 md:mt-15 relative">
-      <div className="hidden absolute top-[8%] z-80 right-[8%] md:flex items-center justify-center gap-8">
-        <Joystick size={70} className="text-red-800"/>
-        <Gamepad2 size={90} className="rotate-20" strokeWidth={1.5}/>
+      <div className="hidden absolute top-[8%] z-80 right-[8%] md:flex items-center justify-center gap-15">
+        <Joystick size={70} className="text-red-800" />
+        <Gamepad2 size={90} className="rotate-20" strokeWidth={1.5} />
       </div>
       <DeviceFilterGrid
         devices={DeviceFilterData}
