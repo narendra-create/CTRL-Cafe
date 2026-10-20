@@ -2,7 +2,7 @@
 import { db } from "@/src/index";
 import { devices } from "@/src/db/schema";
 import { checkAccountType, isLoggedIn } from "@/lib/actions/authorizationCheck";
-import type { deviceAddInput, updateDeviceInput } from "@/lib/validations/deviceValidation";
+import { deviceAddSchema, updateDeviceSchema, type deviceAddInput, type updateDeviceInput } from "@/lib/validations/deviceValidation";
 import { eq } from "drizzle-orm";
 
 export const addDevice = async (input: deviceAddInput): Promise<{
@@ -21,15 +21,22 @@ export const addDevice = async (input: deviceAddInput): Promise<{
             message: "Only admins can add devices"
         }
     };
+    const { error, data: parsed } = deviceAddSchema.safeParse(input);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
 
     try {
         const insertedDevice = await db.insert(devices).values({
-            units: input.units,
-            deviceName: input.deviceName,
-            hourlyRate: String(input.hourlyRate),
-            maxPlayers: input.maxPlayers,
-            type: input.type,
-            extraConsolePrice: String(input.extraConsolePrice)
+            units: parsed.units,
+            deviceName: parsed.deviceName,
+            hourlyRate: String(parsed.hourlyRate),
+            maxPlayers: parsed.maxPlayers,
+            type: parsed.type,
+            extraConsolePrice: String(parsed.extraConsolePrice)
         }).returning();
 
         return {
@@ -66,15 +73,23 @@ export const updateDevice = async (input: updateDeviceInput): Promise<{
         }
     };
 
+    const { error, data: parsed } = updateDeviceSchema.safeParse(input);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+
     try {
         const updated = await db.update(devices).set({
-            units: input.units,
-            deviceName: input.deviceName,
-            type: input.type,
-            maxPlayers: input.maxPlayers,
-            hourlyRate: input.hourlyRate !== undefined ? String(input.hourlyRate) : undefined,
-            extraConsolePrice: input.extraConsolePrice !== undefined ? String(input.extraConsolePrice) : undefined,
-        }).where(eq(devices.id, input.id)).returning();
+            units: parsed.units,
+            deviceName: parsed.deviceName,
+            type: parsed.type,
+            maxPlayers: parsed.maxPlayers,
+            hourlyRate: parsed.hourlyRate !== undefined ? String(parsed.hourlyRate) : undefined,
+            extraConsolePrice: parsed.extraConsolePrice !== undefined ? String(parsed.extraConsolePrice) : undefined,
+        }).where(eq(devices.id, parsed.id)).returning();
 
         if (!updated) {
             return { success: false, message: "Device not found" };

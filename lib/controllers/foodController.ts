@@ -1,6 +1,6 @@
 "use server";
 import { db } from "@/src/index";
-import type { addFoodType } from "@/lib/validations/foodValidation";
+import { addFoodInput, type addFoodType } from "@/lib/validations/foodValidation";
 import { checkAccountType, isLoggedIn } from "@/lib/actions/authorizationCheck";
 import { foodItems } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
@@ -18,15 +18,23 @@ export const addItem = async (input: addFoodType): Promise<{
     if (!isAdmin) {
         return { success: false, message: "Forbidden" }
     }
+    
+    const { error, data: parsed } = addFoodInput.safeParse(input);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
 
     try {
         await db.insert(foodItems).values({
-            name: input.name,
-            category: input.category,
-            price: String(input.price),
-            description: input.description,
-            imageUrl: input.imageUrl,
-            serves: input.serves
+            name: parsed.name,
+            category: parsed.category,
+            price: String(parsed.price),
+            description: parsed.description,
+            imageUrl: parsed.imageUrl,
+            serves: parsed.serves
         });
 
         return { success: true }

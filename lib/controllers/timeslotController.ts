@@ -3,7 +3,7 @@ import { timeSlots } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "@/src/index";
 import { checkAccountType, isLoggedIn } from "@/lib/actions/authorizationCheck";
-import type { addSlotInput, updateSlotInput } from "@/lib/validations/timeslotValidation";
+import { addSlotSchema, updateSlotSchema, type addSlotInput, type updateSlotInput } from "@/lib/validations/timeslotValidation";
 
 export const addSlot = async (input: addSlotInput): Promise<{
     success: boolean;
@@ -25,12 +25,20 @@ export const addSlot = async (input: addSlotInput): Promise<{
         }
     };
 
+    const { error, data: parsed } = addSlotSchema.safeParse(input);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+
     try {
         const addedSlot = await db.insert(timeSlots).values({
-            startTime: input.startTime,
-            endTime: input.endTime,
-            availableDevices: input.availableDevices,
-            timeZone: input.timeZone
+            startTime: parsed.startTime,
+            endTime: parsed.endTime,
+            availableDevices: parsed.availableDevices,
+            timeZone: parsed.timeZone
         }).returning();
 
         return {
@@ -129,9 +137,17 @@ export const updateSlot = async (id: string, input: updateSlotInput): Promise<{
         }
     };
 
+    const { error, data: parsed } = updateSlotSchema.safeParse(input);
+    if (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+
     try {
         const updated = await db.update(timeSlots).set({
-            availableDevices: input.availableDevices
+            availableDevices: parsed.availableDevices
         }).returning();
         return {
             success: true,

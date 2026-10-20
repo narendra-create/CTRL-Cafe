@@ -19,7 +19,7 @@
 - [x] see rewardActions and complete it
 - [ ] Add LUA scripts for booking seats
 - [x] Complete login and register page with supabase claims
-- [ ] add safeparse in all controllers
+- [x] add safeparse in all controllers
 - [ ] add pagination where needed
 - [ ] make controller for unlinking/updating linked games
 
