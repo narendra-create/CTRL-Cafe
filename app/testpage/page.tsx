@@ -59,9 +59,9 @@ const testpage = () => {
         onSelectedDevice={setselected}
         selectedDevice={selected}
       /> */}
-      <div className="pb-55 w-full">
+      {/* <div className="pb-55 w-full">
         <PopularSection />
-      </div>
+      </div> */}
     </div>
   );
 };
