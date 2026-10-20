@@ -50,11 +50,35 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
             to: r.profiles.id,
             optional: false
         }),
-        //One device for one booking but many bookings of one device - one to many
         device: r.one.devices({
             from: r.bookings.bookedDevice,
             to: r.devices.id,
             optional: false
+        }),
+        //One device for one booking but many bookings of one device - one to many
+        items: r.many.bookingItems({
+            from: r.bookings.id,
+            to: r.bookingItems.bookingId
         })
     },
+
+    bookingItems: {
+        booking: r.one.bookings({
+            from: r.bookingItems.bookingId,
+            to: r.bookings.id,
+            optional: false
+        }),
+        foodItem: r.one.foodItems({
+            from: r.bookingItems.foodItemId,
+            to: r.foodItems.id,
+            optional: false
+        })
+    },
+
+    foodItems: {
+        bookingItems: r.many.bookingItems({
+            from: r.foodItems.id,
+            to: r.bookingItems.foodItemId
+        })
+    }
 }))
