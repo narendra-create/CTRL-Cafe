@@ -1,8 +1,9 @@
 "use server";
 import { db } from "@/src/index";
-import { bookings, profiles } from "@/src/db/schema";
-import { eq, and, gte, lt, asc, desc, sql } from "drizzle-orm";
+import { bookings, devices, profiles } from "@/src/db/schema";
+import { eq, and, gte, lt, asc, desc, sql, inArray } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
+import { SeatHoldeInput, seatHoldSchema } from "@/lib/validations/bookingValidation";
 
 //Helping Functions
 const addPoints = async (userId: string, bookingId: string): Promise<{
@@ -132,3 +133,96 @@ export const getBookingHistory = async (): Promise<{
         }
     }
 };
+
+export const holdSeat = async (input: SeatHoldeInput): Promise<{
+    success: boolean;
+    message?: string;
+    data?: any
+}> => {
+    try {
+        //Verify authentication
+        const { dbuser, error } = await resolveAuthenticatedUser("user");
+        if (error) return { success: false, message: error.message };
+        //Parsing
+        const { error: zoderror, data: parsed } = seatHoldSchema.safeParse(input);
+        if (zoderror) { return { success: false, message: zoderror.message } };
+        //Input Checks
+        const now = new Date();
+        const convertedStartTime = new Date(parsed.startTime);
+        const convertedEndTime = new Date(parsed.endTime);
+        const durationInHours = (convertedEndTime.getTime() - convertedStartTime.getTime()) / (1000 * 60 * 60);
+
+        if (convertedStartTime >= convertedEndTime) {
+            return {
+                success: false,
+                message: "Endtime must be after StartTime"
+            }
+        };
+        if (convertedStartTime < now) {
+            return {
+                success: false,
+                message: "StartTime must be in future"
+            }
+        };
+        if (durationInHours < 0.5) {
+            return {
+                success: false,
+                message: "Minimum duration must be 30 minutes"
+            }
+        };
+
+        const [bookedDevicecheck] = await db.select().from(devices).where(eq(devices.id, parsed.bookedDevice));
+        if (!bookedDevicecheck) {
+            return {
+                success: false,
+                message: "Device Not Found"
+            }
+        };
+        //Calculate price
+        // Base price = duration * hourlyRate
+        const totalAmount = (durationInHours * Number(bookedDevicecheck.hourlyRate)).toFixed(2);
+        //Run cleanup & Insert new booking with hold
+        const holdExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        const newBooking = await db.transaction(async (tx) => {
+            await tx.update(bookings)
+                .set({ bookingStatus: "cancelled" })
+                .where(and(
+                    inArray(bookings.bookingStatus, ["hold", "pending"]),
+                    lt(bookings.holdExpiresAt, now)
+                ));
+            const [insertedData] = await tx.insert(bookings).values({
+                bookedDevice: bookedDevicecheck.id,
+                endTime: convertedEndTime,
+                startTime: convertedStartTime,
+                totalAmount: totalAmount,
+                userId: dbuser.userId,
+                bookingStatus: "hold",
+                holdExpiresAt: holdExpiresAt,
+                playersCount: parsed.playersCount
+            }).returning();
+
+            return insertedData;
+        });
+
+        return {
+            success: true,
+            data: newBooking,
+            message: `Seat Held until for 5 Minutes`
+        };
+    }
+    catch (err: any) {
+        const code = err?.code ?? err?.cause?.code;
+        if (code === "23P01") {
+            return {
+                success: false,
+                message: "This device is already held or booked for the selected time slot.",
+            };
+        };
+
+        console.error("[holdSeat]: ", err);
+        return {
+            success: false,
+            message: "Something went wrong while holding the seat."
+        }
+    }
+}
