@@ -40,7 +40,7 @@ const addPoints = async (userId: string, bookingId: string): Promise<{
     }
 };
 
-const redeemPoints = async (userId: string): Promise<{
+const redeemPoints = async (): Promise<{
     success: boolean;
     currentPoints?: string;
     message?: string;
