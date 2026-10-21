@@ -7,4 +7,16 @@ export const seatHoldSchema = z.object({
     playersCount: z.number().int().nonnegative().min(1).default(1),
 });
 
+const bookingFooditemsSchema = z.array(z.object({
+    foodItemId: z.uuid(),
+    qty: z.int().min(1).default(1)
+})
+);
+
+export const bookSeatSchema = z.object({
+    bookingId: z.uuid(),
+    foodItems: bookingFooditemsSchema.default([])
+});
+
 export type SeatHoldeInput = z.infer<typeof seatHoldSchema>;
+export type BookSeatInput = z.infer<typeof bookSeatSchema>;
