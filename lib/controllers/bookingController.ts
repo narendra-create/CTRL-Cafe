@@ -1,9 +1,12 @@
 "use server";
 import { db } from "@/src/index";
-import { bookings, devices, profiles } from "@/src/db/schema";
+import { bookingItems, bookings, devices, foodItems, profiles } from "@/src/db/schema";
 import { eq, and, gte, lt, asc, desc, sql, inArray } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
-import { SeatHoldeInput, seatHoldSchema } from "@/lib/validations/bookingValidation";
+import { BookSeatInput, bookSeatSchema, SeatHoldeInput, seatHoldSchema } from "@/lib/validations/bookingValidation";
+import { razorpay } from "@/lib/setup-files/razorpay.config";
+import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils";
+import { rupeesToPaise } from "@/lib/utils/tools";
 
 //Helping Functions
 const addPoints = async (userId: string, bookingId: string): Promise<{
@@ -184,9 +187,15 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
                 message: `You can choose max ${bookedDevicecheck.maxPlayers} players for this device`
             }
         };
+        if (parsed.playersCount <= 0) {
+            return {
+                success: false,
+                message: "Choose Atleast one player"
+            }
+        }
         //Calculate price
         // Base price = duration * hourlyRate
-        const totalAmount = (durationInHours * Number(bookedDevicecheck.hourlyRate)).toFixed(2);
+        const totalAmount = (durationInHours * Number(bookedDevicecheck.hourlyRate) * Number(parsed.playersCount)).toFixed(2);
         //Run cleanup & Insert new booking with hold
         const holdExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
         const newBooking = await db.transaction(async (tx) => {
@@ -231,4 +240,144 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
             message: "Something went wrong while holding the seat."
         }
     }
+};
+
+export const bookSeat = async (input: BookSeatInput): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+        razorpay_orderId: string;
+        updatedBooking: typeof bookings.$inferSelect;
+    }
+}> => {
+    try {
+        //Checking user
+        const { error: usererror, dbuser } = await resolveAuthenticatedUser("user");
+        if (usererror) return usererror;
+        //Checking Input
+        const { data: parsedinput, error: zodError } = bookSeatSchema.safeParse(input);
+        if (zodError) return { success: false, message: zodError.message };
+        //Check if seat held and belongs to current user
+        const newBooking = await db.transaction(async (tx) => {
+            const [booking] = await tx.select().from(bookings).where(and(
+                eq(bookings.id, parsedinput.bookingId),
+                eq(bookings.userId, dbuser.userId)
+            ));
+
+            if (!booking) {
+                return {
+                    success: false,
+                    message: "Booking not found"
+                }
+            };
+            const foodItemIds = [...new Set(parsedinput.foodItems.map((f) => f.foodItemId))];
+            const foodItemsforBooking = foodItemIds.length > 0
+                ? await tx.select().from(foodItems).where(inArray(foodItems.id, foodItemIds))
+                : [];
+
+            const outOfStock = foodItemsforBooking.filter(item => !item.isAvailable);
+            if (outOfStock.length > 0) {
+                return {
+                    success: false,
+                    message: `Items out of stock: ${outOfStock.map(i => i.name).join(", ")}`
+                };
+            }
+
+            const foundIds = new Set(
+                foodItemsforBooking.map((item) => item.id)
+            );
+            const missingIds = foodItemIds.filter(
+                (id) => !foundIds.has(id)
+            );
+            if (missingIds.length > 0) {
+                return {
+                    success: false,
+                    message: `Food items not found: ${missingIds.join(", ")}`
+                }
+            };
+            const now = new Date();
+            const expiretime = booking.holdExpiresAt ? new Date(booking.holdExpiresAt) : null;
+            if (booking.bookingStatus !== "hold" || !expiretime || expiretime < now) {
+                return {
+                    success: false,
+                    message: "Booking expired or not held by you"
+                }
+            };
+            //Calculating total amount
+            const foodsMapped = new Map(foodItemsforBooking.map((f) => [f.id, f]));
+            const foodsForJunctionTable = parsedinput.foodItems.map((item) => {
+                const singleItem = foodsMapped.get(item.foodItemId);
+
+                return {
+                    bookingId: booking.id,
+                    foodItemId: item.foodItemId,
+                    unitPrice: singleItem?.price!,
+                    qty: item.qty,
+                }
+            });
+
+            if (foodsForJunctionTable.length > 0) {
+                await tx.insert(bookingItems).values(foodsForJunctionTable)
+            };
+
+            const totalAmount = parsedinput.foodItems.reduce((sum, item) => {
+                const singleItem = foodsMapped.get(item.foodItemId);
+                return sum + Number(singleItem?.price) * item.qty
+            }, 0);
+
+            const finalBookingAmount = (Number(totalAmount) + Number(booking.totalAmount)).toFixed(2);
+            const totalAmountInPaise = rupeesToPaise(finalBookingAmount);
+            //Creating Razropay order
+            const razorOrder = await razorpay.orders.create({
+                amount: totalAmountInPaise,
+                currency: "INR",
+                receipt: booking.id,
+                notes: {
+                    bookingId: booking.id
+                }
+            });
+
+            const [updatedBooking] = await tx.update(bookings).set({
+                bookingStatus: "pending",
+                totalAmount: finalBookingAmount,
+                razorpayOrderId: razorOrder.id
+            }).where(eq(bookings.id, booking.id)).returning();
+
+            return {
+                success: true,
+                updatedBooking,
+                razorpay_order_id: razorOrder.id
+            }
+        });
+
+        if (!newBooking.success) {
+            return {
+                success: false,
+                message: newBooking.message
+            }
+        };
+
+        return {
+            success: true,
+            data: {
+                razorpay_orderId: newBooking.razorpay_order_id!,
+                updatedBooking: newBooking.updatedBooking!
+            }
+        }
+    }
+    catch (err) {
+        console.error("[bookSeat]: ", err);
+        return {
+            success: false,
+            message: "Something Went Wrong while booking"
+        }
+    }
+};
+
+export const verifyPayment = async () => {
+
+};
+
+export const retryBooking = async () => {
+
 };

@@ -22,9 +22,10 @@
 - [x] Check Seat hold controller for mistakes
 - [ ] add pagination where needed
 - [ ] make controller for unlinking/updating linked games
-- [ ] controller for booking the holded seat
+- [x] controller for booking the holded seat
+- [ ] Optimize the bookSeat() controller - remove some code from transection to make it light
 - [ ] verifypayment controller
-- [ ] controller for retry payment or pending booking
+- [ ] integrate retry payment or retry pending booking inside bookSeat()
 - [ ] webhook for razropay
 - [ ] controller for checking if user has any pending booking on first load
 
