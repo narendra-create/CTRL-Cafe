@@ -23,6 +23,10 @@
 - [ ] add pagination where needed
 - [ ] make controller for unlinking/updating linked games
 - [ ] controller for booking the holded seat
+- [ ] verifypayment controller
+- [ ] controller for retry payment or pending booking
+- [ ] webhook for razropay
+- [ ] controller for checking if user has any pending booking on first load
 
 ## Importent on 09/11/2026
 
