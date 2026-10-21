@@ -41,12 +41,12 @@ const addPoints = async (userId: string, bookingId: string): Promise<{
     }
 };
 
-const redeemPoints = async (): Promise<{
+const redeemPoints = async (userId: string): Promise<{
     success: boolean;
     currentPoints?: string;
     message?: string;
 }> => {
-    const [findUser] = await db.select({ availablePoints: profiles.rewardPoints }).from(profiles);
+    const [findUser] = await db.select({ availablePoints: profiles.rewardPoints }).from(profiles).where(eq(profiles.id, userId));
     if (!findUser) return { success: false, message: "User Not Found" };
     if (findUser.availablePoints < 65) {
         return {
@@ -142,7 +142,7 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
     try {
         //Verify authentication
         const { dbuser, error } = await resolveAuthenticatedUser("user");
-        if (error) return { success: false, message: error.message };
+        if (error) return error;
         //Parsing
         const { error: zoderror, data: parsed } = seatHoldSchema.safeParse(input);
         if (zoderror) { return { success: false, message: zoderror.message } };
@@ -178,6 +178,12 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
                 message: "Device Not Found"
             }
         };
+        if (parsed.playersCount > bookedDevicecheck.maxPlayers) {
+            return {
+                success: false,
+                message: `You can choose max ${bookedDevicecheck.maxPlayers} players for this device`
+            }
+        };
         //Calculate price
         // Base price = duration * hourlyRate
         const totalAmount = (durationInHours * Number(bookedDevicecheck.hourlyRate)).toFixed(2);
@@ -207,7 +213,7 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
         return {
             success: true,
             data: newBooking,
-            message: `Seat Held until for 5 Minutes`
+            message: `Seat held for 5 minutes`
         };
     }
     catch (err: any) {
@@ -225,4 +231,4 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
             message: "Something went wrong while holding the seat."
         }
     }
-}
+};
