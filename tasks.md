@@ -19,7 +19,7 @@
 - [x] see rewardActions and complete it
 - [x] Complete login and register page with supabase claims
 - [x] add safeparse in all controllers
-- [ ] Check Seat hold controller for mistakes
+- [x] Check Seat hold controller for mistakes
 - [ ] add pagination where needed
 - [ ] make controller for unlinking/updating linked games
 - [ ] controller for booking the holded seat
