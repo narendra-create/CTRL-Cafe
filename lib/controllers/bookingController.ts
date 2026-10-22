@@ -3,10 +3,11 @@ import { db } from "@/src/index";
 import { bookingItems, bookings, devices, foodItems, profiles } from "@/src/db/schema";
 import { eq, and, gte, lt, asc, desc, sql, inArray } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
-import { BookSeatInput, bookSeatSchema, SeatHoldeInput, seatHoldSchema, verifyPaymentSchema, VerifySignatureInput } from "@/lib/validations/bookingValidation";
+import { BookSeatInput, bookSeatSchema, getBookingDetailsInput, getBookingDetailsSchema, SeatHoldeInput, seatHoldSchema, verifyPaymentSchema, VerifySignatureInput } from "@/lib/validations/bookingValidation";
 import { razorpay } from "@/lib/setup-files/razorpay.config";
 import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils";
 import { formatToNormalDate, formatToNormalTime, rupeesToPaise } from "@/lib/utils/tools";
+import { BookingDetailsResponse } from "@/types/bookingTypes";
 
 //Helping Functions
 const addPoints = async (userId: string, bookingId: string): Promise<{
@@ -165,8 +166,77 @@ export const getActiveBooking = async (): Promise<{
     }
 };
 
-export const getBookingDetails = async () => {
+export const getBookingDetails = async (input: getBookingDetailsInput): Promise<BookingDetailsResponse> => {
+    try {
+        const { error: zoderror, data: parsedId } = getBookingDetailsSchema.safeParse(input);
+        if (zoderror) return { success: false, message: zoderror.message };
 
+        const { dbuser, error: authError } = await resolveAuthenticatedUser("user");
+        if (authError) return authError;
+
+        const result = await db.select({
+            id: bookings.id,
+            status: bookings.bookingStatus,
+            startTime: bookings.startTime,
+            endTime: bookings.endTime,
+            totalAmount: bookings.totalAmount,
+            playersCount: bookings.playersCount,
+            holdExpiresAt: bookings.holdExpiresAt,
+            razorpayOrderId: bookings.razorpayOrderId,
+
+            // Device info
+            deviceName: devices.deviceName,
+            hourlyRate: devices.hourlyRate,
+
+            // Snack info (from leftJoin)
+            foodName: foodItems.name,
+            foodQty: bookingItems.qty,
+            foodPrice: bookingItems.unitPrice,
+        })
+            .from(bookings)
+            .leftJoin(bookingItems, eq(bookings.id, bookingItems.bookingId))
+            .leftJoin(foodItems, eq(bookingItems.foodItemId, foodItems.id))
+            .where(and(
+                eq(bookings.id, parsedId.bookingId),
+                eq(bookings.userId, dbuser.userId)
+            ));
+
+        if (result.length === 0) {
+            return { success: false, message: "Booking not found" };
+        }
+        const baseRow = result[0];
+        const foodItemsArray = result[0].foodName ? result.map((r) => ({
+            name: r.foodName!,
+            unitPrice: r.foodPrice!,
+            qty: r.foodQty!
+        })) : [];
+
+        return {
+            success: true,
+            data: {
+                id: baseRow.id,
+                status: baseRow.status,
+                holdExpiresAt: baseRow.holdExpiresAt,
+                totalAmount: baseRow.totalAmount,
+                endTime: baseRow.endTime,
+                startTime: baseRow.startTime,
+                hourlyRate: baseRow.hourlyRate,
+                playersCount: baseRow.playersCount,
+                razorpayOrderId: baseRow.razorpayOrderId,
+
+                deviceName: baseRow.deviceName,
+
+                foodItems: foodItemsArray
+            }
+        }
+    }
+    catch (err) {
+        console.error("[getBookingDetails]: ", err);
+        return {
+            success: false,
+            message: "Something Went Wrong, Try again"
+        }
+    }
 }
 
 export const getBookingHistory = async (): Promise<{
