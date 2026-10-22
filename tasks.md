@@ -28,6 +28,7 @@
 - [x] integrate retry payment or retry pending booking inside bookSeat()
 - [ ] webhook for razropay
 - [ ] controller for checking if user has any pending booking on first load
+- [ ] controller for checking booking details using bookingId and user to show on review screen if not provided in frontend or page refreshed
 
 ## Importent on 09/11/2026
 
