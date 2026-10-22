@@ -106,6 +106,69 @@ export const getCurrentBookings = async (): Promise<{
     }
 };
 
+export const getActiveBooking = async (): Promise<{
+    success: boolean;
+    message?: string;
+    data?: {
+        bookingId: string;
+        deviceName: string;
+        holdExpiresAt: string | Date;
+        status: string;
+    } | null
+}> => {
+    try {
+        //Authentication
+        const { dbuser, error: authError } = await resolveAuthenticatedUser("user");
+        if (authError) return authError;
+
+        const now = new Date();
+        const [activeBooking] = await db.select({
+            bookingId: bookings.id,
+            deviceName: devices.deviceName,
+            holdExpiresAt: bookings.holdExpiresAt,
+            status: bookings.bookingStatus,
+            deviceType: devices.type
+        })
+            .from(bookings)
+            .innerJoin(devices, eq(bookings.bookedDevice, devices.id))
+            .where(and(
+                eq(bookings.userId, dbuser.userId),
+                inArray(bookings.bookingStatus, ["pending", "hold"]),
+                eq(bookings.isArchived, false),
+                gte(bookings.holdExpiresAt, now)
+            ))
+            .limit(1);
+
+        if (!activeBooking) {
+            return {
+                success: true,
+                data: null
+            }
+        }
+
+        return {
+            success: true,
+            data: {
+                bookingId: activeBooking.bookingId,
+                deviceName: String(activeBooking.deviceName + "-" + activeBooking.deviceType),
+                holdExpiresAt: activeBooking.holdExpiresAt!,
+                status: activeBooking.status
+            }
+        }
+    }
+    catch (err) {
+        console.error("[getActiveBooking]: ", err);
+        return {
+            success: false,
+            message: "Something Went Wrong"
+        }
+    }
+};
+
+export const getBookingDetails = async () => {
+
+}
+
 export const getBookingHistory = async (): Promise<{
     success: boolean;
     message?: string;
