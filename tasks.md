@@ -3,7 +3,7 @@
 # Backend Tasks
 
 - [x] add email send logic for register page
-- [ ] add seat booking page api's or controllers
+- [x] add seat booking page api's or controllers
 - [x] controller/server actions for adding new food items
 - [x] controller/server actions for adding new devices
 - [x] controller/server actions for adding new time slots
