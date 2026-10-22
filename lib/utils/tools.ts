@@ -56,4 +56,31 @@ export function paiseToRupees(paise: number): string {
     const remainder = String(paise % 100).padStart(2, "0");
 
     return `${rupees}.${remainder}`;
-}
+};
+
+// Formats Date to: "1 Jan 2026" or "22 Oct 2026"
+export const formatToNormalDate = (date: Date): string => {
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "Asia/Kolkata", // Ensures local Indian timezone even on UTC cloud servers
+    }).format(new Date(date));
+};
+
+// Formats Time to: "6 pm" (if :00) or "6:35 pm"
+export const formatToNormalTime = (date: Date): string => {
+    const d = new Date(date);
+
+    // Check if minutes are 0 (e.g. 6:00 -> 6 pm, but 6:35 -> 6:35 pm)
+    const hasMinutes = d.getMinutes() !== 0;
+
+    return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: hasMinutes ? "2-digit" : undefined,
+        hour12: true,
+        timeZone: "Asia/Kolkata",
+    })
+        .format(d)
+        .toLowerCase();
+};
