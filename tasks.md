@@ -26,7 +26,7 @@
 - [x] Optimize the bookSeat() controller - remove some code from transection to make it light
 - [x] verifypayment controller
 - [x] integrate retry payment or retry pending booking inside bookSeat()
-- [ ] webhook for razropay
+- [x] webhook for razropay
 - [x] controller for checking if user has any pending booking on first load
 - [x] controller for checking booking details using bookingId and user to show on review screen if not provided in frontend or page refreshed
 
