@@ -22,6 +22,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ timestamp, signature });
     } catch (error) {
+        console.error("clodinary sign error", error);
         return NextResponse.json({ error: 'Failed to generate signature' }, { status: 500 });
     }
 }

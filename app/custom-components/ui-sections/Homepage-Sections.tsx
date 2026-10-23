@@ -156,10 +156,12 @@ const HookSection = () => {
           fill
           className="object-contain rounded-lg"
         /> */}
-        {selected === "PC" && <Swords size={120} strokeWidth={1.3}/>}
-        {selected === "CONSOLE" && <GamepadDirectional size={120} strokeWidth={1.3}/>}
-        {selected === "VR" && <HatGlasses size={120} strokeWidth={1.3}/>}
-        {selected === "ARCADE" && <Motorbike size={120} strokeWidth={1.3}/>}
+        {selected === "PC" && <Swords size={120} strokeWidth={1.3} />}
+        {selected === "CONSOLE" && (
+          <GamepadDirectional size={120} strokeWidth={1.3} />
+        )}
+        {selected === "VR" && <HatGlasses size={120} strokeWidth={1.3} />}
+        {selected === "ARCADE" && <Motorbike size={120} strokeWidth={1.3} />}
       </div>
       {selected && (
         <div className="mt-1 md:mt-3 md:pl-3 md:w-[80%] md:ml-[5%]">
@@ -170,18 +172,29 @@ const HookSection = () => {
   );
 };
 
+const POPULAR_MEDIA_QUERY = "(min-width: 768px)";
+
+function subscribeToMediaQuery(callback: () => void) {
+  const mq = window.matchMedia(POPULAR_MEDIA_QUERY);
+  mq.addEventListener("change", callback);
+  return () => mq.removeEventListener("change", callback);
+}
+
+function getItemDistance() {
+  return window.matchMedia(POPULAR_MEDIA_QUERY).matches ? 90 : 50;
+}
+
+function getServerItemDistance() {
+  return 50;
+}
+
 // Popular Section
 const PopularSection = () => {
-  const [itemDistance, setItemDistance] = React.useState(50);
-
-  React.useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    setItemDistance(mq.matches ? 90 : 50);
-    const handler = (e: MediaQueryListEvent) =>
-      setItemDistance(e.matches ? 90 : 50);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const itemDistance = React.useSyncExternalStore(
+    subscribeToMediaQuery,
+    getItemDistance,
+    getServerItemDistance,
+  );
 
   const data: PopularCardProps[] = [
     {

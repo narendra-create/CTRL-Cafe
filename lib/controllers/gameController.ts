@@ -10,7 +10,7 @@ export const linkGames = async (input: addGamesInput): Promise<{
     success: boolean;
     message?: string;
 }> => {
-    const { dbuser, error } = await resolveAuthenticatedUser("admin");
+    const { error } = await resolveAuthenticatedUser("admin");
     if (error) return error;
 
     const parsed = addGamesSchema.safeParse(input);
@@ -87,7 +87,7 @@ export const unLinkGames = async (input: UnlinkGamesInput): Promise<{
         if (zodError) return { success: false, message: zodError.message };
 
         //Authentication
-        const { dbuser, error: authError } = await resolveAuthenticatedUser("admin");
+        const { error: authError } = await resolveAuthenticatedUser("admin");
         if (authError) return authError;
 
         //Finding device

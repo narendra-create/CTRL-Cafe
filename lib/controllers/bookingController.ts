@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/src/index";
 import { bookingItems, bookings, devices, foodItems, profiles } from "@/src/db/schema";
-import { eq, and, gte, lt, asc, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, gte, lt, asc, desc, inArray } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { BookSeatInput, bookSeatSchema, getBookingDetailsInput, getBookingDetailsSchema, SeatHoldeInput, seatHoldSchema, verifyPaymentSchema, VerifySignatureInput } from "@/lib/validations/bookingValidation";
 import { razorpay } from "@/lib/setup-files/razorpay.config";
@@ -208,7 +208,7 @@ export const getBookingHistory = async (): Promise<{
 export const holdSeat = async (input: SeatHoldeInput): Promise<{
     success: boolean;
     message?: string;
-    data?: any
+    data?: typeof bookings.$inferSelect
 }> => {
     try {
         //Verify authentication

@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sendOtp, verifyOtp } from "@/lib/actions/otp";
 import type { User } from "@supabase/supabase-js";
+import { redirect } from "next/navigation";
 
 /* OTP step states */
 type OtpStep = "idle" | "sent" | "verified";
@@ -292,7 +293,7 @@ export default function RegisterPage() {
       return;
     }
     setLoading(false);
-    window.location.href = "/";
+    redirect("/");
   };
 
   /* OAuth Handlers */

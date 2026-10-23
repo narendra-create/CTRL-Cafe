@@ -31,7 +31,7 @@
 - [x] controller for checking booking details using bookingId and user to show on review screen if not provided in frontend or page refreshed
 - [x] controller for getting deviceGames
 - [x] make controller for getting all available games without devices
-- [ ] fix eslint issues
+- [x] fix eslint issues
 
 ## Importent on 09/11/2026
 

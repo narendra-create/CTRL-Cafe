@@ -2,8 +2,8 @@
 import AlreadyLoggedIn from "@/app/custom-components/already-logged-in";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export default function LoginPage() {
@@ -182,7 +182,7 @@ export default function LoginPage() {
       return;
     }
     setLoading(false);
-    window.location.href = "/";
+    redirect("/");
   };
 
   const handleGoogleSignIn = async () => {
