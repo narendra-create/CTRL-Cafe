@@ -30,7 +30,7 @@
 - [x] controller for checking if user has any pending booking on first load
 - [x] controller for checking booking details using bookingId and user to show on review screen if not provided in frontend or page refreshed
 - [x] controller for getting deviceGames
-- [ ] make controller for getting all available games without devices
+- [x] make controller for getting all available games without devices
 
 ## Importent on 09/11/2026
 

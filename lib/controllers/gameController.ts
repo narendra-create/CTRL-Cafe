@@ -2,7 +2,7 @@ import { db } from "@/src/index";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { addGamesSchema, UnlinkGamesInput, unLinkGamesSchema, type addGamesInput } from "@/lib/validations/gamesValidation";
 import { availableGames, deviceGames, devices } from "@/src/db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { DeviceWithInstalledGames, DeviceWithSupportedGames } from "@/types/gameTypes";
 import { isLoggedIn } from "@/lib/actions/authorizationCheck";
 
@@ -157,5 +157,27 @@ export const getLinkedGames = async (): Promise<{
         }
     }
 };
+
+export const getAllAvailableGames = async (): Promise<{
+    success: boolean;
+    message?: string;
+    data?: Array<typeof availableGames.$inferSelect> | null;
+}> => {
+    try {
+        const gotGames = await db.select().from(availableGames).orderBy(asc(availableGames.gameName));
+
+        return {
+            success: true,
+            data: gotGames
+        }
+    }
+    catch (err) {
+        console.error("[getAllAvailableGames]: ", err);
+        return {
+            success: false,
+            message: "Something went wrong while fetching all games"
+        }
+    }
+}
 
 export const getLinkedDevice = getLinkedGames;
