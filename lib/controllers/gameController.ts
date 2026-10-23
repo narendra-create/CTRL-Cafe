@@ -3,7 +3,8 @@ import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { addGamesSchema, UnlinkGamesInput, unLinkGamesSchema, type addGamesInput } from "@/lib/validations/gamesValidation";
 import { availableGames, deviceGames, devices } from "@/src/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import { DeviceWithInstalledGames } from "@/types/gameTypes";
+import { DeviceWithInstalledGames, DeviceWithSupportedGames } from "@/types/gameTypes";
+import { isLoggedIn } from "@/lib/actions/authorizationCheck";
 
 export const linkGames = async (input: addGamesInput): Promise<{
     success: boolean;
@@ -115,4 +116,46 @@ export const unLinkGames = async (input: UnlinkGamesInput): Promise<{
             message: "Something went wrong while unlinking"
         }
     }
-}
+};
+
+export const getLinkedGames = async (): Promise<{
+    success: boolean;
+    message?: string;
+    data?: DeviceWithSupportedGames[];
+}> => {
+    try {
+        const loggedIn = await isLoggedIn();
+        if (!loggedIn) {
+            return {
+                success: false,
+                message: "Unauthenticated user"
+            }
+        };
+
+        const gotLinkedGames = await db.query.devices.findMany({
+            columns: {
+                deviceName: true,
+                hourlyRate: true,
+                id: true,
+                type: true,
+            },
+            with: {
+                supportedGames: true
+            }
+        });
+
+        return {
+            success: true,
+            data: gotLinkedGames
+        }
+    }
+    catch (err) {
+        console.error("[getLinkedGames]: ", err);
+        return {
+            success: false,
+            message: "Something Went wrong while fetching"
+        }
+    }
+};
+
+export const getLinkedDevice = getLinkedGames;
