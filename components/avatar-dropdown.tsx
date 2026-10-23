@@ -55,9 +55,6 @@ export function AvatarDropdown(props: Props) {
           <Link href={"/settings"}>
             <DropdownMenuItem>Settings</DropdownMenuItem>
           </Link>
-          <DropdownMenuItem className="md:hidden">
-            <ThemeChangeButton />
-          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
