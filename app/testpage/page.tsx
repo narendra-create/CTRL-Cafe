@@ -1,68 +1,44 @@
-// "use client";
-// // import React, { useState } from "react";
-// // import GameCard from "@/app/custom-components/cards/gameCard";
-// // import { gameCardProps } from "@/types/gameTypes";
-// // import DeviceCard from "@/app/custom-components/cards/deviceCard";
-// // import type { deviceCardType } from "@/types/deviceTypes";
-// import {
-//   DeviceFilterItem,
-//   FrontendDeviceType,
-// } from "@/app/custom-components/DeviceFilterCard";
-// // import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
-// // import { PopularSection } from "@/app/custom-components/ui-sections/Homepage-Sections";
+"use client";
+import React, { useState } from "react";
+import FoodCard from "@/app/custom-components/cards/FoodCard";
+import { mockFoodItems } from "@/app/mockdata/foodData";
 
-// const testpage = () => {
-//   // const [selected, setselected] = useState<FrontendDeviceType | null>(null);
-//   // const data: gameCardProps = {
-//   //   name: "Grand Theft Auto V",
-//   //   imageUrl:
-//   //     "https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg",
-//   //   genre: ["Action", "Crime"],
-//   //   rating: 4.47,
-//   //   releaseYear: 2013,
-//   //   parentPlatforms: ["PC", "PlayStation", "Xbox"],
-//   //   platforms: [
-//   //     "PlayStation 5",
-//   //     "Xbox Series S/X",
-//   //     "PlayStation 3",
-//   //     "PC",
-//   //     "PlayStation 4",
-//   //     "Xbox 360",
-//   //     "Xbox One",
-//   //   ],
-//   // };
-//   // const deviceData: deviceCardType = {
-//   //   imageUrl: "/console-cutout.webp",
-//   //   isNewDevice: true,
-//   //   name: "PlayStation 5",
-//   //   id: "1",
-//   //   units: 5,
-//   // };
-//   // const devices: DeviceFilterItem[] = [
-//   //   { label: "Console", subLabel: "High end", type: "CONSOLE" },
-//   //   { label: "PC", subLabel: "High end", type: "PC" },
-//   //   { label: "Arcade", subLabel: "High end", type: "ARCADE" },
-//   //   { label: "VR", subLabel: "High end", type: "VR" },
-//   // ];
+const TestPage = () => {
+  const [lastItem, setLastItem] = useState<{ id: string | number; quantity: number } | null>(null);
 
-//   return (
-//     <div className="flex items-center justify-center gap-2 mt-50 px-2">
-//       {/* <GameCard {...data} />
-//       <GameCard {...data} />
-//       <DeviceCard
-//         deviceDetails={deviceData}
-//         onClick={(isSelected, id) => console.log("id", id, "value", isSelected)}
-//       /> */}
-//       {/* <DeviceFilterGrid
-//         devices={devices}
-//         onSelectedDevice={setselected}
-//         selectedDevice={selected}
-//       /> */}
-//       {/* <div className="pb-55 w-full">
-//         <PopularSection />
-//       </div> */}
-//     </div>
-//   );
-// };
+  const handleAdd = (id: string | number, quantity: number) => {
+    setLastItem({ id, quantity });
+  };
 
-// export default testpage;
+  return (
+    <main className="min-h-screen w-full bg-zinc-50 px-4 py-12 dark:bg-zinc-950 md:px-8 2xl:px-16">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col gap-2">
+          <h1 className="font-heading text-2xl font-bold text-zinc-900 dark:text-zinc-100 md:text-3xl 2xl:text-4xl">
+            Food Cards Preview
+          </h1>
+          <p className="font-sans text-sm text-zinc-500 dark:text-zinc-400">
+            Testing FoodCard with responsive breakpoints (below md, md:, 2xl:) and interactive collapse / add actions.
+          </p>
+          {lastItem && (
+            <div className="mt-2 inline-flex w-fit items-center rounded-md bg-zinc-900 px-3 py-1 text-xs font-mono text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900">
+              Cart Update: ID = {String(lastItem.id)} | Qty = {lastItem.quantity}
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:grid-cols-3 2xl:gap-8">
+          {mockFoodItems.map((food) => (
+            <FoodCard
+              key={food.id}
+              {...food}
+              onAdd={handleAdd}
+            />
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default TestPage;

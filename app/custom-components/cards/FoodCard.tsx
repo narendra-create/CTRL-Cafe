@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Plus, Users } from "lucide-react";
+import { Plus, Minus, Users } from "lucide-react";
 
 export interface FoodCardProps {
   id: string | number;
@@ -12,8 +12,10 @@ export interface FoodCardProps {
   serving: number | string;
   description?: string | null;
   addButton?: boolean;
-  onAdd?: (id: string | number) => void;
+  quantity?: number;
+  onAdd?: (id: string | number, quantity: number) => void;
   className?: string;
+  loadingMode?: "eager" | "lazy";
 }
 
 const FoodCard = ({
@@ -24,14 +26,19 @@ const FoodCard = ({
   serving,
   description,
   addButton = false,
+  quantity,
   onAdd,
   className = "",
+  loadingMode = "lazy",
 }: FoodCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [canClamp, setCanClamp] = useState(() =>
-    Boolean(description && description.length > 60)
+    Boolean(description && description.length > 60),
   );
+  const [internalQty, setInternalQty] = useState(0);
   const textRef = useRef<HTMLParagraphElement>(null);
+
+  const currentQty = quantity !== undefined ? quantity : internalQty;
 
   useEffect(() => {
     if (isExpanded) return;
@@ -47,12 +54,35 @@ const FoodCard = ({
     return () => window.removeEventListener("resize", checkOverflow);
   }, [description, isExpanded]);
 
+  const updateQuantity = (newQty: number) => {
+    if (quantity === undefined) {
+      setInternalQty(newQty);
+    }
+    onAdd?.(id, newQty);
+  };
+
+  const handleAddInitial = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    updateQuantity(1);
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    updateQuantity(currentQty + 1);
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextQty = Math.max(0, currentQty - 1);
+    updateQuantity(nextQty);
+  };
+
   const formattedPrice =
     typeof price === "number"
       ? `₹${price.toLocaleString("en-IN")}`
       : typeof price === "string" && price.startsWith("₹")
-      ? price
-      : `₹${price}`;
+        ? price
+        : `₹${price}`;
 
   const formattedServing =
     typeof serving === "number" ? `Serves ${serving}` : serving;
@@ -69,6 +99,7 @@ const FoodCard = ({
           <Image
             src={imageUrl || "/food-card-placeholder.webp"}
             alt={name}
+            loading={loadingMode}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1536px) 50vw, 33vw"
             className="object-cover object-center transition-transform duration-300 ease-out group-hover:scale-105"
@@ -93,7 +124,9 @@ const FoodCard = ({
               <p
                 ref={textRef}
                 className={`font-sans text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 md:text-sm md:leading-relaxed 2xl:text-base 2xl:leading-relaxed ${
-                  isExpanded ? "" : "line-clamp-2 md:line-clamp-2 2xl:line-clamp-3"
+                  isExpanded
+                    ? ""
+                    : "line-clamp-2 md:line-clamp-2 2xl:line-clamp-3"
                 }`}
               >
                 {description}
@@ -126,17 +159,40 @@ const FoodCard = ({
 
         {/* Action Section */}
         {addButton && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAdd?.(id);
-            }}
-            className="flex cursor-pointer items-center gap-1 rounded-lg bg-zinc-900 px-3 py-1.5 font-sans text-xs font-medium text-white transition-all duration-200 hover:bg-zinc-800 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 md:px-3.5 md:py-2 md:text-sm 2xl:px-4 2xl:py-2.5 2xl:text-sm"
-          >
-            <span>Add</span>
-            <Plus className="size-3.5 md:size-4 2xl:size-5" />
-          </button>
+          <div>
+            {currentQty === 0 ? (
+              <button
+                type="button"
+                onClick={handleAddInitial}
+                className="flex cursor-pointer items-center gap-1 rounded-lg bg-zinc-900 px-3 py-1.5 font-sans text-xs font-medium text-white transition-all duration-200 hover:bg-zinc-800 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 md:px-3.5 md:py-2 md:text-sm 2xl:px-4 2xl:py-2.5 2xl:text-sm"
+              >
+                <span>Add</span>
+                <Plus className="size-3.5 md:size-4 2xl:size-4" />
+              </button>
+            ) : (
+              <div className="flex items-center rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 px-1 py-0.5 md:px-1.5 md:py-1 2xl:px-2 2xl:py-1">
+                <button
+                  type="button"
+                  onClick={handleDecrement}
+                  className="flex cursor-pointer items-center justify-center p-1 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-90 transition-all"
+                  aria-label="Decrease quantity"
+                >
+                  <Minus className="size-3.5 md:size-4 2xl:size-4" />
+                </button>
+                <span className="min-w-6 text-center font-mono text-xs font-bold md:text-sm 2xl:text-base px-1">
+                  {currentQty}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleIncrement}
+                  className="flex cursor-pointer items-center justify-center p-1 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-90 transition-all"
+                  aria-label="Increase quantity"
+                >
+                  <Plus className="size-3.5 md:size-4 2xl:size-4" />
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </article>
