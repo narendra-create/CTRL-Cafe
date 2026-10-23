@@ -68,8 +68,8 @@ export default function RegisterPage() {
   /* Section: Session Verification Loading State */
   if (checkingAuth) {
     return (
-      <div className="min-h-[100dvh] bg-[#15191a] md:bg-[#d8d1c5] dark:md:bg-[#0a0a0a] md:p-[clamp(14px,3vw,38px)] 2xl:p-14 block md:grid md:place-items-center font-sans transition-colors duration-300">
-        <main className="w-full max-w-[1180px] 2xl:max-w-[1400px] md:mt-20 min-h-screen md:min-h-[min(760px,calc(100vh-28px))] 2xl:min-h-[820px] block md:grid md:grid-cols-[1.04fr_0.96fr] 2xl:grid-cols-[1.08fr_0.92fr] bg-[#15191a] md:rounded-[28px] 2xl:rounded-[36px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] 2xl:shadow-[0_40px_120px_rgba(0,0,0,0.45)] relative">
+      <div className="min-h-[100dvh] w-full min-w-0 overflow-x-hidden bg-[#15191a] md:bg-[#d8d1c5] dark:md:bg-[#0a0a0a] md:p-[clamp(14px,3vw,38px)] 2xl:p-14 block md:grid md:place-items-center font-sans transition-colors duration-300">
+        <main className="w-full min-w-0 max-w-[1180px] 2xl:max-w-[1400px] md:mt-20 min-h-screen md:min-h-[min(760px,calc(100vh-28px))] 2xl:min-h-[820px] block md:grid md:grid-cols-[1.04fr_0.96fr] 2xl:grid-cols-[1.08fr_0.92fr] bg-[#15191a] md:rounded-[28px] 2xl:rounded-[36px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] 2xl:shadow-[0_40px_120px_rgba(0,0,0,0.45)] relative">
           {/* Showcase Section */}
           <section className="flex flex-col justify-between relative overflow-hidden px-[23px] pt-[25px] pb-[28px] min-h-[265px] md:p-[clamp(26px,4vw,58px)] md:min-h-[700px] 2xl:p-18 2xl:min-h-[820px] bg-[radial-gradient(circle_at_83%_12%,rgba(250,204,21,0.22),transparent_30%),linear-gradient(145deg,#242c2c,#121718_70%)] text-[#f7f3ed]">
             {/* Background Rings */}
@@ -318,8 +318,8 @@ export default function RegisterPage() {
   const otpFilled = otpDigits.join("").length === 6;
 
   return (
-    <div className="min-h-[100dvh] bg-[#15191a] md:bg-[#d8d1c5] dark:md:bg-[#0a0a0a] md:p-[clamp(14px,3vw,38px)] block md:grid md:place-items-center font-sans transition-colors duration-300">
-      <main className="w-full max-w-[1180px] md:mt-20 min-h-screen md:min-h-[min(760px,calc(100vh-28px))] block md:grid md:grid-cols-[1.04fr_0.96fr] bg-[#15191a] md:rounded-[28px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] relative">
+    <div className="min-h-[100dvh] w-full min-w-0 overflow-x-hidden bg-[#15191a] md:bg-[#d8d1c5] dark:md:bg-[#0a0a0a] md:p-[clamp(14px,3vw,38px)] block md:grid md:place-items-center font-sans transition-colors duration-300">
+      <main className="w-full min-w-0 max-w-[1180px] md:mt-20 min-h-screen md:min-h-[min(760px,calc(100vh-28px))] block md:grid md:grid-cols-[1.04fr_0.96fr] bg-[#15191a] md:rounded-[28px] overflow-hidden md:shadow-[0_30px_90px_rgba(0,0,0,0.34)] relative">
         {/* Showcase Section */}
         <section className="flex flex-col justify-between relative overflow-hidden px-[23px] pt-[25px] pb-[28px] min-h-[265px] md:p-[clamp(26px,4vw,58px)] md:min-h-[700px] bg-[radial-gradient(circle_at_83%_12%,rgba(250,204,21,0.22),transparent_30%),linear-gradient(145deg,#242c2c,#121718_70%)] text-[#f7f3ed]">
           {/* Background Rings */}
@@ -362,10 +362,10 @@ export default function RegisterPage() {
         </section>
 
         {/* Auth Content Section */}
-        <section className="bg-[#f4efe7] dark:bg-[#15191a] text-[#19201f] dark:text-[#f7f3ed] p-[31px_23px_42px] md:p-[clamp(27px,5vw,70px)] flex items-start md:items-center min-h-[calc(100dvh-265px)] md:min-h-0 transition-colors duration-300">
-          <div className="w-full max-w-[390px] mx-auto">
+        <section className="w-full min-w-0 overflow-x-hidden bg-[#f4efe7] dark:bg-[#15191a] text-[#19201f] dark:text-[#f7f3ed] p-[28px_16px_36px] min-[400px]:p-[31px_23px_42px] md:p-[clamp(27px,5vw,70px)] flex items-start md:items-center min-h-[calc(100dvh-265px)] md:min-h-0 transition-colors duration-300">
+          <div className="w-full min-w-0 max-w-[390px] mx-auto">
             {/* Header Row */}
-            <div className="flex flex-col min-[370px]:flex-row justify-between items-start mb-[24px] md:mb-[30px]">
+            <div className="flex flex-col min-[400px]:flex-row justify-between items-start gap-3 min-[400px]:gap-2 mb-[24px] md:mb-[30px] min-w-0">
               <div>
                 <h2 className="text-[29px] md:text-[32px] tracking-[-0.06em] m-0 mb-[8px] font-[800]">
                   Create account
@@ -447,7 +447,7 @@ export default function RegisterPage() {
               })}
             </div>
 
-            <form className="grid gap-[15px]" action={handleSubmit}>
+            <form className="grid min-w-0 gap-[15px]" action={handleSubmit}>
               {/* Error Banner */}
               {error && (
                 <div className="flex items-center gap-[10px] bg-[#ff4d4d]/10 dark:bg-[#ff4d4d]/15 border border-[#ff4d4d]/25 rounded-[12px] p-[12px_15px]">
@@ -503,7 +503,7 @@ export default function RegisterPage() {
                   required
                   readOnly={otpStep !== "idle"}
                   disabled={loading}
-                  className="w-full border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed read-only:opacity-70"
+                  className="box-border w-full max-w-full min-w-0 border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed read-only:opacity-70"
                 />
               </div>
 
@@ -515,7 +515,7 @@ export default function RegisterPage() {
                 >
                   Email address
                 </label>
-                <div className="flex gap-[8px]">
+                <div className="flex min-w-0 flex-col min-[400px]:flex-row gap-[8px]">
                   <input
                     ref={emailRef}
                     name="email"
@@ -526,7 +526,7 @@ export default function RegisterPage() {
                     required
                     readOnly={otpStep !== "idle"}
                     disabled={loading}
-                    className="flex-1 min-w-0 border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed read-only:opacity-70"
+                    className="box-border w-full min-w-0 min-[400px]:flex-1 border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed read-only:opacity-70"
                   />
                   {/* Send / Verified badge */}
                   {otpStep === "verified" ? (
@@ -552,7 +552,7 @@ export default function RegisterPage() {
                       type="button"
                       onClick={handleSendOtp}
                       disabled={otpLoading || otpStep === "sent"}
-                      className="shrink-0 border-0 rounded-[12px] px-[13px] py-[11px] bg-[#202b29] dark:bg-white/[0.08] text-white dark:text-[#c5c4bb] text-[12px] font-[800] cursor-pointer hover:bg-[#2e3e3a] dark:hover:bg-white/[0.12] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-[6px] whitespace-nowrap"
+                      className="w-full min-[400px]:w-auto shrink-0 justify-center border-0 rounded-[12px] px-[13px] py-[11px] bg-[#202b29] dark:bg-white/[0.08] text-white dark:text-[#c5c4bb] text-[12px] font-[800] cursor-pointer hover:bg-[#2e3e3a] dark:hover:bg-white/[0.12] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-[6px] whitespace-nowrap"
                     >
                       {otpLoading ? (
                         <svg
@@ -744,7 +744,7 @@ export default function RegisterPage() {
                     placeholder="Create a password"
                     required
                     disabled={loading}
-                    className="w-full border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] pr-[55px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="box-border w-full max-w-full min-w-0 border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[12px] p-[14px_15px] pr-[55px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-[#FACC15] dark:focus:border-[#FACC15] focus:shadow-[0_0_0_4px_rgba(250,204,21,0.13)] font-sans placeholder:text-[#a09d94] dark:placeholder:text-[#70746d] disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <button
                     type="button"
@@ -799,7 +799,7 @@ export default function RegisterPage() {
               </div>
 
               {/* OAuth Buttons */}
-              <div className="grid grid-cols-1 min-[370px]:grid-cols-2 gap-[10px]">
+              <div className="grid min-w-0 grid-cols-1 min-[400px]:grid-cols-2 gap-[10px]">
                 <button
                   type="button"
                   className="border border-[#d8d3ca] dark:border-white/10 bg-transparent rounded-[11px] p-[12px_9px] text-[#404641] dark:text-[#c5c4bb] text-[12px] font-[700] cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-[8px]"
