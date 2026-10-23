@@ -1,8 +1,8 @@
 import { db } from "@/src/index";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
-import { addGamesSchema, type addGamesInput } from "@/lib/validations/gamesValidation";
+import { addGamesSchema, UnlinkGamesInput, unLinkGamesSchema, type addGamesInput } from "@/lib/validations/gamesValidation";
 import { availableGames, deviceGames, devices } from "@/src/db/schema";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { DeviceWithInstalledGames } from "@/types/gameTypes";
 
 export const linkGames = async (input: addGamesInput): Promise<{
@@ -77,3 +77,42 @@ export const getDeviceGames = async (): Promise<{
     }
 };
 
+export const unLinkGames = async (input: UnlinkGamesInput): Promise<{
+    success: boolean;
+    message?: string;
+}> => {
+    try {
+        const { error: zodError, data: parsedInput } = unLinkGamesSchema.safeParse(input);
+        if (zodError) return { success: false, message: zodError.message };
+
+        //Authentication
+        const { dbuser, error: authError } = await resolveAuthenticatedUser("admin");
+        if (authError) return authError;
+
+        //Finding device
+        const [foundDevice] = await db.select({ id: devices.id }).from(devices).where(eq(devices.id, parsedInput.deviceId)).limit(1);
+        if (!foundDevice) {
+            return {
+                success: false,
+                message: "Device Not Found"
+            }
+        };
+
+        //Unlinking games
+        await db.delete(deviceGames).where(and(
+            eq(deviceGames.deviceId, foundDevice.id),
+            inArray(deviceGames.gameId, parsedInput.gameIds)
+        ));
+
+        return {
+            success: true
+        }
+    }
+    catch (err) {
+        console.error("[unLinkGames]: ", err);
+        return {
+            success: false,
+            message: "Something went wrong while unlinking"
+        }
+    }
+}

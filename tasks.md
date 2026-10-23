@@ -21,7 +21,7 @@
 - [x] add safeparse in all controllers
 - [x] Check Seat hold controller for mistakes
 - [ ] add pagination where needed
-- [ ] make controller for unlinking/updating linked games
+- [x] make controller for unlinking/updating linked games
 - [x] controller for booking the holded seat
 - [x] Optimize the bookSeat() controller - remove some code from transection to make it light
 - [x] verifypayment controller
