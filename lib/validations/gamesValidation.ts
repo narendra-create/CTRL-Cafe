@@ -10,4 +10,10 @@ export const addGamesSchema = z.object({
     }))
 });
 
+export const unLinkGamesSchema = z.object({
+    deviceId: z.uuid(),
+    gameIds: z.array(z.uuid()).min(1)
+})
+
 export type addGamesInput = z.infer<typeof addGamesSchema>;
+export type UnlinkGamesInput = z.infer<typeof unLinkGamesSchema>;
