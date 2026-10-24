@@ -32,6 +32,7 @@
 - [x] controller for getting deviceGames
 - [x] make controller for getting all available games without devices
 - [x] fix eslint issues
+- [ ] Controller file for fetching profile details
 
 ## Importent on 09/11/2026
 
@@ -52,7 +53,7 @@
 - [x] Add a theme changing button
 - [x] Make a minimal navbar.
 - [ ] Make the rewards page.
-- [ ] Add goodlooking react icons in all pages.
+- [x] Add goodlooking react icons in all pages.
 - [ ] add cloudinary signature generate in frontend
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
 - [x] fix layout issue in register page
