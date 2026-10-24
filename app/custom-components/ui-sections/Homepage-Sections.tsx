@@ -22,6 +22,10 @@ import Link from "next/link";
 import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
 import PopularCard from "@/app/custom-components/cards/PopularCard";
 import type { PopularCardProps } from "@/app/custom-components/cards/PopularCard";
+import RewardsSection from "@/app/custom-components/ui-sections/Reward-Sections";
+import { Suspense } from "react";
+import MembershipSection from "@/app/custom-components/ui-sections/MembershipSection";
+import SnacksSection from "@/app/custom-components/ui-sections/SnacksSection";
 
 const Herosection = () => {
   return (
@@ -267,4 +271,25 @@ const PopularSection = () => {
   );
 };
 
-export { Herosection, HookSection, PopularSection };
+const RewardsHomepageSection = ({
+  points,
+  onClaim,
+}: {
+  points?: number | null;
+  onClaim?: () => void | Promise<void>;
+}) => {
+  return (
+    <section className="flex w-full flex-col xl:flex-row xl:items-center xl:justify-between xl:px-6">
+      <div className="w-full xl:w-[60%]">
+        <RewardsSection points={points} onClaim={onClaim} />
+      </div>
+
+      <div className="mx-auto flex w-full max-w-260 flex-col gap-8 px-5 pb-12 md:grid md:grid-cols-2 md:px-6 xl:flex xl:w-[30%] xl:max-w-none xl:px-0 xl:pb-0">
+        <MembershipSection />
+        <SnacksSection />
+      </div>
+    </section>
+  );
+};
+
+export { Herosection, HookSection, PopularSection, RewardsHomepageSection };
