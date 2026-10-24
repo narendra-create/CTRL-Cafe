@@ -49,7 +49,7 @@
 - [x] make device card
 - [x] Make foodItems card with image, name, description etc - see the fooditems table in schema file in src/db for more details.
 - [x] Make Game Card for showing game catalogue see schema file for more detail.
-- [ ] Make homepage UI.
+- [x] Make homepage UI.
 - [x] Add a theme changing button
 - [x] Make a minimal navbar.
 - [ ] Make the rewards page.

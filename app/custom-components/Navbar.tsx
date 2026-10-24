@@ -33,7 +33,7 @@ const Navbar = async () => {
           CTRL-CAFE
         </h3>
       </Link>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 md:gap-5">
           <Link
             href={"/plans"}
@@ -44,7 +44,10 @@ const Navbar = async () => {
         </div>
         <div>
           {claims ? (
-            <AvatarDropdown imageurl={image} name={getInitials(name)} />
+            <div className="flex items-center justify-center gap-2.5 md:gap-4">
+              <AvatarDropdown imageurl={image} name={getInitials(name)} />
+              <ThemeChangeButton />
+            </div>
           ) : (
             <div className="flex items-center justify-center gap-2.5 md:gap-4">
               <Link href={"/auth/login"}>
