@@ -57,7 +57,7 @@
 - [ ] add cloudinary signature generate in frontend
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
 - [x] fix layout issue in register page
-- [ ] Make Footer
+- [x] Make Footer
 
 ## Run this checklist after deployement
 

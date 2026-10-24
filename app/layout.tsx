@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/app/custom-components/providers/theme-provider"
 import { cn } from "@/lib/utils";
 import Navbar from "@/app/custom-components/Navbar";
 import { Toaster } from "@/components/ui/toast";
+import Footer from "@/app/custom-components/Footer";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -46,6 +47,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Toaster />
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
