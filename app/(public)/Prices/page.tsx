@@ -40,7 +40,7 @@ const Prices = async () => {
     })) ?? [];
 
   return (
-    <main className="w-full mt-5 md:mt-15">
+    <main className="w-full mt-13 md:mt-15">
       <div className="w-full px-5 pt-12 pb-16 sm:px-8 lg:px-22 lg:pt-20 lg:pb-24 xl:px-26">
         {/* Header */}
         <header className="mb-14 grid items-end gap-8 lg:mb-24 lg:grid-cols-[2fr_1fr] lg:gap-16">
@@ -135,26 +135,26 @@ const Prices = async () => {
           </ul>
         </section>
 
-        {/* Passes notice */}
+        {/* Membership plans notice */}
         <div className="mt-12 flex flex-col items-start justify-between gap-6 border-t border-border pt-8 sm:flex-row sm:items-center lg:mt-16 lg:pt-12">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-600/30 bg-amber-500/10 dark:bg-amber-500/15 px-3 py-0.5 text-xs font-mono font-semibold text-yellow-800 dark:text-yellow-400 uppercase tracking-wider">
-                Passes Available
+                Membership Plans
               </span>
             </div>
             <h3 className="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
-              Play regularly? Save more with a pass.
+              Play regularly? Save more with a Membership Plan.
             </h3>
             <p className="max-w-[52ch] text-base text-muted-foreground lg:text-lg">
-              Daily and monthly gaming passes are also available so you don't have to pay hour by hour.
+              Daily and monthly membership plans are coming soon so regular players won't have to pay hour by hour.
             </p>
           </div>
           <Link
             href={PLANS_HREF}
             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-foreground bg-accent px-7 py-3.5 font-heading text-base font-bold text-accent-foreground shadow-[3px_3px_0_var(--foreground)] transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98]"
           >
-            <span>Buy a pass</span>
+            <span>Explore Membership Plans</span>
             <ArrowRight className="size-4" />
           </Link>
         </div>
