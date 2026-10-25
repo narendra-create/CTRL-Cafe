@@ -34,6 +34,8 @@
 - [x] fix eslint issues
 - [x] Controller file for fetching reward Points
 - [x] Make controller for getting profile details
+- [ ] Controller functions for updating user details and deleting account
+- [ ] Account connecting logic in settings page
 
 ## Importent on 09/11/2026
 
@@ -59,6 +61,7 @@
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
 - [x] fix layout issue in register page
 - [x] Make Footer
+- [ ] Wire up new profile controller functions in setttings page
 
 ## Run this checklist after deployement
 

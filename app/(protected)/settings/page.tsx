@@ -1,18 +1,22 @@
-import { getBookingHistory } from "@/lib/controllers/bookingController";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import SettingsClient from "@/app/(protected)/settings/SettingsClient";
+import { getBookingHistory } from "@/lib/controllers/bookingController";
 import { getProfileDetails } from "@/lib/controllers/profileController";
+import SettingsClient from "./SettingsClient";
+import UnauthenticatedView from "./UnauthenticatedView";
 
-async function getSettingsData() {
+/* Section: Settings Page Server Component */
+export default async function SettingsPage() {
   const profileResult = await getProfileDetails();
-  if (!profileResult.success) {
-  }
-  const userData = profileResult;
-  if (!userData.email) redirect("/auth/login");
-  const email = userData.email ?? "";
 
-  const rawProviders: unknown = userData.providers;
+  if (!profileResult.success || !profileResult.data) {
+    return (
+      <UnauthenticatedView
+        message={profileResult.message || "Please log in to view your settings."}
+      />
+    );
+  }
+
+  const rawProviders: unknown = profileResult.providers;
   const providers: string[] = Array.isArray(rawProviders)
     ? (rawProviders as string[]).filter((p) => p !== "email")
     : [];
@@ -22,14 +26,14 @@ async function getSettingsData() {
     ? (historyResult.data ?? [])
     : [];
 
-  return { email, providers, bookingHistory };
-}
-
-export default async function SettingsPage() {
-  const data = await getSettingsData();
   return (
     <Suspense>
-      <SettingsClient {...data} />
+      <SettingsClient
+        email={profileResult.email ?? ""}
+        providers={providers}
+        bookingHistory={bookingHistory}
+        userDetails={profileResult.data}
+      />
     </Suspense>
   );
 }

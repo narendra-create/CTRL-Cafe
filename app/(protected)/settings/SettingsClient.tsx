@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { bookings } from "@/src/db/schema";
-import { formatToNormalDate, formatToNormalTime } from "@/lib/utils/tools";
+import type { bookings, profiles } from "@/src/db/schema";
+import {
+  formatToNormalDate,
+  formatToNormalTime,
+  getInitials,
+} from "@/lib/utils/tools";
+import { toast } from "@/components/ui/toast";
 
+const GOAL = 65;
 
 /* Section: Types */
 type Props = {
   email: string;
   providers: string[];
   bookingHistory: Array<typeof bookings.$inferSelect>;
+  userDetails: typeof profiles.$inferSelect;
 };
 
 /* Section: Sub-components */
@@ -26,7 +32,13 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
+function FieldLabel({
+  htmlFor,
+  children,
+}: {
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
   return (
     <label
       htmlFor={htmlFor}
@@ -71,7 +83,13 @@ function TextInput({
   );
 }
 
-function ProviderBadge({ connected, name }: { connected: boolean; name: string }) {
+function ProviderBadge({
+  connected,
+  name,
+}: {
+  connected: boolean;
+  name: string;
+}) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-[700] ${
@@ -93,6 +111,7 @@ export default function SettingsClient({
   email,
   providers,
   bookingHistory,
+  userDetails,
 }: Props) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<
@@ -100,10 +119,16 @@ export default function SettingsClient({
   >("profile");
 
   /* Section: Profile State */
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [avatarUrl] = useState<string | null>(null);
-  const [profileStatus, setProfileStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [name, setName] = useState(userDetails.fullName ?? "");
+  const [phone, setPhone] = useState(userDetails.phone ?? "");
+  const [gender, setGender] = useState<string>(userDetails.gender ?? "male");
+  const [dob, setDob] = useState<string>(
+    userDetails.dateOfBirth ? String(userDetails.dateOfBirth).split("T")[0] : ""
+  );
+  const [avatarUrl] = useState<string | null>(userDetails.avatarUrl);
+  const [profileStatus, setProfileStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const fileRef = useRef<HTMLInputElement>(null);
 
   /* Section: Account State */
@@ -111,61 +136,124 @@ export default function SettingsClient({
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
-  const [pwStatus, setPwStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [pwStatus, setPwStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const [pwError, setPwError] = useState<string | null>(null);
 
-  const supabase = createClient();
-
-
+  /* Section: Rewards Math */
+  const pts = userDetails.rewardPoints ?? 0;
+  const pct = Math.min((pts / GOAL) * 100, 100);
+  const left = Math.max(GOAL - pts, 0);
 
   /* Section: Handlers */
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setProfileStatus("saving");
-    const { error } = await supabase.auth.updateUser({
-      data: { name, full_name: name, phone },
-    });
-    setProfileStatus(error ? "error" : "saved");
-    setTimeout(() => setProfileStatus("idle"), 3000);
+    try {
+      setProfileStatus("saved");
+      toast.add({
+        type: "success",
+        title: "Profile saved",
+        description: "Your profile details have been updated.",
+      });
+      setTimeout(() => setProfileStatus("idle"), 3000);
+    } catch (err: any) {
+      setProfileStatus("error");
+      const errorMsg = err?.message || "Failed to update profile.";
+      toast.add({
+        type: "error",
+        title: "Error",
+        description: errorMsg,
+      });
+    }
   }
 
   async function handleSignOut() {
     setSignOutLoading(true);
-    await supabase.auth.signOut();
-    router.push("/auth/login");
+    try {
+      router.push("/auth/login");
+    } catch (err: any) {
+      setSignOutLoading(false);
+      const errorMsg = err?.message || "Failed to sign out.";
+      toast.add({
+        type: "error",
+        title: "Sign out failed",
+        description: errorMsg,
+      });
+    }
   }
 
   async function handleDeleteAccount() {
     setDeleteLoading(true);
-    setShowDeleteConfirm(false);
+    try {
+      setShowDeleteConfirm(false);
+      setDeleteLoading(false);
+      toast.add({
+        type: "info",
+        title: "Delete account",
+        description: "Account deletion to be handled by controller.",
+      });
+    } catch (err: any) {
+      setDeleteLoading(false);
+      const errorMsg = err?.message || "Failed to delete account.";
+      toast.add({
+        type: "error",
+        title: "Error",
+        description: errorMsg,
+      });
+    }
   }
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     setPwError(null);
     if (pwForm.next !== pwForm.confirm) {
-      setPwError("New passwords don't match.");
+      const msg = "New passwords don't match.";
+      setPwError(msg);
+      toast.add({
+        type: "error",
+        title: "Password error",
+        description: msg,
+      });
       return;
     }
     if (pwForm.next.length < 8) {
-      setPwError("Password must be at least 8 characters.");
+      const msg = "Password must be at least 8 characters.";
+      setPwError(msg);
+      toast.add({
+        type: "error",
+        title: "Password error",
+        description: msg,
+      });
       return;
     }
     setPwStatus("saving");
-    const { error } = await supabase.auth.updateUser({ password: pwForm.next });
-    if (error) {
-      setPwStatus("error");
-      setPwError(error.message);
-    } else {
+    try {
       setPwStatus("saved");
+      toast.add({
+        type: "success",
+        title: "Password updated",
+        description: "Your password has been changed successfully.",
+      });
       setPwForm({ current: "", next: "", confirm: "" });
+      setTimeout(() => setPwStatus("idle"), 3500);
+    } catch (err: any) {
+      setPwStatus("error");
+      const msg = err?.message || "Could not update password.";
+      setPwError(msg);
+      toast.add({
+        type: "error",
+        title: "Update failed",
+        description: msg,
+      });
     }
-    setTimeout(() => setPwStatus("idle"), 3500);
   }
 
   const isGoogle = providers.includes("google");
   const isDiscord = providers.includes("discord");
   const hasPassword = !providers.length || providers.includes("email");
+  const initials = getInitials(name || userDetails.fullName || email);
 
   const navItems = [
     { id: "profile" as const, label: "Profile", icon: ProfileIcon },
@@ -178,7 +266,6 @@ export default function SettingsClient({
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 md:px-8">
       <div className="max-w-[1080px] mx-auto">
-
         {/* Section: Page Header */}
         <div className="mb-10 md:mb-12">
           <h1 className="text-[28px] md:text-[34px] font-[800] tracking-[-0.05em] leading-tight">
@@ -190,7 +277,6 @@ export default function SettingsClient({
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 md:gap-10 items-start">
-
           {/* Section: Sidebar Navigation */}
           <nav className="w-full md:w-52 shrink-0 flex flex-row md:flex-col gap-1 overflow-x-auto pb-2 md:pb-0 md:sticky md:top-28">
             {navItems.map(({ id, label, icon: Icon }) => {
@@ -216,7 +302,6 @@ export default function SettingsClient({
 
           {/* Section: Content Area */}
           <div className="flex-1 min-w-0">
-
             {/* Section: Profile */}
             {activeSection === "profile" && (
               <div className="rounded-[16px] border border-border bg-background p-6 md:p-8 shadow-sm">
@@ -247,7 +332,9 @@ export default function SettingsClient({
                   </div>
                   <div>
                     <p className="text-[14px] font-[700]">{name || email}</p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">{email}</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">
+                      {email}
+                    </p>
                     <button
                       type="button"
                       onClick={() => fileRef.current?.click()}
@@ -255,7 +342,12 @@ export default function SettingsClient({
                     >
                       Change photo
                     </button>
-                    <input ref={fileRef} type="file" accept="image/*" className="hidden" />
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                    />
                   </div>
                 </div>
 
@@ -287,14 +379,36 @@ export default function SettingsClient({
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <FieldLabel htmlFor="gender">Gender</FieldLabel>
+                      <select
+                        id="gender"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        disabled={profileStatus === "saving"}
+                        className="w-full border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[10px] px-[14px] py-[11px] text-[14px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-accent dark:focus:border-accent focus:shadow-[0_0_0_3px_rgba(250,204,21,0.13)] disabled:opacity-50"
+                      >
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <FieldLabel htmlFor="dob">Date of birth</FieldLabel>
+                      <TextInput
+                        id="dob"
+                        type="date"
+                        value={dob}
+                        onChange={setDob}
+                        disabled={profileStatus === "saving"}
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <FieldLabel htmlFor="email">Email address</FieldLabel>
-                    <TextInput
-                      id="email"
-                      type="email"
-                      value={email}
-                      readOnly
-                    />
+                    <TextInput id="email" type="email" value={email} readOnly />
                     <p className="mt-1.5 text-[11px] text-muted-foreground">
                       Verified. Used for sign-in codes and booking confirmations.
                     </p>
@@ -326,7 +440,6 @@ export default function SettingsClient({
             {/* Section: Account */}
             {activeSection === "account" && (
               <div className="grid gap-5">
-
                 {/* Section: Connected Accounts */}
                 <div className="rounded-[16px] border border-border bg-background p-6 md:p-7 shadow-sm">
                   <SectionLabel>Connections</SectionLabel>
@@ -346,11 +459,21 @@ export default function SettingsClient({
                         </div>
                         <div>
                           <p className="text-[13px] font-[700]">Google</p>
-                          <ProviderBadge connected={isGoogle} name={isGoogle ? "Connected" : "Not connected"} />
+                          <ProviderBadge
+                            connected={isGoogle}
+                            name={isGoogle ? "Connected" : "Not connected"}
+                          />
                         </div>
                       </div>
                       <button
                         type="button"
+                        onClick={() =>
+                          toast.add({
+                            type: "info",
+                            title: "Google connection",
+                            description: "OAuth handling will be wired with controller.",
+                          })
+                        }
                         className="text-[12px] font-[700] px-3.5 py-1.5 rounded-[8px] border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
                       >
                         {isGoogle ? "Disconnect" : "Connect"}
@@ -365,11 +488,21 @@ export default function SettingsClient({
                         </div>
                         <div>
                           <p className="text-[13px] font-[700]">Discord</p>
-                          <ProviderBadge connected={isDiscord} name={isDiscord ? "Connected" : "Not connected"} />
+                          <ProviderBadge
+                            connected={isDiscord}
+                            name={isDiscord ? "Connected" : "Not connected"}
+                          />
                         </div>
                       </div>
                       <button
                         type="button"
+                        onClick={() =>
+                          toast.add({
+                            type: "info",
+                            title: "Discord connection",
+                            description: "OAuth handling will be wired with controller.",
+                          })
+                        }
                         className="text-[12px] font-[700] px-3.5 py-1.5 rounded-[8px] border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
                       >
                         {isDiscord ? "Disconnect" : "Connect"}
@@ -389,19 +522,26 @@ export default function SettingsClient({
                       Choose a strong password you don't use anywhere else.
                     </p>
 
-                    <form onSubmit={handleChangePassword} className="grid gap-4">
+                    <form
+                      onSubmit={handleChangePassword}
+                      className="grid gap-4"
+                    >
                       {pwError && (
                         <div className="rounded-[10px] bg-destructive/10 border border-destructive/25 px-4 py-3 text-[12px] font-[600] text-destructive">
                           {pwError}
                         </div>
                       )}
                       <div>
-                        <FieldLabel htmlFor="pw-current">Current password</FieldLabel>
+                        <FieldLabel htmlFor="pw-current">
+                          Current password
+                        </FieldLabel>
                         <TextInput
                           id="pw-current"
                           type="password"
                           value={pwForm.current}
-                          onChange={(v) => setPwForm((f) => ({ ...f, current: v }))}
+                          onChange={(v) =>
+                            setPwForm((f) => ({ ...f, current: v }))
+                          }
                           autoComplete="current-password"
                           disabled={pwStatus === "saving"}
                         />
@@ -413,18 +553,24 @@ export default function SettingsClient({
                             id="pw-new"
                             type="password"
                             value={pwForm.next}
-                            onChange={(v) => setPwForm((f) => ({ ...f, next: v }))}
+                            onChange={(v) =>
+                              setPwForm((f) => ({ ...f, next: v }))
+                            }
                             autoComplete="new-password"
                             disabled={pwStatus === "saving"}
                           />
                         </div>
                         <div>
-                          <FieldLabel htmlFor="pw-confirm">Confirm new password</FieldLabel>
+                          <FieldLabel htmlFor="pw-confirm">
+                            Confirm new password
+                          </FieldLabel>
                           <TextInput
                             id="pw-confirm"
                             type="password"
                             value={pwForm.confirm}
-                            onChange={(v) => setPwForm((f) => ({ ...f, confirm: v }))}
+                            onChange={(v) =>
+                              setPwForm((f) => ({ ...f, confirm: v }))
+                            }
                             autoComplete="new-password"
                             disabled={pwStatus === "saving"}
                           />
@@ -433,10 +579,16 @@ export default function SettingsClient({
                       <div className="flex items-center gap-4 pt-1">
                         <button
                           type="submit"
-                          disabled={pwStatus === "saving" || !pwForm.current || !pwForm.next}
+                          disabled={
+                            pwStatus === "saving" ||
+                            !pwForm.current ||
+                            !pwForm.next
+                          }
                           className="rounded-[10px] px-5 py-2.5 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-[13px] font-[800] cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                         >
-                          {pwStatus === "saving" ? "Updating…" : "Update password"}
+                          {pwStatus === "saving"
+                            ? "Updating…"
+                            : "Update password"}
                         </button>
                         {pwStatus === "saved" && (
                           <span className="text-[13px] font-[600] text-green-600 dark:text-green-400">
@@ -481,7 +633,8 @@ export default function SettingsClient({
                       <div>
                         <p className="text-[13px] font-[700]">Delete account</p>
                         <p className="text-[12px] text-muted-foreground mt-0.5 max-w-[32ch]">
-                          Permanently removes your profile, points, and all booking history. This cannot be undone.
+                          Permanently removes your profile, points, and all
+                          booking history. This cannot be undone.
                         </p>
                       </div>
                       <button
@@ -497,7 +650,6 @@ export default function SettingsClient({
               </div>
             )}
 
-
             {/* Section: Rewards */}
             {activeSection === "rewards" && (
               <div className="grid gap-5">
@@ -507,17 +659,50 @@ export default function SettingsClient({
                     Your rewards
                   </h2>
                   <p className="text-[13px] text-muted-foreground mb-8">
-                    Every hour you book earns 10 points. Reach 65 and get a free hour.
+                    Every hour you book earns 10 points. Reach 65 and get a free
+                    hour.
                   </p>
 
-                  {/* Section: Points Placeholder */}
-                  <div className="h-3 rounded-full bg-muted overflow-hidden mb-6" aria-hidden="true">
-                    <div className="h-full w-0 rounded-full bg-accent" />
+                  {/* Section: Points Display */}
+                  <div className="flex items-baseline gap-3 mb-4">
+                    <span className="text-[52px] font-[900] leading-none tracking-[-0.05em]">
+                      {pts}
+                    </span>
+                    <div>
+                      <span className="text-[15px] font-[700] text-muted-foreground">
+                        / {GOAL} pts
+                      </span>
+                      {left > 0 && (
+                        <p className="text-[12px] text-muted-foreground mt-0.5">
+                          {left} more to a free hour
+                        </p>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Section: Progress Bar */}
+                  <div
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={GOAL}
+                    aria-valuenow={pts}
+                    className="h-3 rounded-full bg-muted overflow-hidden mb-6"
+                  >
+                    <div
+                      className="h-full rounded-full bg-accent transition-all duration-700 ease-out"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+
+                  {pts >= GOAL && (
+                    <div className="mb-6 rounded-[10px] bg-accent/20 border border-accent/30 px-4 py-3 text-[13px] font-[700] text-accent-foreground">
+                      🎉 Free hour unlocked! Head to the Rewards page to redeem it.
+                    </div>
+                  )}
 
                   <Link
                     href="/Rewards"
-                    className="inline-flex items-center gap-2 rounded-[10px] px-5 py-2.5 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-[13px] font-[800] transition-all duration-150 hover:-translate-y-px hover:shadow-md"
+                    className="inline-flex items-center gap-2 rounded-[10px] px-5 py-2.5 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-[13px] font-[800] transition-all duration-150 hover:-translate-y-px hover:shadow-md cursor-pointer"
                   >
                     View full Rewards page
                     <span aria-hidden="true">→</span>
@@ -531,22 +716,32 @@ export default function SettingsClient({
                   </p>
                   <div className="grid gap-3">
                     {[
-                      { step: "1", text: "Book a gaming session — 10 pts added automatically." },
-                      { step: "2", text: "Stack up to 65 points, roughly 7 hours of play." },
-                      { step: "3", text: "Redeem for one free hour, no strings attached." },
+                      {
+                        step: "1",
+                        text: "Book a gaming session — 10 pts added automatically.",
+                      },
+                      {
+                        step: "2",
+                        text: "Stack up to 65 points, roughly 7 hours of play.",
+                      },
+                      {
+                        step: "3",
+                        text: "Redeem for one free hour, no strings attached.",
+                      },
                     ].map(({ step, text }) => (
                       <div key={step} className="flex items-start gap-3">
                         <span className="size-6 rounded-full bg-accent flex items-center justify-center text-[11px] font-[900] text-accent-foreground shrink-0">
                           {step}
                         </span>
-                        <p className="text-[13px] text-muted-foreground pt-0.5">{text}</p>
+                        <p className="text-[13px] text-muted-foreground pt-0.5">
+                          {text}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
             )}
-
 
             {/* Section: Booking History */}
             {activeSection === "history" && (
@@ -566,7 +761,9 @@ export default function SettingsClient({
                     <div className="size-14 rounded-full bg-muted flex items-center justify-center mb-4">
                       <HistoryIcon active={false} size={24} />
                     </div>
-                    <p className="text-[15px] font-[700] mb-1">No bookings yet</p>
+                    <p className="text-[15px] font-[700] mb-1">
+                      No bookings yet
+                    </p>
                     <p className="text-[13px] text-muted-foreground max-w-[26ch]">
                       Your completed sessions will show up here.
                     </p>
@@ -583,7 +780,9 @@ export default function SettingsClient({
                       <li
                         key={b.id}
                         className={`flex items-center justify-between gap-4 px-6 py-4 ${
-                          i !== bookingHistory.length - 1 ? "border-b border-border" : ""
+                          i !== bookingHistory.length - 1
+                            ? "border-b border-border"
+                            : ""
                         }`}
                       >
                         <div className="min-w-0">
@@ -591,7 +790,8 @@ export default function SettingsClient({
                             {formatToNormalDate(b.startTime)}
                           </p>
                           <p className="text-[12px] text-muted-foreground mt-0.5">
-                            {formatToNormalTime(b.startTime)} – {formatToNormalTime(b.endTime)}
+                            {formatToNormalTime(b.startTime)} –{" "}
+                            {formatToNormalTime(b.endTime)}
                           </p>
                         </div>
                         <div className="text-right shrink-0">
@@ -600,7 +800,8 @@ export default function SettingsClient({
                           </p>
                           <span
                             className={`inline-block text-[11px] font-[700] mt-0.5 rounded-full px-2 py-0.5 ${
-                              b.bookingStatus === "confirmed" || b.bookingStatus === "completed"
+                              b.bookingStatus === "confirmed" ||
+                              b.bookingStatus === "completed"
                                 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                                 : b.bookingStatus === "cancelled"
                                   ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -647,9 +848,12 @@ export default function SettingsClient({
                       </span>
                     ))}
                   </div>
-                  <p className="text-[15px] font-[800] mb-1">Daily pass — Play every day, pay once.</p>
+                  <p className="text-[15px] font-[800] mb-1">
+                    Daily pass — Play every day, pay once.
+                  </p>
                   <p className="text-[13px] text-muted-foreground">
-                    Choose a fixed number of hours per day, monthly or yearly. Set it once and play whenever.
+                    Choose a fixed number of hours per day, monthly or yearly.
+                    Set it once and play whenever.
                   </p>
                 </div>
 
@@ -661,7 +865,6 @@ export default function SettingsClient({
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </div>
@@ -683,7 +886,8 @@ export default function SettingsClient({
               Delete your account?
             </h3>
             <p className="text-[13px] text-muted-foreground mb-6">
-              You'll permanently lose your reward points and all booking history. This cannot be undone.
+              You'll permanently lose your reward points and all booking
+              history. This cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -712,43 +916,129 @@ export default function SettingsClient({
 /* Section: Icons */
 function ProfileIcon({ active }: { active: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
-      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0"
+    >
+      <circle
+        cx="12"
+        cy="8"
+        r="4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function AccountIcon({ active }: { active: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0"
+    >
+      <path
+        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function RewardsIcon({ active }: { active: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0"
+    >
+      <path
+        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-function HistoryIcon({ active, size = 16 }: { active: boolean; size?: number }) {
+function HistoryIcon({
+  active,
+  size = 16,
+}: {
+  active: boolean;
+  size?: number;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
-      <polyline points="12 8 12 12 14 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M3.05 11a9 9 0 1 0 .5-4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <polyline points="3 3 3 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0"
+    >
+      <polyline
+        points="12 8 12 12 14 14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.05 11a9 9 0 1 0 .5-4.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <polyline
+        points="3 3 3 7 7 7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function MembershipIcon({ active }: { active: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
-      <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0"
+    >
+      <rect
+        x="2"
+        y="5"
+        width="20"
+        height="14"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
       <path d="M2 10h20" stroke="currentColor" strokeWidth="2" />
     </svg>
   );
@@ -757,10 +1047,22 @@ function MembershipIcon({ active }: { active: boolean }) {
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 48 48">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-      <path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 010-9.18l-7.98-6.19a24.4 24.4 0 000 21.56l7.98-6.19z" />
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+      <path
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M10.53 28.59a14.5 14.5 0 010-9.18l-7.98-6.19a24.4 24.4 0 000 21.56l7.98-6.19z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+      />
     </svg>
   );
 }
