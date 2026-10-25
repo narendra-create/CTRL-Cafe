@@ -33,6 +33,7 @@
 - [x] make controller for getting all available games without devices
 - [x] fix eslint issues
 - [x] Controller file for fetching reward Points
+- [ ] Make controller for getting profile details
 
 ## Importent on 09/11/2026
 
