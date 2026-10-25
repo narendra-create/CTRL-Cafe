@@ -141,7 +141,7 @@ const Footer = () => {
               <div className="flex flex-col gap-2.5 font-sans text-xs text-zinc-600 dark:text-zinc-400">
                 <div className="flex items-start gap-2">
                   <MapPin className="size-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-                  <span>PC • PS5 • Arcade • VR Zone</span>
+                  <span>PC • Console • Arcade • VR Zone</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Clock className="size-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
