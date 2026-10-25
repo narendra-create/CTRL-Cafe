@@ -1,25 +1,26 @@
-import { createClient } from "@/lib/supabase/serverClient";
 import { getBookingHistory } from "@/lib/controllers/bookingController";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import SettingsClient from "./SettingsClient";
+import SettingsClient from "@/app/(protected)/settings/SettingsClient";
+import { getProfileDetails } from "@/lib/controllers/profileController";
 
 async function getSettingsData() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims ?? null;
+  const profileResult = await getProfileDetails();
+  if (!profileResult.success) {
+  }
+  const userData = profileResult;
+  if (!userData.email) redirect("/auth/login");
+  const email = userData.email ?? "";
 
-  if (!claims) redirect("/auth/login");
-
-  const email = claims.email ?? "";
-
-  const rawProviders: unknown = claims.app_metadata?.providers;
+  const rawProviders: unknown = userData.providers;
   const providers: string[] = Array.isArray(rawProviders)
     ? (rawProviders as string[]).filter((p) => p !== "email")
     : [];
 
   const historyResult = await getBookingHistory();
-  const bookingHistory = historyResult.success ? (historyResult.data ?? []) : [];
+  const bookingHistory = historyResult.success
+    ? (historyResult.data ?? [])
+    : [];
 
   return { email, providers, bookingHistory };
 }

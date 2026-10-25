@@ -23,7 +23,9 @@ export const getCurrentPoints = async (): Promise<number | null> => {
 export const getProfileDetails = async (): Promise<{
     success: boolean;
     message?: string;
-    data?: typeof profiles.$inferSelect
+    data?: typeof profiles.$inferSelect;
+    email?: string;
+    providers?: string[];
 }> => {
     try {
         const supabase = await createClient();
@@ -46,7 +48,9 @@ export const getProfileDetails = async (): Promise<{
 
         return {
             success: true,
-            data: userdetails
+            data: userdetails,
+            email: user.data.claims.email,
+            providers: user.data.claims.app_metadata?.providers
         }
     }
     catch (err) {

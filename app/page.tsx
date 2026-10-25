@@ -4,7 +4,7 @@ import {
   PopularSection,
   RewardsHomepageSection,
 } from "@/app/custom-components/ui-sections/Homepage-Sections";
-import { getCurrentPoints } from "@/lib/controllers/rewardsController";
+import { getCurrentPoints } from "@/lib/controllers/profileController";
 import { Suspense } from "react";
 
 async function RewardsData() {
