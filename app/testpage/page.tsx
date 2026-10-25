@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import FoodCard from "@/app/custom-components/cards/FoodCard";
 import { mockFoodItems } from "@/app/mockdata/foodData";
 import RewardsSection from "@/app/custom-components/ui-sections/Reward-Sections";
+import ComingSoon from "@/app/custom-components/ComingSoon";
 
 const TestPage = () => {
   // const [lastItem, setLastItem] = useState<{ id: string | number; quantity: number } | null>(null);
@@ -40,7 +41,8 @@ const TestPage = () => {
     //   </div> */}
     // </main>
     <main className="mt-30">
-      <RewardsSection />
+      {/* <RewardsSection /> */}
+      <ComingSoon />
     </main>
   );
 };

@@ -1,6 +1,7 @@
 import { getDevices } from "@/lib/controllers/deviceController";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Prices | CTRL-CAFE",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
 };
 
 const BOOK_HREF = "/book";
+const PLANS_HREF = "/Plans";
 
 type DevicePrice = {
   device: string;
@@ -130,24 +132,32 @@ const Prices = async () => {
               </li>
             ))}
 
-            {/* Passes: same list, quieter, until they launch */}
-            <li
-              className={`items-center md:grid-cols-[minmax(0,1.6fr)_2fr] ${row}`}
-            >
-              <h3 className="font-heading text-4xl font-extrabold tracking-tight text-muted-foreground lg:text-6xl xl:text-7xl">
-                Passes
-              </h3>
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                <span className="rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
-                  Coming soon
-                </span>
-                <p className="max-w-[48ch] text-lg text-muted-foreground xl:text-xl">
-                  Buy a monthly or yearly pass instead of paying hour by hour.
-                </p>
-              </div>
-            </li>
           </ul>
         </section>
+
+        {/* Passes notice */}
+        <div className="mt-12 flex flex-col items-start justify-between gap-6 border-t border-border pt-8 sm:flex-row sm:items-center lg:mt-16 lg:pt-12">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-600/30 bg-amber-500/10 dark:bg-amber-500/15 px-3 py-0.5 text-xs font-mono font-semibold text-yellow-800 dark:text-yellow-400 uppercase tracking-wider">
+                Passes Available
+              </span>
+            </div>
+            <h3 className="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
+              Play regularly? Save more with a pass.
+            </h3>
+            <p className="max-w-[52ch] text-base text-muted-foreground lg:text-lg">
+              Daily and monthly gaming passes are also available so you don't have to pay hour by hour.
+            </p>
+          </div>
+          <Link
+            href={PLANS_HREF}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-foreground bg-accent px-7 py-3.5 font-heading text-base font-bold text-accent-foreground shadow-[3px_3px_0_var(--foreground)] transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98]"
+          >
+            <span>Buy a pass</span>
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
       </div>
 
       {/* Ready to play: edge-to-edge band */}

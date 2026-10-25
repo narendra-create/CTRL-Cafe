@@ -197,7 +197,7 @@ export default function AlreadyLoggedIn({
             {/* Secondary Navigation Actions */}
             <div className="grid grid-cols-2 gap-[10px] 2xl:gap-3 mb-[22px] 2xl:mb-7">
               <Link
-                href="/plans"
+                href="/Plans"
                 className="border border-[#d8d3ca] dark:border-white/10 bg-transparent rounded-[11px] 2xl:rounded-[13px] p-[11px_10px] 2xl:p-[14px_12px] text-[#404641] dark:text-[#c5c4bb] text-[12px] 2xl:text-[13px] font-[700] hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-2 text-center"
               >
                 <svg

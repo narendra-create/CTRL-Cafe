@@ -36,7 +36,7 @@ const Navbar = async () => {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 md:gap-5">
           <Link
-            href={"/plans"}
+            href={"/Plans"}
             className="dark:text-yellow-100 underline underline-offset-3 focus:underline text-yellow-800 tracking-wide font-bold dark:font-medium font-mono md:text-lg"
           >
             PLANS

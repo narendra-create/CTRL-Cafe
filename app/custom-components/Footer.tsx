@@ -35,7 +35,7 @@ const Footer = () => {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
               </span>
-              Stations Online • Open Daily 10 AM - Midnight
+              Stations Online • Open Daily 10 AM - 8 PM (Sun & Sat 9 AM - 10 PM)
             </div>
 
             <p className="font-sans text-sm md:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-sm">

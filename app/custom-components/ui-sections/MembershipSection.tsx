@@ -1,5 +1,4 @@
 "use client";
-
 import { useId, useState } from "react";
 import Link from "next/link";
 import { Bricolage_Grotesque, Caveat } from "next/font/google";
@@ -13,14 +12,13 @@ const PLANS = [
   { id: "yearly", label: "Yearly", line: "A set number of hours every day, for a whole year." },
 ] as const;
 type PlanId = (typeof PLANS)[number]["id"];
-
 const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 
 type MembershipSectionProps = {
   plansHref?: string;
 };
 
-export default function MembershipSection({ plansHref = "/plans" }: MembershipSectionProps) {
+export default function MembershipSection({ plansHref = "/Plans" }: MembershipSectionProps) {
   const [plan, setPlan] = useState<PlanId>("monthly");
   const uid = useId();
   const current = PLANS.find((p) => p.id === plan) ?? PLANS[0];
