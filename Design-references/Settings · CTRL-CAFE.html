@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Settings · CTRL-CAFE</title>
+<style>
+:root{--bg:#F5F5F2;--surface:#fff;--line:#E3E1DA;--ink:#1A1814;--muted:#6B665B;--accent:#FFC72C;--on-accent:#14120E;--danger:#B3321F;--track:#CFCCC2;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14120E;--surface:#1C1A15;--line:#2E2B24;--ink:#F2EEE4;--muted:#A29B8C;--danger:#F08A78;--track:#3A362D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14120E;--surface:#1C1A15;--line:#2E2B24;--ink:#F2EEE4;--muted:#A29B8C;--danger:#F08A78;--track:#3A362D;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;text-decoration:none;color:inherit}
+.key{padding:3px 8px;border-radius:6px;background:var(--accent);color:var(--on-accent);font-size:13px;box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.top-r{display:flex;align-items:center;gap:16px;font-size:14px;color:var(--muted)}
+.top-r a{color:inherit}
+.avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:13px}
+main{max-width:680px;margin:0 auto;padding:40px 20px 80px}
+h1{margin:0 0 4px;font-size:30px;line-height:1.15;font-weight:650;letter-spacing:-.01em}
+.sub{margin:0 0 20px;color:var(--muted)}
+h2{margin:0 0 4px;font-size:17px;font-weight:600}
+.hint{margin:0;color:var(--muted);font-size:14px;max-width:56ch}
+section{padding:28px 0;border-top:1px solid var(--line)}
+.btn{font:inherit;font-weight:500;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--surface)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:600}
+.btn.primary:hover{background:var(--accent);filter:brightness(.95)}
+.btn.danger{color:var(--danger)}
+.rows{margin-top:8px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row p{margin:0}
+.row .t{font-weight:500}
+.row .d{font-size:14px;color:var(--muted)}
+.seg{display:inline-flex;flex:none;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--surface)}
+.seg button{font:inherit;font-weight:500;padding:6px 14px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.wide{grid-column:1/-1}
+label{font-size:14px;font-weight:500}
+input{font:inherit;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+input[readonly]{color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+.photo{display:flex;align-items:center;gap:16px;margin-top:16px}
+.photo .avatar{width:56px;height:56px;font-size:18px}
+.actions{display:flex;align-items:center;gap:14px;margin-top:20px}
+#status{font-size:14px;color:var(--muted)}
+.links{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.link{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.link:first-child{border-top:0}
+.link:hover{background:var(--bg)}
+.link .t{margin:0;font-weight:500}
+.link .d{margin:0;font-size:14px;color:var(--muted)}
+.chev{color:var(--muted);font-size:22px;line-height:1}
+.tag{margin-left:8px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:500;vertical-align:1px}
+.tag.live{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:600}
+.mini{height:6px;width:150px;max-width:100%;margin-top:8px;border-radius:3px;background:var(--track);overflow:hidden}
+.mini i{display:block;height:100%;width:61.5%;background:var(--accent)}
+@media (prefers-reduced-motion:no-preference){.mini i{animation:grow .9s ease-out}}
+@keyframes grow{from{width:0}}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:24px;max-width:400px}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog h3{margin:0 0 6px;font-size:17px}
+dialog p{margin:0 0 20px;color:var(--muted);font-size:14px}
+dialog .actions{justify-content:flex-end;margin:0}
+@media (max-width:560px){
+.grid2{grid-template-columns:1fr}
+.row.theme{flex-direction:column;align-items:flex-start}
+.top-r a{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#"><span class="key">CTRL</span><span>CAFE</span></a>
+  <div class="top-r"><a href="#">Back to site</a><span class="avatar" aria-hidden="true">AS</span></div>
+</header>
+
+<main>
+  <h1>Settings</h1>
+  <p class="sub">Your look, sign-in and profile. Bookings and rewards are one tap below.</p>
+
+  <section>
+    <h2>Appearance</h2>
+    <div class="rows">
+      <div class="row theme"><div><p class="t">Theme</p><p class="d">Light, dark, or follow your device.</p></div>
+        <div class="seg" role="group" aria-label="Theme">
+          <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
+          <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+          <button type="button" data-theme-btn="system" aria-pressed="true">System</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Connected accounts</h2>
+    <p class="hint">Sign in faster with an account you already use.</p>
+    <div class="rows">
+      <div class="row"><div><p class="t">Google</p><p class="d" data-state>Connected as aarav.sharma@gmail.com</p></div><button class="btn" data-connect data-on="true" type="button">Disconnect</button></div>
+      <div class="row"><div><p class="t">Discord</p><p class="d" data-state>Not connected</p></div><button class="btn" data-connect data-on="false" type="button">Connect</button></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Account</h2>
+    <p class="hint">You sign in with an email code, so there’s no password to manage.</p>
+    <div class="rows">
+      <div class="row"><div><p class="t">Sign out</p><p class="d">On this device only.</p></div><button class="btn" type="button">Sign out</button></div>
+      <div class="row"><div><p class="t">Sign out everywhere</p><p class="d">Ends every active session, including this one.</p></div><button class="btn" type="button">Sign out all</button></div>
+      <div class="row"><div><p class="t">Delete account</p><p class="d">Removes your profile, points and booking history. This can’t be undone.</p></div><button class="btn danger" id="del-open" type="button">Delete account</button></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Profile</h2>
+    <p class="hint">We use this to confirm your bookings at the counter.</p>
+    <div class="photo"><span class="avatar" aria-hidden="true">AS</span><button class="btn" type="button">Change photo</button></div>
+    <form id="profile-form">
+      <div class="grid2">
+        <div class="field"><label for="name">Full name</label><input id="name" type="text" value="Aarav Sharma" autocomplete="name"></div>
+        <div class="field"><label for="phone">Phone number</label><input id="phone" type="tel" value="+91 98765 43210" autocomplete="tel"></div>
+        <div class="field wide"><label for="email">Email</label><input id="email" type="email" value="aarav.sharma@gmail.com" readonly><span class="note">Verified. This is where we send your sign-in code.</span></div>
+      </div>
+      <div class="actions"><button class="btn primary" type="submit">Save changes</button><span id="status" role="status" aria-live="polite"></span></div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Your CTRL-CAFE</h2>
+    <p class="hint">Jump to the rest of your account.</p>
+    <div class="links">
+      <a class="link" href="#"><div><p class="t">Current bookings<span class="tag live">1 upcoming</span></p><p class="d">Today, 6:00 pm · PC 12</p></div><span class="chev" aria-hidden="true">›</span></a>
+      <a class="link" href="#"><div><p class="t">Booking history</p><p class="d">Past sessions and what you spent.</p></div><span class="chev" aria-hidden="true">›</span></a>
+      <a class="link" href="#"><div><p class="t">Rewards</p><p class="d">40 points · 25 more for a free hour</p><div class="mini" aria-hidden="true"><i></i></div></div><span class="chev" aria-hidden="true">›</span></a>
+      <a class="link" href="#"><div><p class="t">Manage membership<span class="tag">Coming soon</span></p><p class="d">Monthly and yearly passes are on the way.</p></div><span class="chev" aria-hidden="true">›</span></a>
+      <a class="link" href="#"><div><p class="t">Notifications</p><p class="d">Booking, reminder and reward emails.</p></div><span class="chev" aria-hidden="true">›</span></a>
+    </div>
+  </section>
+</main>
+
+<dialog id="del">
+  <h3>Delete your account?</h3>
+  <p>You’ll lose your 40 points and all booking history. This can’t be undone.</p>
+  <div class="actions"><button class="btn" id="del-cancel" type="button">Keep account</button><button class="btn danger" type="button">Delete account</button></div>
+</dialog>
+
+<script>
+var root=document.documentElement;
+function setTheme(t){
+  if(t==='system'){root.removeAttribute('data-theme');}else{root.setAttribute('data-theme',t);}
+  document.querySelectorAll('[data-theme-btn]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.themeBtn===t));});
+  try{localStorage.setItem('ctrl-theme',t);}catch(e){}
+}
+var saved='system';
+try{saved=localStorage.getItem('ctrl-theme')||'system';}catch(e){}
+setTheme(saved);
+document.querySelectorAll('[data-theme-btn]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.dataset.themeBtn);});});
+
+document.querySelectorAll('[data-connect]').forEach(function(b){
+  b.addEventListener('click',function(){
+    var on=b.dataset.on!=='true';
+    b.dataset.on=String(on);
+    b.textContent=on?'Disconnect':'Connect';
+    b.closest('.row').querySelector('[data-state]').textContent=on?'Connected':'Not connected';
+  });
+});
+
+var form=document.getElementById('profile-form'),status=document.getElementById('status'),timer;
+form.addEventListener('submit',function(e){
+  e.preventDefault();
+  status.textContent='Changes saved';
+  clearTimeout(timer);
+  timer=setTimeout(function(){status.textContent='';},3000);
+});
+
+var dlg=document.getElementById('del');
+document.getElementById('del-open').addEventListener('click',function(){dlg.showModal();});
+document.getElementById('del-cancel').addEventListener('click',function(){dlg.close();});
+document.querySelectorAll('a.link').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();});});
+</script>
+</body>
+</html>
