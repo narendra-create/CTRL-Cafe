@@ -1,12 +1,5 @@
-import React from "react";
+import BookingClient from "@/app/book/BookingClient";
 
-const Book = () => {
-  return (
-    <div>
-      this page is under contruction and will be used for main booking ui using
-      slugs for device types or without slugs
-    </div>
-  );
-};
-
-export default Book;
+export default function BookPage() {
+  return <BookingClient />;
+}

@@ -84,3 +84,44 @@ export const formatToNormalTime = (date: Date): string => {
         .format(d)
         .toLowerCase();
 };
+
+
+// lib/booking-date.ts
+
+export function getIndiaDateKey(now: Date = new Date()): string {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).formatToParts(now);
+
+    const part = (type: string) =>
+        parts.find((item) => item.type === type)?.value ?? "";
+
+    return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+export function isValidDateKey(value: unknown): value is string {
+    if (
+        typeof value !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+        return false;
+    }
+
+    // Validate the actual calendar date, not just its format.
+    const parsed = new Date(`${value}T00:00:00.000Z`);
+
+    return (
+        !Number.isNaN(parsed.getTime()) &&
+        parsed.toISOString().slice(0, 10) === value
+    );
+}
+
+export function isBookableDate(
+    value: unknown,
+    today = getIndiaDateKey(),
+): value is string {
+    return isValidDateKey(value) && value >= today;
+}
