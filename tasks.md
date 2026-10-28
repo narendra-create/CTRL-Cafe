@@ -63,9 +63,12 @@
 - [x] Make Footer
 - [ ] Wire up new profile controller functions in setttings page
 - [x] add checks in booking page for date, time, user logged in or not
-- [ ] make handlesubmit in booking client and pass it to prop
+- [ ] make handlesubmit in sidebar
 - [ ] implement url based stages of booking
 - [x] add use context for booking page
+- [ ] add getDevices function and wire it up in bookingclient to show real data instead of mock data
+- [ ] add seed file for foodItems and devices and other things
+- [ ] Test this flow = Select device - choose snacks - review page - pay
 
 ## Run this checklist after deployement
 
