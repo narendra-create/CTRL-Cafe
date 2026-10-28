@@ -65,7 +65,7 @@
 - [x] add checks in booking page for date, time, user logged in or not
 - [ ] make handlesubmit in booking client and pass it to prop
 - [ ] implement url based stages of booking
-- [ ] add use context for booking page
+- [x] add use context for booking page
 
 ## Run this checklist after deployement
 
