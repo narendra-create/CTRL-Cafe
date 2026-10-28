@@ -67,6 +67,7 @@
 - [ ] implement url based stages of booking
 - [x] add use context for booking page
 - [ ] add getDevices function and wire it up in bookingclient to show real data instead of mock data
+- [ ] add foodItems showing section in the sidebar below devices
 - [ ] add seed file for foodItems and devices and other things
 - [ ] Test this flow = Select device - choose snacks - review page - pay
 
