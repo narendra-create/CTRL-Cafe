@@ -18,7 +18,7 @@ export const addItem = async (input: addFoodType): Promise<{
     if (!isAdmin) {
         return { success: false, message: "Forbidden" }
     }
-    
+
     const { error, data: parsed } = addFoodInput.safeParse(input);
     if (error) {
         return {
@@ -51,7 +51,7 @@ export const addItem = async (input: addFoodType): Promise<{
     }
 };
 
-export const getFoodItems = async () => {
+export const getFoodItems = async (): Promise<Array<typeof foodItems.$inferSelect>> => {
     try {
         const foods = await db.select().from(foodItems).where(eq(foodItems.isAvailable, true));
         return foods;
