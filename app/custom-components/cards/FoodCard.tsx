@@ -9,7 +9,7 @@ export interface FoodCardProps {
   name: string;
   imageUrl?: string | null;
   price: number | string;
-  serving: number | string;
+  serves: number | string;
   description?: string | null;
   addButton?: boolean;
   quantity?: number;
@@ -23,7 +23,7 @@ const FoodCard = ({
   name,
   imageUrl,
   price,
-  serving,
+  serves,
   description,
   addButton = false,
   quantity,
@@ -85,7 +85,7 @@ const FoodCard = ({
         : `₹${price}`;
 
   const formattedServing =
-    typeof serving === "number" ? `Serves ${serving}` : serving;
+    typeof serves === "number" ? `Serves ${serves}` : serves;
 
   return (
     /* Card Container */

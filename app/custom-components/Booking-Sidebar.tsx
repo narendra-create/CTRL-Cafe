@@ -1,31 +1,40 @@
 "use client";
-import React from "react";
-import { AllSelections } from "@/types/bookingTypes";
+import React, { useState } from "react";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 import { ARENAS } from "@/lib/static-data/Booking-data";
 import { toMinutes } from "@/lib/utils/tools";
-/* Section: Types */
-export interface BookingSidebarProps {
-  allSelections?: AllSelections;
-  durationHours?: number;
-  canProceed?: boolean;
-  onClearAll?: () => void;
-  onProceed?: () => void;
-  proceedLabel?: string;
-}
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 /* Section: Main Component */
 
-export default function BookingSidebar({
-  onProceed,
-  proceedLabel = "Proceed to snacks",
-}: BookingSidebarProps) {
+export default function BookingSidebar() {
   const { allSelections, setAllSelections, startTime, endTime } = useBooking();
+  const [error, seterror] = useState<string | null>(null);
+  const [pending, setpending] = useState(false);
+  //defining some navigation things
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  //Getting booking id from params if it has it
+  const bookingId = searchParams.get("bookingId");
+
+  //Deciding the step
+  const isFoodStep = pathname.startsWith("/book/snacks");
+  const isReviewStep = pathname.startsWith("/book/review");
 
   const durationHours = Math.max(
     0,
     (toMinutes(endTime) - toMinutes(startTime)) / 60,
   );
+
+  const proceedLabel = pending
+    ? "Processing.."
+    : isReviewStep
+      ? "Pay Now"
+      : isFoodStep
+        ? "Review Booking"
+        : "Proceed To Snacks";
 
   const lineItems = ARENAS.flatMap((arena) => {
     const sel = allSelections[arena.key] ?? {};
@@ -57,6 +66,17 @@ export default function BookingSidebar({
   function handleClearAll() {
     setAllSelections({});
   }
+
+  async function handleProceed() {
+    if (isReviewStep) {
+      alert("Razorpay Opens");
+    } else if (isFoodStep) {
+      router.push("/book/review");
+    } else {
+      router.push("/book/snacks");
+    }
+  }
+
   return (
     <>
       {/* Section: Desktop Sidebar Card */}
@@ -75,6 +95,11 @@ export default function BookingSidebar({
               >
                 Clear all
               </button>
+            )}
+            {error && (
+              <p role="alert" className="mt-2 text-sm text-destructive">
+                {error}
+              </p>
             )}
           </div>
           <p className="text-[22px] md:text-2xl font-bold tracking-[-0.03em] leading-tight">
@@ -153,7 +178,7 @@ export default function BookingSidebar({
         <div className="px-5 pb-5">
           <button
             type="button"
-            onClick={onProceed}
+            onClick={handleProceed}
             disabled={!canProceed}
             className="w-full bg-accent text-accent-foreground rounded-xl py-3.5 text-[14px] font-[700] cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-lg disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
@@ -182,7 +207,7 @@ export default function BookingSidebar({
           </div>
           <button
             type="button"
-            onClick={onProceed}
+            onClick={handleProceed}
             disabled={!canProceed}
             className="bg-accent text-accent-foreground rounded-xl px-5 py-3 text-[14px] font-[700] cursor-pointer transition-all duration-150 whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
           >
