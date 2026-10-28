@@ -2,7 +2,12 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { DatePickerSimple } from "@/components/Date-Picker";
-import { getIndiaDateKey } from "@/lib/utils/tools";
+import {
+  createTimeSlots,
+  getIndiaDateKey,
+  getOperatingHours,
+  minutesToTime,
+} from "@/lib/utils/tools";
 import { TimePicker } from "@/components/ui/time-picker";
 
 /* Section: Types */
@@ -84,52 +89,6 @@ const BOOKED: Record<DeviceType, number[]> = {
   ARCADE: [],
   VR: [],
 };
-
-const TIME_SLOTS_START = [
-  { value: "10:00", label: "10:00 AM" },
-  { value: "10:30", label: "10:30 AM" },
-  { value: "11:00", label: "11:00 AM" },
-  { value: "11:30", label: "11:30 AM" },
-  { value: "12:00", label: "12:00 PM" },
-  { value: "12:30", label: "12:30 PM" },
-  { value: "13:00", label: "1:00 PM" },
-  { value: "13:30", label: "1:30 PM" },
-  { value: "14:00", label: "2:00 PM" },
-  { value: "14:30", label: "2:30 PM" },
-  { value: "15:00", label: "3:00 PM" },
-  { value: "15:30", label: "3:30 PM" },
-  { value: "16:00", label: "4:00 PM" },
-  { value: "16:30", label: "4:30 PM" },
-  { value: "17:00", label: "5:00 PM" },
-  { value: "17:30", label: "5:30 PM" },
-  { value: "18:00", label: "6:00 PM" },
-  { value: "18:30", label: "6:30 PM" },
-  { value: "19:00", label: "7:00 PM" },
-  { value: "19:30", label: "7:30 PM" },
-];
-
-const TIME_SLOTS_END = [
-  { value: "10:30", label: "10:30 AM" },
-  { value: "11:00", label: "11:00 AM" },
-  { value: "11:30", label: "11:30 AM" },
-  { value: "12:00", label: "12:00 PM" },
-  { value: "12:30", label: "12:30 PM" },
-  { value: "13:00", label: "1:00 PM" },
-  { value: "13:30", label: "1:30 PM" },
-  { value: "14:00", label: "2:00 PM" },
-  { value: "14:30", label: "2:30 PM" },
-  { value: "15:00", label: "3:00 PM" },
-  { value: "15:30", label: "3:30 PM" },
-  { value: "16:00", label: "4:00 PM" },
-  { value: "16:30", label: "4:30 PM" },
-  { value: "17:00", label: "5:00 PM" },
-  { value: "17:30", label: "5:30 PM" },
-  { value: "18:00", label: "6:00 PM" },
-  { value: "18:30", label: "6:30 PM" },
-  { value: "19:00", label: "7:00 PM" },
-  { value: "19:30", label: "7:30 PM" },
-  { value: "20:00", label: "8:00 PM" },
-];
 
 function toMinutes(t: string) {
   const [h, m] = t.split(":").map(Number);
@@ -511,8 +470,19 @@ export default function BookingClient() {
   const [selectedArena, setSelectedArena] = useState<DeviceType>("CONSOLE");
   const [allSelections, setAllSelections] = useState<AllSelections>({});
   const [date, setDate] = useState(() => getIndiaDateKey());
-  const [startTime, setStartTime] = useState("17:00");
-  const [endTime, setEndTime] = useState("19:00");
+  const [startTime, setStartTime] = useState("10:00");
+  const [endTime, setEndTime] = useState("20:00");
+
+  const operatingHours = getOperatingHours(date);
+  const startTimeSlots = createTimeSlots(
+    operatingHours.open,
+    operatingHours.close - 30,
+  );
+
+  const endTimeSlots = createTimeSlots(
+    toMinutes(startTime) + 30,
+    operatingHours.close,
+  );
 
   const arena = ARENAS.find((a) => a.key === selectedArena)!;
   const currentSel = allSelections[selectedArena] ?? {};
@@ -546,6 +516,31 @@ export default function BookingClient() {
 
   function handleArenaChange(key: DeviceType) {
     setSelectedArena(key);
+  }
+
+  function handleDateChange(nextDate: string) {
+    const hours = getOperatingHours(nextDate);
+
+    const currentStart = toMinutes(startTime);
+
+    // Keep the current start time if it fits the new day's hours.
+    const nextStart =
+      currentStart >= hours.open && currentStart <= hours.close - 30
+        ? startTime
+        : minutesToTime(hours.open);
+
+    const nextStartMinutes = toMinutes(nextStart);
+    const currentEnd = toMinutes(endTime);
+
+    // Keep the end time only if it remains valid.
+    const nextEnd =
+      currentEnd > nextStartMinutes && currentEnd <= hours.close
+        ? endTime
+        : minutesToTime(Math.min(nextStartMinutes + 60, hours.close));
+
+    setDate(nextDate);
+    setStartTime(nextStart);
+    setEndTime(nextEnd);
   }
 
   function handleDeviceToggle(deviceIndex: number) {
@@ -652,70 +647,84 @@ export default function BookingClient() {
                 <div>
                   <DatePickerSimple
                     selectedDate={date}
-                    onDateSelect={setDate}
+                    onDateSelect={handleDateChange}
                   />
                 </div>
                 <div>
                   <div>
                     <FieldLabel htmlFor="book-start">Start time</FieldLabel>
+
                     <TimePicker
                       id="book-start"
                       ariaLabel="Start time"
                       placeholder="Select start time"
-                      options={TIME_SLOTS_START.map((slot) => slot.label)}
+                      options={startTimeSlots.map((slot) => slot.label)}
                       value={
-                        TIME_SLOTS_START.find(
-                          (slot) => slot.value === startTime,
-                        )?.label ?? ""
+                        startTimeSlots.find((slot) => slot.value === startTime)
+                          ?.label ?? ""
                       }
                       onChange={(label) => {
-                        const selected = TIME_SLOTS_START.find(
+                        const selected = startTimeSlots.find(
                           (slot) => slot.label === label,
                         );
 
-                        if (selected) {
-                          setStartTime(selected.value);
+                        if (!selected) return;
+
+                        const nextStart = selected.value;
+                        const nextStartMinutes = toMinutes(nextStart);
+
+                        setStartTime(nextStart);
+
+                        if (
+                          toMinutes(endTime) <= nextStartMinutes ||
+                          toMinutes(endTime) > operatingHours.close
+                        ) {
+                          setEndTime(
+                            minutesToTime(
+                              Math.min(
+                                nextStartMinutes + 60,
+                                operatingHours.close,
+                              ),
+                            ),
+                          );
                         }
                       }}
                     />
                   </div>
                 </div>
                 <div>
-                  <div>
-                    <FieldLabel htmlFor="book-end">End time</FieldLabel>
+                    <div>
+                      <FieldLabel htmlFor="book-end">End time</FieldLabel>
 
-                    <TimePicker
-                      id="book-end"
-                      ariaLabel="End time"
-                      placeholder="Select end time"
-                      options={TIME_SLOTS_END.map((slot) => slot.label)}
-                      value={
-                        TIME_SLOTS_END.find((slot) => slot.value === endTime)
-                          ?.label ?? ""
-                      }
-                      onChange={(label) => {
-                        const selected = TIME_SLOTS_END.find(
-                          (slot) => slot.label === label,
-                        );
-
-                        if (selected) {
-                          setEndTime(selected.value);
+                      <TimePicker
+                        id="book-end"
+                        ariaLabel="End time"
+                        placeholder="Select end time"
+                        options={endTimeSlots.map((slot) => slot.label)}
+                        value={
+                          endTimeSlots.find((slot) => slot.value === endTime)
+                            ?.label ?? ""
                         }
-                      }}
-                    />
-                  </div>
+                        onChange={(label) => {
+                          const selected = endTimeSlots.find(
+                            (slot) => slot.label === label,
+                          );
+
+                          if (selected) {
+                            setEndTime(selected.value);
+                          }
+                        }}
+                      />
+                    </div>
                 </div>
               </div>
-              {durationHours <= 0 ? (
-                <p className="text-[12px] text-destructive mt-2.5 font-[600]">
-                  End time must be after start time.
-                </p>
-              ) : (
-                <p className="text-[12px] text-muted-foreground mt-2.5">
-                  {durationHours} hour{durationHours !== 1 ? "s" : ""} session ·
-                  Open 10:00 AM - 8:00 PM weekdays, 9:00 AM - 10:00 PM weekends.
-                </p>
-              )}
+              <p className="text-[12px] text-muted-foreground mt-2.5">
+                {durationHours} hour{durationHours !== 1 ? "s" : ""} session ·{" "}
+                Open{" "}
+                {operatingHours.isWeekend
+                  ? "9:00 AM - 10:00 PM on Saturdays and Sundays."
+                  : "10:00 AM - 8:00 PM on weekdays."}
+              </p>
             </div>
           </div>
 

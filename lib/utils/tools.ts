@@ -124,4 +124,53 @@ export function isBookableDate(
     today = getIndiaDateKey(),
 ): value is string {
     return isValidDateKey(value) && value >= today;
+};
+ 
+export function getOperatingHours(date: string) {
+    // Parse YYYY-MM-DD as a local calendar date.
+    const [year, month, day] = date.split("-").map(Number);
+    const dayOfWeek = new Date(year, month - 1, day).getDay();
+
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+    return {
+        open: isWeekend ? 9 * 60 : 10 * 60,
+        close: isWeekend ? 22 * 60 : 20 * 60,
+        isWeekend,
+    };
+}
+
+export function minutesToTime(minutes: number): string {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
+}
+
+export function formatTimeLabel(value: string): string {
+    const [hours, minutes] = value.split(":").map(Number);
+    const displayHours = hours % 12 || 12;
+    const period = hours >= 12 ? "PM" : "AM";
+
+    return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
+}
+
+export function createTimeSlots(start: number, end: number) {
+    const slots: { value: string; label: string }[] = [];
+
+    for (let minute = start; minute <= end; minute += 30) {
+        const value = minutesToTime(minute);
+
+        slots.push({
+            value,
+            label: formatTimeLabel(value),
+        });
+    }
+
+    return slots;
+}
+
+export function toMinutes(time: string) {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
 }
