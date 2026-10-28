@@ -10,34 +10,11 @@ import {
 } from "@/lib/utils/tools";
 import { TimePicker } from "@/components/ui/time-picker";
 import { fromZonedTime } from "date-fns-tz";
+import { AllSelections, Arena, DeviceType } from "@/types/bookingTypes";
 
 const timeZone = "Asia/Kolkata";
 
-/* Section: Types */
-type DeviceType = "CONSOLE" | "PC" | "ARCADE" | "VR";
-
-interface Arena {
-  key: DeviceType;
-  label: string;
-  subLabel: string;
-  eyebrow: string;
-  description: string;
-  tags: string[];
-  price: number;
-  totalUnits: number;
-  maxPlayers: number;
-}
-
-/* device index → player count */
-interface DeviceSelection {
-  [deviceIndex: number]: number;
-}
-
-/* all selections across arenas: arena key → DeviceSelection */
-type AllSelections = Partial<Record<DeviceType, DeviceSelection>>;
-
 /* Section: Static Data */
-
 const ARENAS: Arena[] = [
   {
     key: "CONSOLE",

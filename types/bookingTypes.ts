@@ -22,4 +22,27 @@ export interface BookingDetailsResponse {
     success: boolean;
     message?: string;
     data?: BookingDetailsData;
+};
+
+/* Booking Page Types */
+export type DeviceType = "CONSOLE" | "PC" | "ARCADE" | "VR";
+
+export interface Arena {
+    key: DeviceType;
+    label: string;
+    subLabel: string;
+    eyebrow: string;
+    description: string;
+    tags: string[];
+    price: number;
+    totalUnits: number;
+    maxPlayers: number;
 }
+
+/* device index → player count */
+export interface DeviceSelection {
+    [deviceIndex: number]: number;
+}
+
+/* all selections across arenas: arena key → DeviceSelection */
+export type AllSelections = Partial<Record<DeviceType, DeviceSelection>>;
