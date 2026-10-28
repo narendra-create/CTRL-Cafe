@@ -125,11 +125,13 @@ export function isBookableDate(
 ): value is string {
     return isValidDateKey(value) && value >= today;
 };
- 
+
 export function getOperatingHours(date: string) {
     // Parse YYYY-MM-DD as a local calendar date.
     const [year, month, day] = date.split("-").map(Number);
-    const dayOfWeek = new Date(year, month - 1, day).getDay();
+    const dayOfWeek = new Date(
+        Date.UTC(year, month - 1, day),
+    ).getUTCDay();
 
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 

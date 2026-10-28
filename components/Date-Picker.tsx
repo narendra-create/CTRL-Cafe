@@ -180,11 +180,11 @@ export function DatePickerSimple({
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
-        className="group flex min-h-[48px] w-full items-center justify-between gap-3 rounded-xl border border-border bg-background px-[14px] py-2.5 text-left outline-none transition-colors duration-200 hover:border-accent/60 focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_rgba(250,204,21,0.13)]"
+        className="group flex min-h-[48px] w-full items-center justify-between gap-3 rounded-xl border border-black/15 dark:border-border bg-foreground/2 dark:bg-background px-[14px] py-2.5 text-left outline-none transition-colors duration-200 hover:border-yellow-600 hover:dark:border-accent/60 focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_rgba(250,204,21,0.13)]"
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-accent/25 bg-accent/10 text-accent">
-            <CalendarDays size={17} strokeWidth={1.8} />
+          <span className="grid h-9 w-9 md:w-12 md:h-12 shrink-0 place-items-center rounded-lg border border-yellow-700/30 dark:border-accent/25 bg-yellow-600/5 dark:bg-accent/10 text-yellow-600 dark:text-accent">
+            <CalendarDays strokeWidth={1.8} />
           </span>
 
           <span className="min-w-0">
@@ -226,11 +226,11 @@ export function DatePickerSimple({
             </button>
 
             <div className="text-center">
-              <p className="text-[15px] font-[700] tracking-[-0.02em] text-foreground">
+              <p className="text-[15px] font-bold tracking-[-0.02em] text-foreground">
                 {monthLabel}
               </p>
 
-              <p className="mt-1 text-[9px] font-[700] uppercase tracking-[0.2em] text-accent">
+              <p className="mt-1 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-yellow-600 dark:text-accent">
                 Pick your play date
               </p>
             </div>
