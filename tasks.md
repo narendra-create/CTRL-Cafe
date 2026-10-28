@@ -63,6 +63,8 @@
 - [x] Make Footer
 - [ ] Wire up new profile controller functions in setttings page
 - [x] add checks in booking page for date, time, user logged in or not
+- [ ] make handlesubmit in booking client and pass it to prop
+- [ ] implement url based stages of booking
 
 ## Run this checklist after deployement
 
