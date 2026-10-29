@@ -8,17 +8,21 @@ import {
   type SetStateAction,
 } from "react";
 import { getIndiaDateKey } from "@/lib/utils/tools";
-import type { AllSelections, DeviceType } from "@/types/bookingTypes";
-import { foodItems } from "@/src/db/schema";
+import type { DeviceType } from "@/types/bookingTypes";
+import { devices, foodItems } from "@/src/db/schema";
 
 type FoodItemType = typeof foodItems.$inferSelect;
 type cartItemType = FoodItemType & { quantity: number };
 
+type SelectedDeviceType = typeof devices.$inferSelect;
+type SelectedDeviceArrayType = SelectedDeviceType & { players: number };
+
 type BookingContextType = {
   selectedArena: DeviceType;
   setSelectedArena: Dispatch<SetStateAction<DeviceType>>;
-  allSelections: AllSelections;
-  setAllSelections: Dispatch<SetStateAction<AllSelections>>;
+  selectedDevices: SelectedDeviceArrayType[];
+  toggleDevice: (device: SelectedDeviceType, players?: number) => void;
+  updateDevicePlayers: (deviceId: string, players: number) => void;
   date: string;
   setDate: Dispatch<SetStateAction<string>>;
   startTime: string;
@@ -27,6 +31,7 @@ type BookingContextType = {
   setEndTime: Dispatch<SetStateAction<string>>;
   selectedFoods: cartItemType[];
   setSelectedFoods: Dispatch<SetStateAction<cartItemType[]>>;
+  setSelectedDevices: Dispatch<SetStateAction<SelectedDeviceArrayType[]>>;
   setFoodQuantity: (foodId: string, quantity: number) => void;
   addFood: (food: FoodItemType, quantity?: number) => void;
 };
@@ -34,7 +39,9 @@ const BookingContext = createContext<BookingContextType | null>(null);
 
 export function BookingProvider({ children }: { children: ReactNode }) {
   const [selectedArena, setSelectedArena] = useState<DeviceType>("CONSOLE");
-  const [allSelections, setAllSelections] = useState<AllSelections>({});
+  const [selectedDevices, setSelectedDevices] = useState<
+    SelectedDeviceArrayType[]
+  >([]);
   const [selectedFoods, setSelectedFoods] = useState<cartItemType[]>([]);
 
   const [date, setDate] = useState(() => getIndiaDateKey());
@@ -63,13 +70,38 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  // Simple actions:
+  function toggleDevice(device: typeof devices.$inferSelect) {
+    setSelectedDevices((prev) => {
+      const exists = prev.some((d) => d.id === device.id);
+      if (exists) {
+        return prev.filter((d) => d.id !== device.id); // Deselect
+      }
+      return [...prev, { ...device, players: 1 }]; // Select with 1 player
+    });
+  }
+  function updateDevicePlayers(deviceId: string, delta: number) {
+    setSelectedDevices((prev) =>
+      prev.map((d) => {
+        if (d.id !== deviceId) return d;
+        const nextCount = Math.min(
+          d.maxPlayers,
+          Math.max(1, d.players + delta),
+        );
+        return { ...d, players: nextCount };
+      }),
+    );
+  }
+
   return (
     <BookingContext.Provider
       value={{
         selectedArena,
         setSelectedArena,
-        allSelections,
-        setAllSelections,
+        selectedDevices,
+        toggleDevice,
+        updateDevicePlayers,
+        setSelectedDevices,
         date,
         setDate,
         startTime,
