@@ -8,8 +8,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 /* Section: Main Component */
 
 export default function BookingSidebar() {
-  const { allSelections, setAllSelections, startTime, endTime, selectedFoods } =
-    useBooking();
+  const {
+    setSelectedDevices,
+    selectedDevices,
+    startTime,
+    endTime,
+    selectedFoods,
+  } = useBooking();
 
   const [error, seterror] = useState<string | null>(null);
   const [pending, setpending] = useState(false);
@@ -38,41 +43,23 @@ export default function BookingSidebar() {
         ? "Review Booking"
         : "Proceed To Snacks";
 
-  const lineItems = ARENAS.flatMap((arena) => {
-    const sel = allSelections[arena.key] ?? {};
-    const deviceIds = Object.keys(sel).map(Number);
-    if (deviceIds.length === 0) return [];
-    const totalPlayers = deviceIds.reduce((acc, id) => acc + sel[id], 0);
-    const subtotal = deviceIds.length * arena.price * durationHours;
-    return [
-      {
-        arena,
-        deviceCount: deviceIds.length,
-        totalPlayers,
-        subtotal,
-      },
-    ];
-  });
-  const devicePrices = lineItems.reduce((acc, item) => acc + item.subtotal, 0);
+  // Price calculation becomes 3 clean lines:
+  const devicePrices = selectedDevices.reduce(
+    (sum, dev) => sum + Number(dev.hourlyRate) * durationHours,
+    0,
+  );
+  const totalDevices = selectedDevices.length;
+  const totalPlayers = selectedDevices.reduce((sum, d) => sum + d.players, 0);
   const foodItemPrices = selectedFoods.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0,
   );
 
   const grandTotal = devicePrices + foodItemPrices;
-  const totalDevices = lineItems.reduce(
-    (acc, item) => acc + item.deviceCount,
-    0,
-  );
-
-  const totalPlayers = lineItems.reduce(
-    (acc, item) => acc + item.totalPlayers,
-    0,
-  );
   const canProceed = totalDevices > 0 && durationHours >= 0.5;
 
   function handleClearAll() {
-    setAllSelections({});
+    setSelectedDevices([]);
   }
 
   async function handleProceed() {
@@ -122,32 +109,36 @@ export default function BookingSidebar() {
 
         {/* Section: Sidebar Line Items */}
         <div className="px-5 py-4 min-h-[80px] border-t md:mt-3 md:pt-6 border-black/30 dark:border-foreground/30">
-          {lineItems.length === 0 ? (
+          {selectedDevices.length === 0 ? (
             <p className="text-[13px] text-muted-foreground text-center py-4">
               No devices selected yet.
             </p>
           ) : (
             <ul className="grid gap-3 divide-y divide-black/25">
-              {lineItems.map(
-                ({ arena, deviceCount, totalPlayers: pl, subtotal }) => (
+              {selectedDevices.map((device) => {
+                const DeviceTotalPrice =
+                  Number(device.hourlyRate) * Number(device.players);
+
+                return (
                   <li
-                    key={arena.key}
+                    key={device.id}
                     className="flex items-start justify-between gap-3 pb-3"
                   >
                     <div>
                       <p className="text-[13px] md:text-lg font-bold">
-                        {deviceCount} x {arena.label}
+                        {device.units} x {device.deviceName}
                       </p>
                       <p className="text-[11px] md:text-[12px] text-foreground/60 dark:text-muted-foreground mt-0.5">
-                        {pl} player{pl > 1 ? "s" : ""} · ₹{arena.price}/hr each
+                        {device.players} player{device.players > 1 ? "s" : ""} ·
+                        ₹{device.hourlyRate}/hr each
                       </p>
                     </div>
                     <p className="text-[13px] md:text-lg font-bold shrink-0">
-                      ₹{subtotal}
+                      ₹{DeviceTotalPrice}
                     </p>
                   </li>
-                ),
-              )}
+                );
+              })}
             </ul>
           )}
         </div>
