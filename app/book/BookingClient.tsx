@@ -1,5 +1,6 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import { DatePickerSimple } from "@/components/Date-Picker";
 import {
@@ -11,13 +12,15 @@ import { TimePicker } from "@/components/ui/time-picker";
 import { Arena, DeviceType } from "@/types/bookingTypes";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 import { ARENAS } from "@/lib/static-data/Booking-data";
+import type { devices } from "@/src/db/schema";
 
-const BOOKED: Record<DeviceType, number[]> = {
-  CONSOLE: [2],
-  PC: [1, 4],
-  ARCADE: [],
-  VR: [],
-};
+type DeviceItem = typeof devices.$inferSelect;
+type SelectedDeviceItem = DeviceItem & { players: number };
+
+export interface BookingClientProps {
+  initialDevice: DeviceType;
+  devices?: DeviceItem[];
+}
 
 function toMinutes(t: string) {
   const [h, m] = t.split(":").map(Number);
@@ -87,8 +90,14 @@ function ArenaTab({
 
 /* Section: Arena Info Card */
 
-function ArenaInfoCard({ arena }: { arena: Arena }) {
-  const freeUnits = arena.totalUnits - BOOKED[arena.key].length;
+function ArenaInfoCard({
+  arena,
+  freeUnits,
+}: {
+  arena: Arena;
+  freeUnits?: number;
+}) {
+  const availableUnits = freeUnits ?? arena.totalUnits;
 
   return (
     <div className="mt-2.5 shadow-[0px_4px_20px_0px_#00000024] dark:shadow-[0px_4px_5px_0px_#1a202c] bg-card dark:bg-background border border-foreground/15 dark:border-border rounded-2xl px-5 py-4 flex justify-between gap-4 items-start">
@@ -121,7 +130,7 @@ function ArenaInfoCard({ arena }: { arena: Arena }) {
           /Hour per device
         </p>
         <p className="text-[11px] text-muted-foreground mt-2">
-          {freeUnits} of {arena.totalUnits} free
+          {availableUnits} of {arena.totalUnits} free
         </p>
       </div>
     </div>
@@ -221,21 +230,29 @@ function DeviceCard({
 /* Section: Main Component */
 export default function BookingClient({
   initialDevice,
-}: {
-  initialDevice: DeviceType;
-}) {
+  devices = [],
+}: BookingClientProps) {
+  const router = useRouter();
+
   const {
     selectedArena,
     setSelectedArena,
-    allSelections,
-    setAllSelections,
     date,
     setDate,
     startTime,
     setStartTime,
     endTime,
     setEndTime,
+    selectedDevices,
+    toggleDevice,
+    updateDevicePlayers,
   } = useBooking();
+
+  // Local state for device selections per arena (arenaKey -> { deviceIndex: playerCount })
+  // Self-contained until you wire up your external dynamic backend / context logic
+  const [localSelections, setLocalSelections] = useState<
+    Partial<Record<DeviceType, Record<number, number>>>
+  >({});
 
   useEffect(() => {
     setSelectedArena(initialDevice);
@@ -253,7 +270,7 @@ export default function BookingClient({
   );
 
   const arena = ARENAS.find((a) => a.key === selectedArena)!;
-  const currentSel = allSelections[selectedArena] ?? {};
+  const currentSel = localSelections[selectedArena] ?? {};
 
   const durationHours = Math.max(
     0,
@@ -287,7 +304,7 @@ export default function BookingClient({
   }
 
   function handleDeviceToggle(deviceIndex: number) {
-    setAllSelections((prev) => {
+    setLocalSelections((prev) => {
       const sel = { ...(prev[selectedArena] ?? {}) };
       if (sel[deviceIndex]) {
         delete sel[deviceIndex];
@@ -299,7 +316,7 @@ export default function BookingClient({
   }
 
   function handleAdjust(deviceIndex: number, delta: number) {
-    setAllSelections((prev) => {
+    setLocalSelections((prev) => {
       const sel = { ...(prev[selectedArena] ?? {}) };
       const current = sel[deviceIndex] ?? 1;
       sel[deviceIndex] = Math.min(
@@ -310,8 +327,10 @@ export default function BookingClient({
     });
   }
 
-  const bookedDevices = BOOKED[selectedArena];
-  const freeUnits = arena.totalUnits - bookedDevices.length;
+  const visibleDevices = devices.filter(
+    (d) => d.type.toUpperCase() === selectedArena,
+  );
+  const freeUnits = visibleDevices.length;
 
   return (
     <section className="flex flex-col gap-8 md:gap-10">
@@ -339,7 +358,7 @@ export default function BookingClient({
             />
           ))}
         </div>
-        <ArenaInfoCard arena={arena} />
+        <ArenaInfoCard arena={arena} freeUnits={freeUnits} />
       </div>
 
       {/* Section: Device Picker */}
@@ -356,18 +375,24 @@ export default function BookingClient({
         {/* Scrollable device grid */}
         <div className="max-h-[420px] overflow-y-auto rounded-2xl border border-black/12 dark:border-border bg-foreground/1 dark:bg-muted/20 p-3 scrollbar-thin">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {Array.from({ length: arena.totalUnits }, (_, i) => {
-              const isBooked = bookedDevices.includes(i);
-              const players = currentSel[i] ?? 0;
+            {visibleDevices.map((device, index) => {
+              const selected = selectedDevices.find(
+                (selectedDevice) => selectedDevice.id === device.id,
+              );
+              const isSelected = Boolean(selected);
+              const players = selected?.players ?? 0;
+
               return (
                 <DeviceCard
-                  key={`${selectedArena}-${i}`}
+                  key={device.id}
                   arena={arena}
-                  deviceNumber={i + 1}
-                  isBooked={isBooked}
+                  deviceNumber={index + 1}
+                  isBooked={false}
                   players={players}
-                  onToggle={() => handleDeviceToggle(i)}
-                  onAdjust={(d) => handleAdjust(i, d)}
+                  onToggle={() => toggleDevice(device)}
+                  onAdjust={(delta) =>
+                    updateDevicePlayers(device.id, players + delta)
+                  }
                 />
               );
             })}
