@@ -1,66 +1,120 @@
-import type { FoodCardProps } from "@/app/custom-components/cards/FoodCard";
+import { foodItems } from "@/src/db/schema";
 
-export const mockFoodItems: FoodCardProps[] = [
+//(property) category: "food" | "beverage" | "snacks" | "dessert"
+
+export const mockFoodItems: Array<typeof foodItems.$inferSelect> = [
   {
-    id: "food-1",
-    name: "Truffle Parmesan Fries",
-    imageUrl: "https://images.pexels.com/photos/5779487/pexels-photo-5779487.jpeg",
-    price: 180,
-    serving: 2,
-    description:
-      "Crispy hand-cut golden potatoes tossed in fragrant white truffle oil, grated aged parmesan, roasted garlic flakes, and fresh parsley with a side of house-made garlic aioli dip.",
-    addButton: true,
+    id: "123",
+    name: "Paneer Chlly",
+    category: "snacks",
+    description: "Paneer cubes fried and then tossed into sauces",
+    imageUrl: "https://www.pexels.com/photo/a-bowl-of-cooked-food-in-a-bowl-on-a-rustic-background-7160695/",
+    isAvailable: true,
+    price: "123",
+    serves: 1,
+    createdAt: new Date()
   },
   {
-    id: "food-2",
-    name: "Classic Smash Burger",
-    imageUrl: "https://images.pexels.com/photos/5779487/pexels-photo-5779487.jpeg",
-    price: 260,
-    serving: 1,
-    description:
-      "Double juicy smashed beef patties with melted cheddar cheese, caramelized onions, house pickles, and our signature secret smoky sauce on a toasted brioche bun.",
-    addButton: true,
+    id: "456",
+    name: "Momos",
+    category: "snacks",
+    description: "Steamed dumplings filled with seasoned vegetables and served with spicy chutney",
+    imageUrl: "https://www.pexels.com/photo/plate-with-greasy-momos-dumplings-18803177/",
+    isAvailable: true,
+    price: "99",
+    serves: 1,
+    createdAt: new Date()
   },
   {
-    id: "food-3",
-    name: "Iced Caramel Macchiato",
-    imageUrl: "https://images.pexels.com/photos/5779487/pexels-photo-5779487.jpeg",
-    price: 160,
-    serving: 1,
-    description: "Espresso with vanilla syrup, cold milk, and caramel drizzle.",
-    addButton: true,
+    id: "789",
+    name: "Chicken Lolypop",
+    category: "snacks",
+    description: "Crispy chicken wings marinated in spices and coated with a flavorful sauce",
+    imageUrl: "https://www.pexels.com/photo/delicious-tandoori-chicken-with-fresh-veggies-31771054/",
+    isAvailable: true,
+    price: "179",
+    serves: 2,
+    createdAt: new Date()
   },
   {
-    id: "food-4",
-    name: "Spicy Peri-Peri Wings",
+    id: "321",
+    name: "White sauce Pasta",
+    category: "food",
+    description: "Creamy white sauce pasta tossed with herbs, vegetables, and Italian seasoning",
+    imageUrl: "https://www.pexels.com/photo/food-photography-of-pasta-1438672/",
+    isAvailable: true,
+    price: "149",
+    serves: 2,
+    createdAt: new Date()
+  },
+  {
+    id: "654",
+    name: "Cheese Burger",
+    category: "food",
+    description: "Juicy burger layered with melted cheese, fresh vegetables, and a house sauce",
+    imageUrl: "https://www.pexels.com/photo/delicious-cheeseburger-with-pickles-on-a-plate-32480062/",
+    isAvailable: true,
+    price: "129",
+    serves: 1,
+    createdAt: new Date()
+  },
+  {
+    id: "987",
+    name: "Fried Rice",
+    category: "food",
+    description: "Wok-tossed rice with fresh vegetables, soy sauce, and aromatic spices",
+    imageUrl: "https://www.pexels.com/photo/vegetable-fried-rice-with-sauces-on-plate-35071826/",
+    isAvailable: true,
+    price: "119",
+    serves: 4,
+    createdAt: new Date()
+  },
+  {
+    id: "213",
+    name: "Pizza",
+    category: "food",
+    description: "Classic pizza topped with mozzarella cheese, tomato sauce, and fresh herbs",
+    imageUrl: "https://www.pexels.com/photo/delicious-margherita-pizza-with-fresh-toppings-31596394/",
+    isAvailable: true,
+    price: "199",
+    serves: 2,
+    createdAt: new Date()
+  },
+  {
+    id: "546",
+    name: "Corn Cheese Sandwich",
+    category: "snacks",
+    description: "Grilled sandwich stuffed with sweet corn, melted cheese, and mild spices",
+    imageUrl: "https://www.pexels.com/photo/grilled-paneer-corn-sandwich-with-sauces-36268517/",
+    isAvailable: false,
+    price: "109",
+    serves: 1,
+    createdAt: new Date()
+  },
+  {
+    id: "879",
+    name: "DimSums",
+    category: "snacks",
+    description: "Delicate dumplings filled with seasoned ingredients and served with dipping sauce",
     imageUrl: null,
-    price: 240,
-    serving: "3-4 pieces",
-    description:
-      "Crispy double-fried chicken wings glazed in a fiery African bird's eye chili marinade, finished with lime zest and served with chilled ranch.",
-    addButton: true,
+    isAvailable: true,
+    price: "129",
+    serves: 1,
+    createdAt: new Date()
   },
   {
-    id: "food-5",
-    name: "Artisan Margherita Flatbread",
-    imageUrl: "https://images.pexels.com/photos/5779487/pexels-photo-5779487.jpeg",
-    price: 320,
-    serving: 2,
+    id: "852",
+    name: "Chaumin",
+    category: "food",
     description: null,
-    addButton: false,
-  },
-  {
-    id: "food-6",
-    name: "Dark Chocolate Brownie Sundae",
-    imageUrl: "https://images.pexels.com/photos/5779487/pexels-photo-5779487.jpeg",
-    price: 210,
-    serving: 1,
-    description:
-      "Warm Belgian dark chocolate fudge brownie served with a generous scoop of Madagascar vanilla bean gelato, drizzled with hot melted fudge and roasted hazelnuts.",
-    addButton: true,
-  },
+    imageUrl: "https://www.pexels.com/photo/noodles-on-white-ceramic-plate-3926121/",
+    isAvailable: true,
+    price: "99",
+    serves: 1,
+    createdAt: new Date()
+  }
 ];
 
-export const singleMockFood: FoodCardProps = mockFoodItems[0];
+export const singleMockFood: typeof foodItems.$inferSelect = mockFoodItems[0];
 
 export default mockFoodItems;
