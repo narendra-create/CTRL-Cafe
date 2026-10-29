@@ -67,7 +67,8 @@
 - [ ] make handlesubmit in sidebar
 - [ ] implement url based stages of booking
 - [x] add use context for booking page
-- [ ] add getDevices function and wire it up in bookingclient to show real data instead of mock data
+- [x] add getDevices function in booking page
+- [ ] wire up bookingclient to show real data instead of mock data
 - [x] add foodItems showing section in the sidebar below devices
 - [x] add seed file for foodItems
 - [x] seed file for devices and other things
