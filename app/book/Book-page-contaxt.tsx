@@ -9,6 +9,10 @@ import {
 } from "react";
 import { getIndiaDateKey } from "@/lib/utils/tools";
 import type { AllSelections, DeviceType } from "@/types/bookingTypes";
+import { foodItems } from "@/src/db/schema";
+
+type FoodItemType = typeof foodItems.$inferSelect;
+type cartItemType = FoodItemType & { quantity: number };
 
 type BookingContextType = {
   selectedArena: DeviceType;
@@ -21,16 +25,43 @@ type BookingContextType = {
   setStartTime: Dispatch<SetStateAction<string>>;
   endTime: string;
   setEndTime: Dispatch<SetStateAction<string>>;
+  selectedFoods: cartItemType[];
+  setSelectedFoods: Dispatch<SetStateAction<cartItemType[]>>;
+  setFoodQuantity: (foodId: string, quantity: number) => void;
+  addFood: (food: FoodItemType, quantity?: number) => void;
 };
-
 const BookingContext = createContext<BookingContextType | null>(null);
 
 export function BookingProvider({ children }: { children: ReactNode }) {
   const [selectedArena, setSelectedArena] = useState<DeviceType>("CONSOLE");
   const [allSelections, setAllSelections] = useState<AllSelections>({});
+  const [selectedFoods, setSelectedFoods] = useState<cartItemType[]>([]);
+
   const [date, setDate] = useState(() => getIndiaDateKey());
   const [startTime, setStartTime] = useState("10:00");
   const [endTime, setEndTime] = useState("20:00");
+
+  function addFood(food: FoodItemType, quantity = 1) {
+    setSelectedFoods((currentfoods) => {
+      if (currentfoods?.some((cfood) => cfood.id === food.id)) {
+        return currentfoods;
+      }
+
+      return [...currentfoods, { ...food, quantity }];
+    });
+  }
+
+  function setFoodQuantity(id: string, quantity: number) {
+    setSelectedFoods((currentfoods) => {
+      if (quantity <= 0) {
+        return currentfoods.filter((item) => item.id !== id);
+      }
+
+      return currentfoods.map((item) => {
+        return item.id === id ? { ...item, quantity } : item;
+      });
+    });
+  }
 
   return (
     <BookingContext.Provider
@@ -45,6 +76,10 @@ export function BookingProvider({ children }: { children: ReactNode }) {
         setStartTime,
         endTime,
         setEndTime,
+        selectedFoods,
+        setSelectedFoods,
+        setFoodQuantity,
+        addFood,
       }}
     >
       {children}

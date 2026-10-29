@@ -317,10 +317,10 @@ export default function BookingClient({
     <section className="flex flex-col gap-8 md:gap-10">
       {/* Section: Header */}
       <div className="mt-6 md:mt-8 mb-4 md:mb-6">
-        <h1 className="text-lg md:text-7xl font-bold tracking-[-0.03em] leading-tight">
+        <h1 className="text-3xl md:text-7xl font-bold tracking-[-0.03em] leading-tight">
           Reserve a device<span className="text-accent">.</span>
         </h1>
-        <p className="text-muted-foreground text-[15px] mt-2 max-w-[44em] leading-relaxed">
+        <p className="text-muted-foreground text-xs mx-2.5 md:mx-0 md:text-[15px] mt-2 max-w-[44em] leading-relaxed">
           Pick an arena, choose your devices and set your time. Each device is a
           full unit — bring the whole squad.
         </p>
