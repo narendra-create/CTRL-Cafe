@@ -157,7 +157,7 @@ function DeviceCard({
           ? undefined
           : (e) => (e.key === "Enter" || e.key === " " ? onToggle() : undefined)
       }
-      className={`rounded-2xl border p-[14px] transition-all duration-150 select-none ${
+      className={`rounded-2xl border p-1.5 md:p-3.5 transition-all duration-150 select-none ${
         isBooked
           ? "opacity-40 cursor-not-allowed border-black/30 dark:border-border bg-background"
           : isSelected
@@ -190,25 +190,25 @@ function DeviceCard({
       {/* Player stepper */}
       {isSelected && !isBooked && (
         <div
-          className="mt-2.5 md:max-w-[95%] flex items-center justify-between bg-muted rounded-[10px] px-1 md:px-2 py-0.5 md:py-3 border border-black/20 dark:border-border"
+          className="mt-2.5 md:max-w-[95%] flex items-center justify-between bg-muted rounded-[10px] px-0.5 md:px-2 py-0.5 md:py-3 border border-black/20 dark:border-border"
           onClick={(e) => e.stopPropagation()}
         >
           <button
             type="button"
             aria-label="Fewer players"
             onClick={() => onAdjust(-1)}
-            className="w-7 h-7 rounded-[8px] bg-accent text-accent-foreground cursor-pointer flex items-center justify-center shrink-0"
+            className="w-7 h-7 rounded-lg bg-accent text-accent-foreground cursor-pointer flex items-center justify-center shrink-0"
           >
             <Minus size={12} strokeWidth={3} />
           </button>
-          <span className="text-[12px] md:text-[15px] font-semibold">
+          <span className="text-[12px] text-center md:text-[15px] font-semibold">
             {players} player{players > 1 ? "s" : ""}
           </span>
           <button
             type="button"
             aria-label="More players"
             onClick={() => onAdjust(1)}
-            className="w-7 h-7 rounded-[8px] bg-accent text-accent-foreground cursor-pointer flex items-center justify-center shrink-0"
+            className="w-7 h-7 rounded-lg bg-accent text-accent-foreground cursor-pointer flex items-center justify-center shrink-0"
           >
             <Plus size={12} strokeWidth={3} />
           </button>
