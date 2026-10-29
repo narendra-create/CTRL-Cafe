@@ -68,7 +68,8 @@
 - [x] add use context for booking page
 - [ ] add getDevices function and wire it up in bookingclient to show real data instead of mock data
 - [ ] add foodItems showing section in the sidebar below devices
-- [ ] add seed file for foodItems and devices and other things
+- [x] add seed file for foodItems
+- [ ] seed file for devices and other things
 - [ ] redirect user to /book if booking id not provided in /snacks and /review endpoints
 - [ ] Test this flow = Select device - choose snacks - review page - pay
 
