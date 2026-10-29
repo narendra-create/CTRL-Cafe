@@ -36,6 +36,7 @@
 - [x] Make controller for getting profile details
 - [ ] Controller functions for updating user details and deleting account
 - [ ] Account connecting logic in settings page
+- [ ] Get booked seats
 
 ## Importent on 09/11/2026
 
@@ -72,6 +73,7 @@
 - [x] seed file for devices and other things
 - [ ] redirect user to /book if booking id not provided in /snacks and /review endpoints
 - [ ] Test this flow = Select device - choose snacks - review page - pay
+- [ ] add functionality to get device unit selected into sidebar, means user can select 2 ps4 or 1, and ps4 has total 5 units, each has players count
 
 ## Run this checklist after deployement
 
