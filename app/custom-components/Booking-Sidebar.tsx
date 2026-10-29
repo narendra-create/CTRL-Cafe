@@ -8,7 +8,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 /* Section: Main Component */
 
 export default function BookingSidebar() {
-  const { allSelections, setAllSelections, startTime, endTime } = useBooking();
+  const { allSelections, setAllSelections, startTime, endTime, selectedFoods } =
+    useBooking();
+
   const [error, seterror] = useState<string | null>(null);
   const [pending, setpending] = useState(false);
   //defining some navigation things
@@ -51,7 +53,13 @@ export default function BookingSidebar() {
       },
     ];
   });
-  const grandTotal = lineItems.reduce((acc, item) => acc + item.subtotal, 0);
+  const devicePrices = lineItems.reduce((acc, item) => acc + item.subtotal, 0);
+  const foodItemPrices = selectedFoods.reduce(
+    (sum, item) => sum + Number(item.price) * item.quantity,
+    0,
+  );
+
+  const grandTotal = devicePrices + foodItemPrices;
   const totalDevices = lineItems.reduce(
     (acc, item) => acc + item.deviceCount,
     0,
@@ -80,9 +88,9 @@ export default function BookingSidebar() {
   return (
     <>
       {/* Section: Desktop Sidebar Card */}
-      <div className="lg:sticky lg:top-28 rounded-2xl border border-black/20 shadow-[0px_4px_10px_0px_#e2e8f0] dark:shadow-none dark:border-border bg-background overflow-hidden">
+      <div className="lg:sticky lg:top-28 mb-5 md:mb-0 rounded-2xl border border-black/20 shadow-[0px_4px_10px_0px_#e2e8f0] dark:shadow-none dark:border-border bg-background overflow-hidden">
         {/* Section: Sidebar Header */}
-        <div className="px-5 py-4 border-b border-border">
+        <div className="px-5 py-4">
           <div className="flex items-center justify-between gap-2 mb-0.5">
             <p className="text-[10px] md:text-[15px] font-extrabold tracking-[0.11em] text-muted-foreground uppercase">
               Your booking
@@ -113,7 +121,7 @@ export default function BookingSidebar() {
         </div>
 
         {/* Section: Sidebar Line Items */}
-        <div className="px-5 py-4 min-h-[80px] border-t md:mt-3 md:pt-6 border-black/30">
+        <div className="px-5 py-4 min-h-[80px] border-t md:mt-3 md:pt-6 border-black/30 dark:border-foreground/30">
           {lineItems.length === 0 ? (
             <p className="text-[13px] text-muted-foreground text-center py-4">
               No devices selected yet.
@@ -140,6 +148,42 @@ export default function BookingSidebar() {
                   </li>
                 ),
               )}
+            </ul>
+          )}
+        </div>
+        <span
+          className={`ml-5 text-lg font-bold tracking-wide text-accent ${selectedFoods.length === 0 && "hidden"}`}
+        >
+          - Snacks
+        </span>
+        <div className="px-5 py-4 min-h-[80px] border-t md:mt-3 md:pt-6 border-black/30 dark:border-foreground/30">
+          {selectedFoods.length === 0 ? (
+            <p className="text-[13px] text-muted-foreground text-center py-4">
+              No Snacks ? Huh
+            </p>
+          ) : (
+            <ul className="grid gap-3 divide-y divide-black/25">
+              {selectedFoods.map((food) => {
+                const total = Number(food.price) * food.quantity;
+                return (
+                  <li
+                    key={food.id}
+                    className="flex items-start justify-between gap-3 pb-3"
+                  >
+                    <div>
+                      <p className="text-[13px] md:text-lg font-bold">
+                        {food.quantity} x {food.name}
+                      </p>
+                      <p className="text-[11px] md:text-[12px] text-foreground/60 dark:text-muted-foreground mt-0.5">
+                        ₹{food.price}/Per Count
+                      </p>
+                    </div>
+                    <p className="text-[13px] md:text-lg font-bold shrink-0">
+                      ₹{total}
+                    </p>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
