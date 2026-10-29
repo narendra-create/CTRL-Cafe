@@ -164,13 +164,13 @@ const FoodCard = ({
               <button
                 type="button"
                 onClick={handleAddInitial}
-                className="flex cursor-pointer items-center gap-1 rounded-lg bg-zinc-900 px-3 py-1.5 font-sans text-xs font-medium text-white transition-all duration-200 hover:bg-zinc-800 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 md:px-3.5 md:py-2 md:text-sm 2xl:px-4 2xl:py-2.5 2xl:text-sm"
+                className="flex cursor-pointer items-center gap-1 rounded-lg bg-zinc-900 px-3 py-1.5 font-sans text-xs font-medium text-white transition-all duration-200 hover:bg-zinc-800 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 md:px-3.5 md:py-2 md:text-sm 2xl:px-4 2xl:py-1.5 2xl:text-sm"
               >
                 <span>Add</span>
                 <Plus className="size-3.5 md:size-4 2xl:size-4" />
               </button>
             ) : (
-              <div className="flex items-center rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 px-1 py-0.5 md:px-1.5 md:py-1 2xl:px-2 2xl:py-1">
+              <div className="flex items-center rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 px-1 py-0.75 md:px-1.5 md:py-1 2xl:px-2 2xl:py-1">
                 <button
                   type="button"
                   onClick={handleDecrement}
