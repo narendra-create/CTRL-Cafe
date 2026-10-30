@@ -37,7 +37,8 @@ export const addDevice = async (input: deviceAddInput): Promise<{
             maxPlayers: parsed.maxPlayers,
             type: parsed.type,
             extraConsolePrice: String(parsed.extraConsolePrice),
-            supportsFiltering: false
+            supportsFiltering: false,
+            availableUnits: parsed.units
         }).returning();
 
         return {

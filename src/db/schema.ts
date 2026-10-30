@@ -12,7 +12,8 @@ import {
     index,
     check,
     time,
-    primaryKey
+    primaryKey,
+    unique
 } from "drizzle-orm/pg-core";
 import { authUsers, authUid, authenticatedRole } from "drizzle-orm/supabase";
 import { sql } from "drizzle-orm";
@@ -153,11 +154,64 @@ export const foodItems = pgTable("food_items", {
     ]
 );
 
+export const gameStations = pgTable("game_stations", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    stationLabel: text("station_label").notNull(),
+    frontendLabel: text("frontend_label").notNull(),
+    isActive: boolean("is_active").notNull().default(true), //For maintanance toggle
+    deviceId: uuid("device_id").notNull().references(() => devices.id, { onDelete: "cascade" }),
+}, (table) => [
+    unique("station_label_unique").on(table.deviceId, table.stationLabel),
+    index("deviceid_index").on(table.deviceId),
+
+    //RLS policies
+    pgPolicy("all_users_can_see_devices", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`true` // means no rls for select
+    }),
+    pgPolicy("only_admins_can_insert", {
+        for: "insert",
+        to: authenticatedRole,
+        withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_delete", {
+        for: "delete",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_update", {
+        for: "update",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`,
+        withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+]);
+
 export const devices = pgTable("devices", {
     id: uuid("id").defaultRandom().primaryKey(),
     deviceName: text("device_name").notNull().unique(),
     supportsFiltering: boolean("supports_filtering"),
-    units: integer("units").notNull().default(1),
     type: deviceTypeEnum("type").notNull(),
     maxPlayers: integer("max_players").notNull(),
     hourlyRate: numeric("hourly_rate", {
@@ -289,7 +343,7 @@ export const bookings = pgTable("bookings", {
         withTimezone: true
     }).notNull(),
     endTime: timestamp("end_time", { withTimezone: true }).notNull(),
-    bookedDevice: uuid("booked_device").notNull().references(() => devices.id),
+    gameStationId: uuid("game_station_id").notNull().references(() => gameStations.id),
     playersCount: integer("players_count").notNull().default(1),
     bookingStatus: bookingStatusEnum("booking_status").notNull().default("pending"),
     isArchived: boolean("is_archived").notNull().default(false),
@@ -321,7 +375,7 @@ export const bookings = pgTable("bookings", {
         pgPolicy("users_can_update_their_bookings", {
             for: "update",
             to: authenticatedRole,
-            using: sql`${authUid} = ${table.userId} AND ${table.bookingStatus} = 'pending'`,
+            using: sql`${authUid} = ${table.userId} AND ${table.bookingStatus} IN ('pending', 'hold')`,
             withCheck: sql`${authUid} = ${table.userId}`
         }),
         pgPolicy("admins_can_see_all_bookings", {
@@ -351,7 +405,7 @@ export const bookings = pgTable("bookings", {
         }),
 
         //Indexes
-        index("booking_device_idx").on(table.bookedDevice),
+        index("gamestation_id_idx").on(table.gameStationId),
         index("booking_user_status_idx").on(table.userId, table.bookingStatus),
         index("booking_start_idx").on(table.startTime),
 

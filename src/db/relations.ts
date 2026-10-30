@@ -10,9 +10,9 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
             to: r.availableGames.id.through(r.deviceGames.gameId)
         }),
 
-        bookings: r.many.bookings({
+        game_stations: r.many.gameStations({
             from: r.devices.id,
-            to: r.bookings.bookedDevice
+            to: r.gameStations.deviceId
         })
     },
 
@@ -50,9 +50,9 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
             to: r.profiles.id,
             optional: false
         }),
-        device: r.one.devices({
-            from: r.bookings.bookedDevice,
-            to: r.devices.id,
+        game_station: r.one.gameStations({
+            from: r.bookings.gameStationId,
+            to: r.gameStations.id,
             optional: false
         }),
         //One device for one booking but many bookings of one device - one to many
@@ -79,6 +79,17 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
         bookingItems: r.many.bookingItems({
             from: r.foodItems.id,
             to: r.bookingItems.foodItemId
+        })
+    },
+
+    gameStations: {
+        device: r.one.devices({
+            from: r.gameStations.deviceId,
+            to: r.devices.id
+        }),
+        booking: r.many.bookings({
+            from: r.gameStations.id,
+            to: r.bookings.gameStationId
         })
     }
 }))

@@ -36,6 +36,8 @@
 - [x] Make controller for getting profile details
 - [ ] Controller functions for updating user details and deleting account
 - [ ] Account connecting logic in settings page
+- [x] refactor seat booking by adding a new table for different units
+- [ ] replace logic on controllers for making space for gameStations table
 - [ ] Get booked seats
 
 ## Importent on 09/11/2026

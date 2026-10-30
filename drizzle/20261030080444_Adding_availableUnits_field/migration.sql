@@ -1,0 +1,1 @@
+ALTER TABLE "devices" ADD COLUMN "available_units" integer DEFAULT 1 NOT NULL;
