@@ -175,4 +175,70 @@ export function createTimeSlots(start: number, end: number) {
 export function toMinutes(time: string) {
     const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
-}
+};
+
+//Function for generating Station labels
+const CONSOLE_ALIASES: Record<string, string> = {
+    // PlayStation
+    playstation2: "PS2",
+    ps2: "PS2",
+    playstation3: "PS3",
+    ps3: "PS3",
+    playstation4: "PS4",
+    ps4: "PS4",
+    playstation4pro: "PS4P",
+    ps4pro: "PS4P",
+    playstation5: "PS5",
+    ps5: "PS5",
+    playstation5pro: "PS5P",
+    ps5pro: "PS5P",
+
+    // Xbox
+    xbox360: "X360",
+    xboxone: "XBO",
+    xbox1: "XBO",
+    xbone: "XBO",
+    xbosone: "XBO",
+    xboxseriesx: "XSX",
+    xboxseriess: "XSS",
+
+    // Nintendo
+    nintendoswitch: "NS",
+    switch: "NS",
+    nintendoswitcholed: "NSO",
+    switcholed: "NSO",
+    nintendoswitch2: "NS2",
+    switch2: "NS2",
+    switchlite: "NSL",
+
+    // Others
+    steamdeck: "SD",
+};
+
+export function formatConsoleName(input: string): string {
+    if (!input?.trim()) return "UNK";
+
+    const normalized = input
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+
+    // Known console aliases
+    if (CONSOLE_ALIASES[normalized]) {
+        return CONSOLE_ALIASES[normalized];
+    }
+
+    // Extract alphabetic words and numbers
+    const words = input.match(/[a-z]+/gi) ?? [];
+    const numbers = input.match(/\d+/g) ?? [];
+
+    if (!words.length) return "UNK";
+
+    // Generate fallback abbreviation
+    const abbreviation =
+        words.length === 1
+            ? words[0].slice(0, 3)
+            : words.map((word) => word[0]).join("").slice(0, 3);
+
+    return (abbreviation + numbers.join("")).toUpperCase();
+};
