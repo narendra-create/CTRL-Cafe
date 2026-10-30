@@ -43,7 +43,10 @@ CREATE POLICY "only_admins_can_update" ON "game_stations" AS PERMISSIVE FOR UPDA
             WHERE id = (select auth.uid())
             AND account_type = 'admin'
         ));--> statement-breakpoint
-ALTER POLICY "users_can_update_their_bookings" ON "bookings" TO "authenticated" USING ((select auth.uid()) = "bookings"."userId" AND "bookings"."booking_status" IN ('pending', 'hold')) WITH CHECK ((select auth.uid()) = "bookings"."userId");
+ALTER POLICY "users_can_update_their_bookings" ON "bookings" TO "authenticated" 
+USING ((select auth.uid()) = "bookings"."userId" AND "bookings"."booking_status" IN ('pending', 'hold')) 
+WITH CHECK ((select auth.uid()) = "bookings"."userId"); --> statement-breakpoint
+
 
 ALTER TABLE "bookings"
 ADD CONSTRAINT "bookings_no_station_overlap"
