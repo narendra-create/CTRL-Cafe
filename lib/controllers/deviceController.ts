@@ -1,9 +1,11 @@
 "use server";
 import { db } from "@/src/index";
-import { devices } from "@/src/db/schema";
+import { devices, gameStations } from "@/src/db/schema";
 import { checkAccountType, isLoggedIn } from "@/lib/actions/authorizationCheck";
 import { deviceAddSchema, updateDeviceSchema, type deviceAddInput, type updateDeviceInput } from "@/lib/validations/deviceValidation";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
+import { formatConsoleName } from "@/lib/utils/tools";
+import { DeviceWithStations } from "@/types/deviceTypes";
 
 export const addDevice = async (input: deviceAddInput): Promise<{
     success: boolean;
@@ -30,20 +32,34 @@ export const addDevice = async (input: deviceAddInput): Promise<{
     }
 
     try {
-        const insertedDevice = await db.insert(devices).values({
-            units: parsed.units,
-            deviceName: parsed.deviceName,
-            hourlyRate: String(parsed.hourlyRate),
-            maxPlayers: parsed.maxPlayers,
-            type: parsed.type,
-            extraConsolePrice: String(parsed.extraConsolePrice),
-            supportsFiltering: false,
-            availableUnits: parsed.units
-        }).returning();
+        const result = await db.transaction(async (tx) => {
+            const [insertedDevice] = await tx.insert(devices).values({
+                deviceName: parsed.deviceName,
+                hourlyRate: String(parsed.hourlyRate),
+                maxPlayers: parsed.maxPlayers,
+                type: parsed.type,
+                extraConsolePrice: String(parsed.extraConsolePrice),
+                supportsFiltering: false
+            }).returning();
+
+            const dataForGameStationInsert: Array<typeof gameStations.$inferInsert> = Array.from({ length: parsed.units }, (_, index) => {
+                const stationLabel = "#" + String(index + 1);
+                return {
+                    deviceId: insertedDevice.id,
+                    frontendLabel: `Station ${stationLabel}`,
+                    stationLabel: `${formatConsoleName(insertedDevice.deviceName)} - Station ${stationLabel}`,
+                    isActive: true
+                }
+            });
+
+            await tx.insert(gameStations).values(dataForGameStationInsert);
+
+            return insertedDevice;
+        });
 
         return {
             success: true,
-            data: insertedDevice[0]
+            data: result
         };
     }
     catch (err) {
@@ -85,7 +101,6 @@ export const updateDevice = async (input: updateDeviceInput): Promise<{
 
     try {
         const updated = await db.update(devices).set({
-            units: parsed.units,
             deviceName: parsed.deviceName,
             type: parsed.type,
             maxPlayers: parsed.maxPlayers,
@@ -171,10 +186,16 @@ export const getDeviceTypes = async (): Promise<{
 export const getDevices = async (): Promise<{
     success: boolean;
     message?: string;
-    data?: Array<typeof devices.$inferSelect>;
+    data?: DeviceWithStations[]
 }> => {
     try {
-        const gotDevices = await db.select().from(devices);
+        const gotDevices = await db.query.devices.findMany({
+            with: {
+                game_stations: true
+            },
+            orderBy: (devices, { asc }) => [asc(devices.deviceName)]
+        });
+
         return {
             success: true,
             data: gotDevices

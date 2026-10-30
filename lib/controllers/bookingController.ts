@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/src/index";
-import { bookingItems, bookings, devices, foodItems, profiles } from "@/src/db/schema";
-import { eq, and, gte, lt, asc, desc, inArray } from "drizzle-orm";
+import { bookingItems, bookings, devices, foodItems, gameStations, profiles } from "@/src/db/schema";
+import { eq, and, gte, lt, asc, desc, inArray, gt } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { BookSeatInput, bookSeatSchema, getBookingDetailsInput, getBookingDetailsSchema, SeatHoldeInput, seatHoldSchema, verifyPaymentSchema, VerifySignatureInput } from "@/lib/validations/bookingValidation";
 import { razorpay } from "@/lib/setup-files/razorpay.config";
@@ -50,6 +50,7 @@ export const getActiveBooking = async (): Promise<{
         deviceName: string;
         holdExpiresAt: string | Date;
         status: string;
+        stationLabel: string;
     } | null
 }> => {
     try {
@@ -63,10 +64,14 @@ export const getActiveBooking = async (): Promise<{
             deviceName: devices.deviceName,
             holdExpiresAt: bookings.holdExpiresAt,
             status: bookings.bookingStatus,
-            deviceType: devices.type
+            deviceType: devices.type,
+
+            //For station
+            stationLabel: gameStations.frontendLabel
         })
             .from(bookings)
-            .innerJoin(devices, eq(bookings.bookedDevice, devices.id))
+            .innerJoin(gameStations, eq(bookings.gameStationId, gameStations.id))
+            .innerJoin(devices, eq(gameStations.deviceId, devices.id))
             .where(and(
                 eq(bookings.userId, dbuser.userId),
                 inArray(bookings.bookingStatus, ["pending", "hold"]),
@@ -88,7 +93,8 @@ export const getActiveBooking = async (): Promise<{
                 bookingId: activeBooking.bookingId,
                 deviceName: String(activeBooking.deviceName + "-" + activeBooking.deviceType),
                 holdExpiresAt: activeBooking.holdExpiresAt!,
-                status: activeBooking.status
+                status: activeBooking.status,
+                stationLabel: activeBooking.stationLabel
             }
         }
     }
@@ -129,6 +135,8 @@ export const getBookingDetails = async (input: getBookingDetailsInput): Promise<
             foodPrice: bookingItems.unitPrice,
         })
             .from(bookings)
+            .innerJoin(gameStations, eq(bookings.gameStationId, gameStations.id))
+            .innerJoin(devices, eq(gameStations.deviceId, devices.id))
             .leftJoin(bookingItems, eq(bookings.id, bookingItems.bookingId))
             .leftJoin(foodItems, eq(bookingItems.foodItemId, foodItems.id))
             .where(and(
@@ -242,17 +250,27 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
             }
         };
 
-        const [bookedDevicecheck] = await db.select().from(devices).where(eq(devices.id, parsed.bookedDevice));
-        if (!bookedDevicecheck) {
+        const [bookedStationcheck] = await db.select({
+            stationId: gameStations.id,
+            maxPlayers: devices.maxPlayers,
+            hourlyRate: devices.hourlyRate,
+            isActive: gameStations.isActive,
+        }).from(gameStations)
+            .innerJoin(devices, eq(gameStations.deviceId, devices.id))
+            .where(and(
+                eq(gameStations.id, parsed.gameStationId),
+                eq(gameStations.isActive, true)
+            ))
+        if (!bookedStationcheck) {
             return {
                 success: false,
-                message: "Device Not Found"
+                message: "NO STATIONS AVAILABLE"
             }
         };
-        if (parsed.playersCount > bookedDevicecheck.maxPlayers) {
+        if (parsed.playersCount > bookedStationcheck.maxPlayers) {
             return {
                 success: false,
-                message: `You can choose max ${bookedDevicecheck.maxPlayers} players for this device`
+                message: `You can choose max ${bookedStationcheck.maxPlayers} players for this device`
             }
         };
         if (parsed.playersCount <= 0) {
@@ -263,7 +281,7 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
         }
         //Calculate price
         // Base price = duration * hourlyRate
-        const totalAmount = (durationInHours * Number(bookedDevicecheck.hourlyRate) * Number(parsed.playersCount)).toFixed(2);
+        const totalAmount = (durationInHours * Number(bookedStationcheck.hourlyRate) * Number(parsed.playersCount)).toFixed(2);
         //Run cleanup & Insert new booking with hold
         const holdExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
         const newBooking = await db.transaction(async (tx) => {
@@ -273,8 +291,9 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
                     inArray(bookings.bookingStatus, ["hold", "pending"]),
                     lt(bookings.holdExpiresAt, now)
                 ));
+                
             const [insertedData] = await tx.insert(bookings).values({
-                bookedDevice: bookedDevicecheck.id,
+                gameStationId: bookedStationcheck.stationId,
                 endTime: convertedEndTime,
                 startTime: convertedStartTime,
                 totalAmount: totalAmount,
@@ -294,19 +313,26 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
         };
     }
     catch (err: any) {
+        if (err?.message === "NO_STATIONS_AVAILABLE") {
+            return {
+                success: false,
+                message: "All setups for this device are currently booked for the selected time slot."
+            };
+        }
+
         const code = err?.code ?? err?.cause?.code;
         if (code === "23P01") {
             return {
                 success: false,
-                message: "This device is already held or booked for the selected time slot.",
+                message: "This station was just claimed by someone else. Please try again.",
             };
-        };
+        }
 
         console.error("[holdSeat]: ", err);
         return {
             success: false,
             message: "Something went wrong while holding the seat."
-        }
+        };
     }
 };
 
@@ -517,7 +543,9 @@ export const verifyPayment = async (input: VerifySignatureInput): Promise<{
             .where(and(
                 eq(bookings.id, parsedInput.bookingId),
                 eq(bookings.userId, dbuser.userId)
-            )).innerJoin(devices, eq(bookings.bookedDevice, devices.id))
+            ))
+            .innerJoin(gameStations, eq(bookings.gameStationId, gameStations.id))
+            .innerJoin(devices, eq(gameStations.deviceId, devices.id))
             .innerJoin(profiles, eq(bookings.userId, profiles.id));
 
         if (!bookingresponse) {
