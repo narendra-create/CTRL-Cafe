@@ -343,7 +343,6 @@ export const bookings = pgTable("bookings", {
         withTimezone: true
     }).notNull(),
     endTime: timestamp("end_time", { withTimezone: true }).notNull(),
-    gameStationId: uuid("game_station_id").notNull().references(() => gameStations.id),
     playersCount: integer("players_count").notNull().default(1),
     bookingStatus: bookingStatusEnum("booking_status").notNull().default("pending"),
     isArchived: boolean("is_archived").notNull().default(false),
@@ -405,14 +404,13 @@ export const bookings = pgTable("bookings", {
         }),
 
         //Indexes
-        index("gamestation_id_idx").on(table.gameStationId),
         index("booking_user_status_idx").on(table.userId, table.bookingStatus),
         index("booking_start_idx").on(table.startTime),
 
         //Checks
         check("booking_time_valid", sql`${table.startTime} < ${table.endTime}`),
         check("booking_price_valid", sql`${table.totalAmount} >= 0`),
-        check("booking_playercount_valid", sql`${table.playersCount} >= 0`)
+        check("booking_playercount_valid", sql`${table.playersCount} >= 1`)
     ]
 );
 
@@ -504,6 +502,88 @@ export const deviceGames = pgTable("device_games", {
         index("device_games_device_id_idx").on(table.deviceId)
     ]
 );
+
+export const bookingStations = pgTable("booking_stations", {
+    id: uuid("id").notNull().defaultRandom().primaryKey(),
+    gameStationId: uuid("game_station_id").notNull().references(() => gameStations.id),
+    bookingId: uuid("booking_id").notNull().references(() => bookings.id, { onDelete: "cascade" }),
+    playersCount: integer("players_count").notNull().default(1),
+    startTime: timestamp("start_time", { withTimezone: true }).notNull(),
+    endTime: timestamp("end_time", { withTimezone: true }).notNull(),
+}, (table) => [
+    //RLS Policies
+    pgPolicy("users_can_see_their_booked_stations", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`
+       EXISTS (
+        SELECT 1 from bookings
+        WHERE bookings.id = ${table.bookingId}
+        AND bookings."userId" = ${authUid}
+       )
+        OR EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("users_can_insert_booking_stations", {
+        for: 'insert',
+        to: authenticatedRole,
+        withCheck: sql`
+      EXISTS (
+        SELECT 1 FROM bookings
+        WHERE bookings.id = ${table.bookingId}
+        AND bookings."userId" = ${authUid}        
+      )
+      OR EXISTS (
+        SELECT 1 FROM profiles
+        WHERE id = ${authUid}
+        AND account_type = 'admin'
+      )
+      `
+    }),
+    pgPolicy("admins_can_update_booked_stations", {
+        for: "update",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )
+        `,
+        withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )
+        `
+    }),
+    pgPolicy("admins_can_delete_bookingstations", {
+        for: "delete",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )
+        `
+    }),
+
+    //Indexes
+    index("bookingid_idx").on(table.bookingId),
+    index("stationid_idx").on(table.gameStationId),
+
+    //Uniqueness
+    unique("one_station_per_booking_unique").on(table.bookingId, table.gameStationId),
+
+    //Checks
+    check("bookingstation_time_valid", sql`${table.startTime} < ${table.endTime}`),
+    check("bookingstation_playercount_valid", sql`${table.playersCount} >= 1`)
+]);
 
 export const bookingItems = pgTable("booking_items", {
     id: uuid("id").primaryKey().defaultRandom(),
