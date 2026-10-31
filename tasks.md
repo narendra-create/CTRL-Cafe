@@ -83,7 +83,7 @@
 
 - [ ] Run sql code for triggers and hooks in supabase dashboard
 - [ ] Update otp verification email template - privacy policy link and ctrl cafe logo
-
+- [ ] cron jobs for cleaning hold/pending status bookings and their bookingStation table rows
 #### Version 2 update features
 
 - [ ] Subscription plans
