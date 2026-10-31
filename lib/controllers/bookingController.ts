@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/src/index";
-import { bookingItems, bookings, devices, foodItems, gameStations, profiles } from "@/src/db/schema";
-import { eq, and, gte, lt, asc, desc, inArray, gt } from "drizzle-orm";
+import { bookingItems, bookings, bookingStations, devices, foodItems, gameStations, profiles } from "@/src/db/schema";
+import { eq, and, gte, lt, asc, desc, inArray, gt, ne, or } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { BookSeatInput, bookSeatSchema, getBookingDetailsInput, getBookingDetailsSchema, SeatHoldeInput, seatHoldSchema, verifyPaymentSchema, VerifySignatureInput } from "@/lib/validations/bookingValidation";
 import { razorpay } from "@/lib/setup-files/razorpay.config";
@@ -70,7 +70,8 @@ export const getActiveBooking = async (): Promise<{
             stationLabel: gameStations.frontendLabel
         })
             .from(bookings)
-            .innerJoin(gameStations, eq(bookings.gameStationId, gameStations.id))
+            .innerJoin(bookingStations, eq(bookingStations.bookingId, bookings.id))
+            .innerJoin(gameStations, eq(bookingStations.gameStationId, gameStations.id))
             .innerJoin(devices, eq(gameStations.deviceId, devices.id))
             .where(and(
                 eq(bookings.userId, dbuser.userId),
@@ -135,7 +136,8 @@ export const getBookingDetails = async (input: getBookingDetailsInput): Promise<
             foodPrice: bookingItems.unitPrice,
         })
             .from(bookings)
-            .innerJoin(gameStations, eq(bookings.gameStationId, gameStations.id))
+            .innerJoin(bookingStations, eq(bookingStations.bookingId, bookings.id))
+            .innerJoin(gameStations, eq(bookingStations.gameStationId, gameStations.id))
             .innerJoin(devices, eq(gameStations.deviceId, devices.id))
             .leftJoin(bookingItems, eq(bookings.id, bookingItems.bookingId))
             .leftJoin(foodItems, eq(bookingItems.foodItemId, foodItems.id))
@@ -148,11 +150,17 @@ export const getBookingDetails = async (input: getBookingDetailsInput): Promise<
             return { success: false, message: "Booking not found" };
         }
         const baseRow = result[0];
-        const foodItemsArray = result[0].foodName ? result.map((r) => ({
-            name: r.foodName!,
-            unitPrice: r.foodPrice!,
-            qty: r.foodQty!
-        })) : [];
+        const foodMap = new Map<string, { name: string; unitPrice: string; qty: number }>();
+        for (const r of result) {
+            if (r.foodName && !foodMap.has(r.foodName)) {
+                foodMap.set(r.foodName, {
+                    name: r.foodName,
+                    qty: r.foodQty!,
+                    unitPrice: r.foodPrice!
+                })
+            }
+        }
+        const foodItemsArray = Array.from(foodMap.values());
 
         return {
             success: true,
@@ -225,6 +233,12 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
         //Parsing
         const { error: zoderror, data: parsed } = seatHoldSchema.safeParse(input);
         if (zoderror) { return { success: false, message: zoderror.message } };
+        if (parsed.gameStations.length === 0) {
+            return {
+                success: false,
+                message: "Choose Atleast one station to play"
+            }
+        }
         //Input Checks
         const now = new Date();
         const convertedStartTime = new Date(parsed.startTime);
@@ -249,59 +263,107 @@ export const holdSeat = async (input: SeatHoldeInput): Promise<{
                 message: "Minimum duration must be 30 minutes"
             }
         };
+        const requestedStationIds = parsed.gameStations.map((s) => s.stationId);
+        const dbRecords = requestedStationIds.length > 0 ?
+            await db.select({
+                stationId: gameStations.id,
+                stationLabel: gameStations.stationLabel,
+                frontendLabel: gameStations.frontendLabel,
+                isActive: gameStations.isActive,
 
-        const [bookedStationcheck] = await db.select({
-            stationId: gameStations.id,
-            maxPlayers: devices.maxPlayers,
-            hourlyRate: devices.hourlyRate,
-            isActive: gameStations.isActive,
-        }).from(gameStations)
-            .innerJoin(devices, eq(gameStations.deviceId, devices.id))
-            .where(and(
-                eq(gameStations.id, parsed.gameStationId),
-                eq(gameStations.isActive, true)
-            ))
-        if (!bookedStationcheck) {
+                //Device Details
+                deviceId: devices.id,
+                deviceName: devices.deviceName,
+                maxPlayers: devices.maxPlayers,
+                extraConsolePrice: devices.extraConsolePrice,
+                deviceHourlyRate: devices.hourlyRate,
+
+                conflictBookingId: bookings.id,
+            })
+                .from(gameStations)
+                .innerJoin(devices, eq(gameStations.deviceId, devices.id))
+                .leftJoin(bookingStations, and(
+                    eq(bookingStations.gameStationId, gameStations.id),
+                    lt(bookingStations.startTime, convertedEndTime),
+                    gt(bookingStations.endTime, convertedStartTime)
+                ))
+                .leftJoin(bookings, and(
+                    eq(bookings.id, bookingStations.bookingId),
+                    eq(bookings.isArchived, false),
+                    inArray(bookings.bookingStatus, ["hold", "confirmed", "pending"]),
+                    or(
+                        ne(bookings.bookingStatus, "hold"),
+                        gt(bookings.holdExpiresAt, now)
+                    )
+                ))
+                .where(inArray(gameStations.id, requestedStationIds))
+            : [];
+
+        if (dbRecords.length === 0 || new Set(dbRecords.map(s => s.stationId)).size !== requestedStationIds.length) {
             return {
                 success: false,
-                message: "NO STATIONS AVAILABLE"
+                message: "One or more selected Stations do not exist"
             }
         };
-        if (parsed.playersCount > bookedStationcheck.maxPlayers) {
+        const inactiveStations = dbRecords.filter((s) => !s.isActive);
+        if (inactiveStations.length > 0) {
             return {
                 success: false,
-                message: `You can choose max ${bookedStationcheck.maxPlayers} players for this device`
+                message: `Stations Under Maintenance: ${inactiveStations.map((s) => s.frontendLabel).join(", ")}`
             }
         };
-        if (parsed.playersCount <= 0) {
+
+        const conflict = dbRecords.find(s => s.conflictBookingId !== null);
+        if (conflict) {
             return {
                 success: false,
-                message: "Choose Atleast one player"
+                message: `Station ${conflict.frontendLabel} is already reserved for this time.`
             }
-        }
-        //Calculate price
-        // Base price = duration * hourlyRate
-        const totalAmount = (durationInHours * Number(bookedStationcheck.hourlyRate) * Number(parsed.playersCount)).toFixed(2);
-        //Run cleanup & Insert new booking with hold
+        };
+
+        const stationsMapped = new Map(dbRecords.map((s) => [s.stationId, s]));
+        let totalPlayers = 0;
+        let totalCalculatedAmount = 0;
+
+        for (const item of parsed.gameStations) {
+            //First get the station by id
+            const singleStation = stationsMapped.get(item.stationId)!;
+
+            //playerscount check 
+            if (item.playersCount <= 0 || item.playersCount > singleStation.maxPlayers) {
+                return {
+                    success: false,
+                    message: `Station ${singleStation.frontendLabel} allows 1 to ${singleStation.maxPlayers} players.`
+                };
+            };
+
+            //totalplayers add
+            totalPlayers += item.playersCount;
+            //totalamount calculate
+            totalCalculatedAmount += durationInHours * Number(singleStation.deviceHourlyRate) * item.playersCount;
+        };
+
         const holdExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        //Run cleanup & Insert new booking with hold
         const newBooking = await db.transaction(async (tx) => {
-            await tx.update(bookings)
-                .set({ bookingStatus: "cancelled" })
-                .where(and(
-                    inArray(bookings.bookingStatus, ["hold", "pending"]),
-                    lt(bookings.holdExpiresAt, now)
-                ));
-                
             const [insertedData] = await tx.insert(bookings).values({
-                gameStationId: bookedStationcheck.stationId,
+                userId: dbuser.userId,
                 endTime: convertedEndTime,
                 startTime: convertedStartTime,
-                totalAmount: totalAmount,
-                userId: dbuser.userId,
+                totalAmount: totalCalculatedAmount.toFixed(2),
                 bookingStatus: "hold",
                 holdExpiresAt: holdExpiresAt,
-                playersCount: parsed.playersCount
+                playersCount: totalPlayers
             }).returning();
+
+            const stationRows: Array<typeof bookingStations.$inferInsert> = parsed.gameStations.map((station) => ({
+                bookingId: insertedData.id,
+                gameStationId: station.stationId,
+                startTime: convertedStartTime,
+                endTime: convertedEndTime,
+                playersCount: station.playersCount
+            }));
+            await tx.insert(bookingStations).values(stationRows);
 
             return insertedData;
         });
@@ -544,7 +606,8 @@ export const verifyPayment = async (input: VerifySignatureInput): Promise<{
                 eq(bookings.id, parsedInput.bookingId),
                 eq(bookings.userId, dbuser.userId)
             ))
-            .innerJoin(gameStations, eq(bookings.gameStationId, gameStations.id))
+            .innerJoin(bookingStations, eq(bookingStations.bookingId, bookings.id))
+            .innerJoin(gameStations, eq(bookingStations.gameStationId, gameStations.id))
             .innerJoin(devices, eq(gameStations.deviceId, devices.id))
             .innerJoin(profiles, eq(bookings.userId, profiles.id));
 

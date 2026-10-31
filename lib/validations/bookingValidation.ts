@@ -3,7 +3,10 @@ import z from "zod";
 export const seatHoldSchema = z.object({
     endTime: z.iso.datetime({ offset: true }),
     startTime: z.iso.datetime({ offset: true }),
-    gameStationId: z.uuid(),
+    gameStations: z.array(z.object({
+        stationId: z.uuid(),
+        playersCount: z.number().nonnegative()
+    })).nonempty(),
     playersCount: z.number().int().nonnegative().min(1).default(1),
 });
 
