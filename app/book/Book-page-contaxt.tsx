@@ -14,15 +14,27 @@ import { devices, foodItems } from "@/src/db/schema";
 type FoodItemType = typeof foodItems.$inferSelect;
 type cartItemType = FoodItemType & { quantity: number };
 
-type SelectedDeviceType = typeof devices.$inferSelect;
-type SelectedDeviceArrayType = SelectedDeviceType & { players: number };
+export type SelectedDeviceArrayType = {
+  id: string;
+  stationId: string;
+  stationLabel?: string;
+  deviceId: string;
+  deviceName: string;
+  hourlyRate: string;
+  maxPlayers: number;
+  players: number;
+  units?: number | string;
+};
 
 type BookingContextType = {
   selectedArena: DeviceType;
   setSelectedArena: Dispatch<SetStateAction<DeviceType>>;
   selectedDevices: SelectedDeviceArrayType[];
-  toggleDevice: (device: SelectedDeviceType, players?: number) => void;
-  updateDevicePlayers: (deviceId: string, players: number) => void;
+  toggleDevice: (
+    station: { id: string; frontendLabel?: string },
+    device: typeof devices.$inferSelect,
+  ) => void;
+  updateDevicePlayers: (id: string, delta: number) => void;
   date: string;
   setDate: Dispatch<SetStateAction<string>>;
   startTime: string;
@@ -70,20 +82,36 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  // Simple actions:
-  function toggleDevice(device: typeof devices.$inferSelect) {
+  function toggleDevice(
+    station: { id: string; frontendLabel?: string },
+    device: typeof devices.$inferSelect,
+  ) {
     setSelectedDevices((prev) => {
-      const exists = prev.some((d) => d.id === device.id);
+      const exists = prev.some((d) => d.id === station.id);
       if (exists) {
-        return prev.filter((d) => d.id !== device.id); // Deselect
+        return prev.filter((d) => d.id !== station.id);
       }
-      return [...prev, { ...device, players: 1 }]; // Select with 1 player
+      return [
+        ...prev,
+        {
+          id: station.id,
+          stationId: station.id,
+          stationLabel: station.frontendLabel ?? "",
+          deviceId: device.id,
+          deviceName: device.deviceName,
+          hourlyRate: device.hourlyRate,
+          maxPlayers: device.maxPlayers,
+          players: 1,
+          units: 1,
+        },
+      ];
     });
   }
-  function updateDevicePlayers(deviceId: string, delta: number) {
+
+  function updateDevicePlayers(id: string, delta: number) {
     setSelectedDevices((prev) =>
       prev.map((d) => {
-        if (d.id !== deviceId) return d;
+        if (d.id !== id) return d;
         const nextCount = Math.min(
           d.maxPlayers,
           Math.max(1, d.players + delta),

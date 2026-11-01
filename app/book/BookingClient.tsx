@@ -7,19 +7,25 @@ import {
   createTimeSlots,
   getOperatingHours,
   minutesToTime,
+  toIndiaDateTime,
 } from "@/lib/utils/tools";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Arena, DeviceType } from "@/types/bookingTypes";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 import { ARENAS } from "@/lib/static-data/Booking-data";
 import type { devices } from "@/src/db/schema";
+import { DeviceWithStations } from "@/types/deviceTypes";
 
 type DeviceItem = typeof devices.$inferSelect;
 type SelectedDeviceItem = DeviceItem & { players: number };
 
 export interface BookingClientProps {
   initialDevice: DeviceType;
-  devices?: DeviceItem[];
+  devices?: DeviceWithStations[];
+  onAvailibilityCheck: (
+    startTime: string | Date,
+    endTime?: string | Date,
+  ) => Promise<{ error?: string; data?: any }>;
 }
 
 function toMinutes(t: string) {
@@ -166,7 +172,7 @@ function DeviceCard({
           ? undefined
           : (e) => (e.key === "Enter" || e.key === " " ? onToggle() : undefined)
       }
-      className={`rounded-2xl border p-1.5 md:p-3.5 transition-all duration-150 select-none ${
+      className={`rounded-2xl border p-3 md:p-3.5 transition-all duration-150 select-none ${
         isBooked
           ? "opacity-40 cursor-not-allowed border-black/30 dark:border-border bg-background"
           : isSelected
@@ -231,6 +237,7 @@ function DeviceCard({
 export default function BookingClient({
   initialDevice,
   devices = [],
+  onAvailibilityCheck,
 }: BookingClientProps) {
   const router = useRouter();
 
@@ -250,8 +257,8 @@ export default function BookingClient({
 
   // Flag: Shows "Check Availability" button after user picks a custom date/time
   const [hasCustomTimeSelected, setHasCustomTimeSelected] = useState(false);
-
-  // UI state placeholders: Set these according to your dynamic fetching logic
+  const [deviceList, setDeviceList] = useState<DeviceWithStations[]>(devices);
+  // UI state placeholders
   const [isLoadingDevices, setIsLoadingDevices] = useState(false);
   const [deviceFetchError, setDeviceFetchError] = useState<string | null>(null);
 
@@ -281,6 +288,27 @@ export default function BookingClient({
     setSelectedArena(key);
   }
 
+  async function handleCheckAvailability() {
+    setIsLoadingDevices(true);
+    setDeviceFetchError(null);
+    try {
+      const checkstartTime = toIndiaDateTime(date, startTime);
+      const checkendTime = toIndiaDateTime(date, endTime);
+      const result = await onAvailibilityCheck(checkstartTime, checkendTime);
+      if (result.error) {
+        setIsLoadingDevices(false);
+        setDeviceFetchError(result.error);
+        return;
+      }
+
+      setDeviceList(result.data);
+    } catch (err) {
+      setDeviceFetchError("Could not connect to server. Please try again.");
+    } finally {
+      setIsLoadingDevices(false);
+    }
+  }
+
   function handleDateChange(nextDate: string) {
     const hours = getOperatingHours(nextDate);
     const currentStart = toMinutes(startTime);
@@ -304,10 +332,13 @@ export default function BookingClient({
     setHasCustomTimeSelected(true);
   }
 
-  const visibleDevices = devices.filter(
+  const visibleDevices = deviceList.filter(
     (d) => d.type.toUpperCase() === selectedArena,
   );
-  const freeUnits = visibleDevices.length;
+
+  const arenaStations = visibleDevices.flatMap((d) => d.game_stations ?? []);
+  const totalUnits = arenaStations.length;
+  const freeUnits = arenaStations.filter((s) => !s.isBooked).length;
 
   return (
     <section className="flex flex-col gap-8 md:gap-10">
@@ -408,13 +439,10 @@ export default function BookingClient({
               : "10:00 AM - 8:00 PM on weekdays."}
           </p>
 
-          {/* Action: Check Availability button (Visible once user picks custom date/time) */}
           {hasCustomTimeSelected && (
             <button
               type="button"
-              onClick={() => {
-                // TODO: Wire up getDevices({ startTime, endTime }) here
-              }}
+              onClick={handleCheckAvailability}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-xs md:text-sm font-bold text-accent-foreground shadow-sm hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               Check Availability
@@ -427,7 +455,7 @@ export default function BookingClient({
       <div className="flex flex-col gap-8 md:gap-10">
         {isLoadingDevices ? (
           /* ========================================================================= */
-          /* PLACEHOLDER: ADD YOUR LOADER COMPONENT HERE                               */
+          /* PLACEHOLDER: ADD LOADER COMPONENT HERE IN FUTURE                          */
           /* ========================================================================= */
           <div className="rounded-2xl border border-border bg-card/50 p-12 text-center flex flex-col items-center justify-center gap-3 animate-pulse">
             {/* Replace this div with your custom loader component */}
@@ -457,10 +485,7 @@ export default function BookingClient({
             </div>
             <button
               type="button"
-              onClick={() => {
-                // TODO: Call your retry fetch logic here
-                setDeviceFetchError(null);
-              }}
+              onClick={handleCheckAvailability}
               className="mt-2 inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-xs md:text-sm font-semibold hover:bg-muted transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               <RotateCw size={14} />
@@ -500,33 +525,35 @@ export default function BookingClient({
               </div>
 
               {/* Scrollable device grid */}
-              <div className="max-h-[420px] overflow-y-auto rounded-2xl border border-black/12 dark:border-border bg-foreground/1 dark:bg-muted/20 p-3 scrollbar-thin">
+              <div className="max-h-105 overflow-y-auto rounded-2xl border border-black/12 dark:border-border bg-foreground/1 dark:bg-muted/20 p-3 scrollbar-thin">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {visibleDevices.map((device, index) => {
-                    const selected = selectedDevices.find(
-                      (selectedDevice) => selectedDevice.id === device.id,
-                    );
-                    const isSelected = Boolean(selected);
-                    const players = selected?.players ?? 0;
+                  {visibleDevices.flatMap((device) =>
+                    device.game_stations.map((station, index) => {
+                      const selected = selectedDevices.find(
+                        (selectedDevice) => selectedDevice.id === station.id,
+                      );
+                      const isSelected = Boolean(selected);
+                      const players = selected?.players ?? 0;
 
-                    return (
-                      <DeviceCard
-                        key={device.id}
-                        arena={arena}
-                        deviceNumber={index + 1}
-                        isBooked={false}
-                        players={players}
-                        onToggle={() => toggleDevice(device)}
-                        onAdjust={(delta) =>
-                          updateDevicePlayers(device.id, players + delta)
-                        }
-                      />
-                    );
-                  })}
+                      return (
+                        <DeviceCard
+                          key={station.id}
+                          arena={arena}
+                          deviceNumber={index + 1}
+                          isBooked={station.isBooked}
+                          players={players}
+                          onToggle={() => toggleDevice(station, device)}
+                          onAdjust={(delta) =>
+                            updateDevicePlayers(station.id, delta)
+                          }
+                        />
+                      );
+                    }),
+                  )}
                 </div>
               </div>
-              <p className="text-[12px] text-muted-foreground mt-2.5">
-                You book the whole device unit, whatever the player count.
+              <p className="text-[12px] md:mb-12 text-muted-foreground mt-2.5">
+                You book the whole device unit, Per player charge.
               </p>
             </div>
           </>

@@ -242,3 +242,7 @@ export function formatConsoleName(input: string): string {
 
     return (abbreviation + numbers.join("")).toUpperCase();
 };
+
+export function toIndiaDateTime(date: string, time: string): string {
+    return `${date}T${time}:00+05:30`;
+}

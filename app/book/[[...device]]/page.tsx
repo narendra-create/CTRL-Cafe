@@ -19,10 +19,31 @@ export default async function BookPage({ params }: Props) {
     ? (value as DeviceType)
     : "CONSOLE";
 
-  // const { data: DeviceList = [] } = await getDevices();
-  const DeviceList = mockupDevices;
+  const { data: DeviceList = [] } = await getDevices();
+  // const DeviceList = mockupDevices;
+
+  async function CheckAvailableStations(
+    startTime: string | Date,
+    endTime?: string | Date,
+  ) {
+    "use server";
+    const result = await getDevices({ startTime, endTime });
+    if (!result.success) {
+      return {
+        error: result.message,
+      };
+    }
+
+    return {
+      data: result.data,
+    };
+  }
 
   return (
-    <BookingClient initialDevice={initialDevice} devices={DeviceList ?? []} />
+    <BookingClient
+      initialDevice={initialDevice}
+      devices={DeviceList ?? []}
+      onAvailibilityCheck={CheckAvailableStations}
+    />
   );
 }

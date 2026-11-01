@@ -41,6 +41,8 @@
 - [x] Get booked seats
 - [x] IMPORTENT = make bookingController capable of handling many devices and stations booking at once
 - [x] review bookingcontroller function - holdseat and bookseat and verifypayment then move to the next task
+- [ ] add a seed file for devices + games + some bookings and fooditem
+- [ ] test the booking system from start to end
 
 ## Importent on 09/11/2026
 
@@ -85,6 +87,7 @@
 - [ ] Run sql code for triggers and hooks in supabase dashboard
 - [ ] Update otp verification email template - privacy policy link and ctrl cafe logo
 - [ ] cron jobs for cleaning hold/pending status bookings and their bookingStation table rows
+
 #### Version 2 update features
 
 - [ ] Subscription plans
