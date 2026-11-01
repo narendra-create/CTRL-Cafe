@@ -8,6 +8,15 @@ export type deviceCardType = {
     units: string | number;
 };
 
+export type getDeviceInputType = {
+    startTime?: string | Date;
+    endTime?: string | Date;
+}
+
+export type StationWithStatus = typeof gameStations.$inferSelect & {
+    isBooked: boolean;
+};
+
 export type DeviceWithStations = typeof devices.$inferSelect & {
-    game_stations: Array<typeof gameStations.$inferSelect>;
+    game_stations: Array<StationWithStatus>;
 };

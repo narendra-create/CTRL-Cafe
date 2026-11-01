@@ -1,11 +1,11 @@
 "use server";
 import { db } from "@/src/index";
-import { devices, gameStations } from "@/src/db/schema";
+import { bookings, bookingStations, devices, gameStations } from "@/src/db/schema";
 import { checkAccountType, isLoggedIn } from "@/lib/actions/authorizationCheck";
 import { deviceAddSchema, updateDeviceSchema, type deviceAddInput, type updateDeviceInput } from "@/lib/validations/deviceValidation";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, lt, ne, or } from "drizzle-orm";
 import { formatConsoleName } from "@/lib/utils/tools";
-import { DeviceWithStations } from "@/types/deviceTypes";
+import { DeviceWithStations, getDeviceInputType } from "@/types/deviceTypes";
 
 export const addDevice = async (input: deviceAddInput): Promise<{
     success: boolean;
@@ -183,22 +183,53 @@ export const getDeviceTypes = async (): Promise<{
     }
 };
 
-export const getDevices = async (): Promise<{
+export const getDevices = async (input?: getDeviceInputType): Promise<{
     success: boolean;
     message?: string;
     data?: DeviceWithStations[]
 }> => {
     try {
-        const gotDevices = await db.query.devices.findMany({
-            with: {
-                game_stations: true
-            },
-            orderBy: (devices, { asc }) => [asc(devices.deviceName)]
-        });
+        const now = new Date();
+
+        const starting = input?.startTime ? new Date(input.startTime) : now;
+        const ending = input?.endTime ? new Date(input.endTime) : new Date(starting.getTime() + 2 * 60 * 60 * 1000); //Two hours after starttime
+        const [gotDevices, bookedRows] = await Promise.all([
+            await db.query.devices.findMany({
+                with: {
+                    game_stations: true
+                },
+                orderBy: (devices, { asc }) => [asc(devices.deviceName)]
+            }),
+
+            await db.select({ stationId: bookingStations.gameStationId }).from(bookingStations)
+                .innerJoin(bookings, eq(bookings.id, bookingStations.bookingId))
+                .where(
+                    and(
+                        eq(bookings.isArchived, false),
+                        inArray(bookings.bookingStatus, ["hold", "pending", "confirmed"]),
+                        or(
+                            ne(bookings.bookingStatus, "hold"),
+                            gt(bookings.holdExpiresAt, now)
+                        ),
+                        lt(bookings.startTime, ending),
+                        gt(bookings.endTime, starting)
+                    )
+                )
+        ]);
+
+        const bookedStations = new Set(bookedRows.map(row => row.stationId));
+
+        const data: DeviceWithStations[] = gotDevices.map((device) => ({
+            ...device,
+            game_stations: device.game_stations.map((station) => ({
+                ...station,
+                isBooked: bookedStations.has(station.id)
+            }))
+        }))
 
         return {
             success: true,
-            data: gotDevices
+            data
         };
     }
     catch (err) {
