@@ -38,7 +38,7 @@
 - [ ] Account connecting logic in settings page
 - [x] refactor seat booking by adding a new table for different units
 - [x] replace logic on controllers for making space for gameStations table
-- [ ] Get booked seats
+- [x] Get booked seats
 - [x] IMPORTENT = make bookingController capable of handling many devices and stations booking at once
 - [x] review bookingcontroller function - holdseat and bookseat and verifypayment then move to the next task
 
