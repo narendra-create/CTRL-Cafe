@@ -188,7 +188,7 @@ export const getBookingDetails = async (input: getBookingDetailsInput): Promise<
             message: "Something Went Wrong, Try again"
         }
     }
-}
+};
 
 export const getBookingHistory = async (): Promise<{
     success: boolean;
@@ -480,7 +480,7 @@ export const bookSeat = async (input: BookSeatInput): Promise<{
                 success: false,
                 message: `Items out of stock: ${outOfStock.map(i => i.name).join(", ")}`
             };
-        }
+        };
         //Filtering which foodItems Details are found in database
         const foundIds = new Set(
             foodItemsforBooking.map((item) => item.id)

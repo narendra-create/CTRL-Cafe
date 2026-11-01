@@ -40,7 +40,7 @@
 - [x] replace logic on controllers for making space for gameStations table
 - [ ] Get booked seats
 - [x] IMPORTENT = make bookingController capable of handling many devices and stations booking at once
-- [ ] review bookingcontroller function - holdseat and bookseat and verifypayment then move to the next task
+- [x] review bookingcontroller function - holdseat and bookseat and verifypayment then move to the next task
 
 ## Importent on 09/11/2026
 
