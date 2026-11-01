@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Minus, Plus } from "lucide-react";
+import { AlertCircle, Minus, Plus, RotateCw } from "lucide-react";
 import { DatePickerSimple } from "@/components/Date-Picker";
 import {
   createTimeSlots,
@@ -248,11 +248,12 @@ export default function BookingClient({
     updateDevicePlayers,
   } = useBooking();
 
-  // Local state for device selections per arena (arenaKey -> { deviceIndex: playerCount })
-  // Self-contained until you wire up your external dynamic backend / context logic
-  const [localSelections, setLocalSelections] = useState<
-    Partial<Record<DeviceType, Record<number, number>>>
-  >({});
+  // Flag: Shows "Check Availability" button after user picks a custom date/time
+  const [hasCustomTimeSelected, setHasCustomTimeSelected] = useState(false);
+
+  // UI state placeholders: Set these according to your dynamic fetching logic
+  const [isLoadingDevices, setIsLoadingDevices] = useState(false);
+  const [deviceFetchError, setDeviceFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedArena(initialDevice);
@@ -270,7 +271,6 @@ export default function BookingClient({
   );
 
   const arena = ARENAS.find((a) => a.key === selectedArena)!;
-  const currentSel = localSelections[selectedArena] ?? {};
 
   const durationHours = Math.max(
     0,
@@ -301,30 +301,7 @@ export default function BookingClient({
     setDate(nextDate);
     setStartTime(nextStart);
     setEndTime(nextEnd);
-  }
-
-  function handleDeviceToggle(deviceIndex: number) {
-    setLocalSelections((prev) => {
-      const sel = { ...(prev[selectedArena] ?? {}) };
-      if (sel[deviceIndex]) {
-        delete sel[deviceIndex];
-      } else {
-        sel[deviceIndex] = 1;
-      }
-      return { ...prev, [selectedArena]: sel };
-    });
-  }
-
-  function handleAdjust(deviceIndex: number, delta: number) {
-    setLocalSelections((prev) => {
-      const sel = { ...(prev[selectedArena] ?? {}) };
-      const current = sel[deviceIndex] ?? 1;
-      sel[deviceIndex] = Math.min(
-        arena.maxPlayers,
-        Math.max(1, current + delta),
-      );
-      return { ...prev, [selectedArena]: sel };
-    });
+    setHasCustomTimeSelected(true);
   }
 
   const visibleDevices = devices.filter(
@@ -334,7 +311,7 @@ export default function BookingClient({
 
   return (
     <section className="flex flex-col gap-8 md:gap-10">
-      {/* Section: Header */}
+      {/* 1. Section: Header */}
       <div className="mt-6 md:mt-8 mb-4 md:mb-6">
         <h1 className="text-3xl md:text-7xl font-bold tracking-[-0.03em] leading-tight">
           Reserve a device<span className="text-accent">.</span>
@@ -345,65 +322,7 @@ export default function BookingClient({
         </p>
       </div>
 
-      {/* Section: Arena Selection */}
-      <div>
-        <SectionLabel>Choose your arena</SectionLabel>
-        <div className="grid grid-cols-2 md:grid-cols-4 md:max-w-[88%] gap-1.5 bg-foreground dark:bg-foreground/98 border border-border rounded-[18px] p-1.5">
-          {ARENAS.map((a) => (
-            <ArenaTab
-              key={a.key}
-              arena={a}
-              isSelected={selectedArena === a.key}
-              onClick={() => handleArenaChange(a.key)}
-            />
-          ))}
-        </div>
-        <ArenaInfoCard arena={arena} freeUnits={freeUnits} />
-      </div>
-
-      {/* Section: Device Picker */}
-      <div>
-        <div className="flex items-baseline justify-between mb-3">
-          <SectionLabel>
-            Pick your {arena.label.toLowerCase()} devices
-          </SectionLabel>
-          <span className="text-[11px] md:text-[12px] text-red-600 dark:text-red-400 font-semibold -mt-3">
-            {freeUnits} of {arena.totalUnits} available
-          </span>
-        </div>
-
-        {/* Scrollable device grid */}
-        <div className="max-h-[420px] overflow-y-auto rounded-2xl border border-black/12 dark:border-border bg-foreground/1 dark:bg-muted/20 p-3 scrollbar-thin">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {visibleDevices.map((device, index) => {
-              const selected = selectedDevices.find(
-                (selectedDevice) => selectedDevice.id === device.id,
-              );
-              const isSelected = Boolean(selected);
-              const players = selected?.players ?? 0;
-
-              return (
-                <DeviceCard
-                  key={device.id}
-                  arena={arena}
-                  deviceNumber={index + 1}
-                  isBooked={false}
-                  players={players}
-                  onToggle={() => toggleDevice(device)}
-                  onAdjust={(delta) =>
-                    updateDevicePlayers(device.id, players + delta)
-                  }
-                />
-              );
-            })}
-          </div>
-        </div>
-        <p className="text-[12px] text-muted-foreground mt-2.5">
-          You book the whole device unit, whatever the player count.
-        </p>
-      </div>
-
-      {/* Section: Date and Time */}
+      {/* 2. Section: Date and Time (Moved to Top) */}
       <div>
         <SectionLabel>Date and time</SectionLabel>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -437,6 +356,7 @@ export default function BookingClient({
                   const nextStartMinutes = toMinutes(nextStart);
 
                   setStartTime(nextStart);
+                  setHasCustomTimeSelected(true);
 
                   if (
                     toMinutes(endTime) <= nextStartMinutes ||
@@ -472,18 +392,145 @@ export default function BookingClient({
 
                   if (selected) {
                     setEndTime(selected.value);
+                    setHasCustomTimeSelected(true);
                   }
                 }}
               />
             </div>
           </div>
         </div>
-        <p className="text-[12px] text-muted-foreground mt-2.5">
-          {durationHours} hour{durationHours !== 1 ? "s" : ""} session · Open{" "}
-          {operatingHours.isWeekend
-            ? "9:00 AM - 10:00 PM on Saturdays and Sundays."
-            : "10:00 AM - 8:00 PM on weekdays."}
-        </p>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-3">
+          <p className="text-[12px] text-muted-foreground">
+            {durationHours} hour{durationHours !== 1 ? "s" : ""} session · Open{" "}
+            {operatingHours.isWeekend
+              ? "9:00 AM - 10:00 PM on Saturdays and Sundays."
+              : "10:00 AM - 8:00 PM on weekdays."}
+          </p>
+
+          {/* Action: Check Availability button (Visible once user picks custom date/time) */}
+          {hasCustomTimeSelected && (
+            <button
+              type="button"
+              onClick={() => {
+                // TODO: Wire up getDevices({ startTime, endTime }) here
+              }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-xs md:text-sm font-bold text-accent-foreground shadow-sm hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              Check Availability
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Section: Arena & Device Selector (Moved to Bottom with Loader & Error UI) */}
+      <div className="flex flex-col gap-8 md:gap-10">
+        {isLoadingDevices ? (
+          /* ========================================================================= */
+          /* PLACEHOLDER: ADD YOUR LOADER COMPONENT HERE                               */
+          /* ========================================================================= */
+          <div className="rounded-2xl border border-border bg-card/50 p-12 text-center flex flex-col items-center justify-center gap-3 animate-pulse">
+            {/* Replace this div with your custom loader component */}
+            <p className="text-sm font-semibold text-muted-foreground">
+              Checking available devices & stations...
+            </p>
+          </div>
+        ) : deviceFetchError ? (
+          /* ========================================================================= */
+          /* ERROR UI: Shown when device/station availability check fails              */
+          /* ========================================================================= */
+          <div
+            role="alert"
+            className="rounded-2xl border border-red-500/20 bg-red-500/5 dark:bg-red-500/10 p-6 md:p-8 text-center flex flex-col items-center justify-center gap-3"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
+              <AlertCircle size={24} />
+            </div>
+            <div>
+              <h3 className="text-base md:text-lg font-bold text-foreground">
+                Unable to load devices
+              </h3>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1 max-w-md">
+                {deviceFetchError ||
+                  "We could not check device availability for the selected time. Please try again."}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                // TODO: Call your retry fetch logic here
+                setDeviceFetchError(null);
+              }}
+              className="mt-2 inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-xs md:text-sm font-semibold hover:bg-muted transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              <RotateCw size={14} />
+              Try Again
+            </button>
+          </div>
+        ) : (
+          /* ========================================================================= */
+          /* STATIONS & DEVICES: Arena selection and device grid                      */
+          /* ========================================================================= */
+          <>
+            {/* Arena Selection */}
+            <div>
+              <SectionLabel>Choose your arena</SectionLabel>
+              <div className="grid grid-cols-2 md:grid-cols-4 md:max-w-[88%] gap-1.5 bg-foreground dark:bg-foreground/98 border border-border rounded-[18px] p-1.5">
+                {ARENAS.map((a) => (
+                  <ArenaTab
+                    key={a.key}
+                    arena={a}
+                    isSelected={selectedArena === a.key}
+                    onClick={() => handleArenaChange(a.key)}
+                  />
+                ))}
+              </div>
+              <ArenaInfoCard arena={arena} freeUnits={freeUnits} />
+            </div>
+
+            {/* Device Picker */}
+            <div>
+              <div className="flex items-baseline justify-between mb-3">
+                <SectionLabel>
+                  Pick your {arena.label.toLowerCase()} devices
+                </SectionLabel>
+                <span className="text-[11px] md:text-[12px] text-red-600 dark:text-red-400 font-semibold -mt-3">
+                  {freeUnits} of {arena.totalUnits} available
+                </span>
+              </div>
+
+              {/* Scrollable device grid */}
+              <div className="max-h-[420px] overflow-y-auto rounded-2xl border border-black/12 dark:border-border bg-foreground/1 dark:bg-muted/20 p-3 scrollbar-thin">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {visibleDevices.map((device, index) => {
+                    const selected = selectedDevices.find(
+                      (selectedDevice) => selectedDevice.id === device.id,
+                    );
+                    const isSelected = Boolean(selected);
+                    const players = selected?.players ?? 0;
+
+                    return (
+                      <DeviceCard
+                        key={device.id}
+                        arena={arena}
+                        deviceNumber={index + 1}
+                        isBooked={false}
+                        players={players}
+                        onToggle={() => toggleDevice(device)}
+                        onAdjust={(delta) =>
+                          updateDevicePlayers(device.id, players + delta)
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+              <p className="text-[12px] text-muted-foreground mt-2.5">
+                You book the whole device unit, whatever the player count.
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
