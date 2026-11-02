@@ -34,7 +34,7 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
         authUser: r.one.authUsers({
             from: r.profiles.id,
             to: r.authUsers.id,
-            optional: false
+            optional: true
         })
     },
 

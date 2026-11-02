@@ -55,10 +55,7 @@ export const profiles = pgTable("profiles", {
     /* Same UUID as Supabase auth.users.id */
     id: uuid("id")
         .primaryKey()
-        .notNull()
-        .references(() => authUsers.id, {
-            onDelete: "cascade",
-        }),
+        .notNull(),
 
     /* Profile information*/
     fullName: text("full_name"),
@@ -79,6 +76,8 @@ export const profiles = pgTable("profiles", {
         .defaultNow()
         .notNull()
         .$onUpdate(() => new Date()),
+
+    deletedAt: timestamp("deleted_at")
 }, (table) => [
     pgPolicy("users_can_select_their_profile", {
         for: "select",
