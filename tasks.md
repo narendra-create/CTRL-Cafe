@@ -81,6 +81,7 @@
 - [ ] redirect user to /book if booking id not provided in /snacks and /review endpoints
 - [ ] Test this flow = Select device - choose snacks - review page - pay
 - [ ] add functionality to get device unit selected into sidebar, means user can select 2 ps4 or 1, and ps4 has total 5 units, each has players count
+- [ ] add players rate too in grandtotal in sidebar
 
 ## Run this checklist after deployement
 
