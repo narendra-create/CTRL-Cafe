@@ -71,14 +71,14 @@
 - [ ] Wire up new profile controller functions in setttings page
 - [x] add checks in booking page for date, time, user logged in or not
 - [ ] make handlesubmit in sidebar
-- [ ] implement url based stages of booking
+- [x] implement url based stages of booking
 - [x] add use context for booking page
 - [x] add getDevices function in booking page
 - [x] wire up bookingclient to show real data instead of mock data
 - [x] add foodItems showing section in the sidebar below devices
 - [x] add seed file for foodItems
 - [x] seed file for devices and other things
-- [ ] redirect user to /book if booking id not provided in /snacks and /review endpoints
+- [x] redirect user to /book if booking id not provided in /snacks and /review endpoints
 - [ ] Test this flow = Select device - choose snacks - review page - pay
 - [ ] add functionality to get device unit selected into sidebar, means user can select 2 ps4 or 1, and ps4 has total 5 units, each has players count
 - [x] add players rate too in grandtotal in sidebar
