@@ -568,6 +568,91 @@ export const bookSeat = async (input: BookSeatInput): Promise<{
     }
 };
 
+export const cancelBooking = async (bookingId: string): Promise<{
+    success: boolean;
+    message?: string;
+}> => {
+    try {
+        const { error: authError, dbuser } = await resolveAuthenticatedUser("user");
+        if (authError) return authError;
+        if (!bookingId) return { success: false, message: "Please Provide booking Id" };
+        const [bookingFound] = await db.select().from(bookings).where(and(
+            eq(bookings.userId, dbuser.userId),
+            eq(bookings.id, bookingId),
+            eq(bookings.isArchived, false)
+        ));
+
+        if (!bookingFound) {
+            return {
+                success: false,
+                message: "Booking Not Found"
+            }
+        };
+
+        if (bookingFound.bookingStatus === "completed" || bookingFound.bookingStatus === "cancelled") {
+            return {
+                success: false,
+                message: `Your Booking is Already ${bookingFound.bookingStatus}`
+            }
+        };
+        const now = new Date();
+
+        if (bookingFound.bookingStatus === "confirmed") {
+            await db.transaction(async (tx) => {
+                await tx.update(bookings).set({
+                    bookingStatus: "cancelled",
+                    cancelledAt: now,
+                    holdExpiresAt: now,
+                }).where(and(
+                    eq(bookings.userId, dbuser.userId),
+                    eq(bookings.id, bookingFound.id)
+                ));
+
+                if (bookingFound.rewardGranted) {
+                    await tx.update(profiles).set({
+                        rewardPoints: Math.max(0, Number(profiles.rewardPoints) - 65)
+                    });
+                };
+
+                await tx.delete(bookingStations).where(and(
+                    eq(bookingStations.bookingId, bookingFound.id)
+                ));
+            });
+            return {
+                success: true,
+                message: "Booking Cancelled"
+            }
+        }
+        else {
+            await db.transaction(async (tx) => {
+                await tx.update(bookings).set({
+                    bookingStatus: "cancelled",
+                    cancelledAt: now,
+                    holdExpiresAt: now
+                }).where(and(
+                    eq(bookings.id, bookingFound.id),
+                    eq(bookings.userId, dbuser.userId),
+                    inArray(bookings.bookingStatus, ["hold", "pending"])
+                ));
+
+                await tx.delete(bookingStations).where(eq(bookingStations.bookingId, bookingFound.id));
+            });
+
+            return {
+                success: true,
+                message: "Booking Cancelled"
+            }
+        }
+    }
+    catch (err) {
+        console.error("[cancelBooking]: ", err);
+        return {
+            success: false,
+            message: "Something Went Wrong"
+        }
+    }
+}
+
 export const verifyPayment = async (input: VerifySignatureInput): Promise<{
     success: boolean;
     message?: string;
