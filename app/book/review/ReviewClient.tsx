@@ -94,8 +94,8 @@ export function ReviewHeader({ onCancel }: { onCancel: () => void }) {
       </h1>
 
       <p className="text-muted-foreground text-xs md:text-base mt-2 max-w-[46em] leading-relaxed">
-        Double check your rigs, food orders, and CTRL rewards below. Payment opens in
-        Razorpay when you tap Pay in the booking summary.
+        Double check your rigs, food orders, and CTRL rewards below. Payment
+        opens in Razorpay when you tap Pay in the booking summary.
       </p>
     </div>
   );
@@ -109,9 +109,17 @@ export function ScheduleBriefingCard({
 }) {
   const items = [
     { label: "Date", value: schedule.dateFormatted, icon: Calendar },
-    { label: "Session Window", value: `${schedule.startsAt} – ${schedule.endsAt}`, icon: Clock },
+    {
+      label: "Session Window",
+      value: `${schedule.startsAt} – ${schedule.endsAt}`,
+      icon: Clock,
+    },
     { label: "Duration", value: schedule.durationFormatted, icon: Timer },
-    { label: "Total Squad", value: `${schedule.totalPlayers} Players`, icon: Users },
+    {
+      label: "Total Squad",
+      value: `${schedule.totalPlayers} Players`,
+      icon: Users,
+    },
   ];
 
   return (
@@ -156,8 +164,11 @@ export function ScheduleBriefingCard({
         <div className="flex items-center gap-3 rounded-xl border border-dashed border-accent/60 bg-accent/10 px-4 py-3 text-xs text-foreground/90">
           <Clock className="size-4 text-accent-foreground dark:text-accent shrink-0" />
           <p className="leading-relaxed">
-            <span className="font-semibold text-foreground">Front Desk Advisory:</span>{" "}
-            {schedule.arrivalWindow}. Your stations will be powered up and pre-loaded with games.
+            <span className="font-semibold text-foreground">
+              Front Desk Advisory:
+            </span>{" "}
+            {schedule.arrivalWindow}. Your stations will be powered up and
+            pre-loaded with games.
           </p>
         </div>
       </div>
@@ -166,11 +177,7 @@ export function ScheduleBriefingCard({
 }
 
 /* Section: Reserved Rigs & Station Setups */
-export function DeviceSetupsVisual({
-  setups,
-}: {
-  setups: DeviceSetupCard[];
-}) {
+export function DeviceSetupsVisual({ setups }: { setups: DeviceSetupCard[] }) {
   return (
     <section aria-labelledby="rigs-heading" className="space-y-4">
       <div className="flex items-center justify-between pb-1">
@@ -270,11 +277,7 @@ export function DeviceSetupsVisual({
 }
 
 /* Section: Snack Bar Orders with Item Images x Quantity */
-export function SnackVisualCards({
-  snacks,
-}: {
-  snacks: SnackVisualItem[];
-}) {
+export function SnackVisualCards({ snacks }: { snacks: SnackVisualItem[] }) {
   return (
     <section aria-labelledby="snacks-visual-heading" className="space-y-4">
       <div className="flex items-center justify-between pb-1">
@@ -315,7 +318,9 @@ export function SnackVisualCards({
               {/* Quantity Overlay Badge */}
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1 rounded-lg bg-accent text-accent-foreground px-2.5 py-1 text-xs font-black font-mono shadow-md">
                 <span>{snack.quantity}×</span>
-                <span className="text-[10px] font-sans font-bold uppercase">Ordered</span>
+                <span className="text-[10px] font-sans font-bold uppercase">
+                  Ordered
+                </span>
               </div>
 
               {/* Servings badge */}
@@ -350,11 +355,7 @@ export function SnackVisualCards({
 }
 
 /* Section: Rewards Earned After Payment */
-export function RewardsEarnedCard({
-  rewards,
-}: {
-  rewards: RewardsSummary;
-}) {
+export function RewardsEarnedCard({ rewards }: { rewards: RewardsSummary }) {
   const progressPercent = Math.round(
     (rewards.totalPointsEarned / rewards.goalForFreeHour) * 100,
   );
@@ -388,7 +389,8 @@ export function RewardsEarnedCard({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Earned at {rewards.pointsPerHour} points/hour across {rewards.hoursBooked} hours of booked play.
+              Earned at {rewards.pointsPerHour} points/hour across{" "}
+              {rewards.hoursBooked} hours of booked play.
             </p>
           </div>
 
@@ -405,7 +407,8 @@ export function RewardsEarnedCard({
               Progress to 1 Free Gaming Hour
             </span>
             <span className="font-mono text-muted-foreground">
-              {rewards.totalPointsEarned} / {rewards.goalForFreeHour} points ({progressPercent}%)
+              {rewards.totalPointsEarned} / {rewards.goalForFreeHour} points (
+              {progressPercent}%)
             </span>
           </div>
 
@@ -478,7 +481,8 @@ export function RazorpayBriefingCard({
                 </span>
               </p>
               <p className="text-xs text-muted-foreground">
-                Payment opens instantly in the Razorpay popup when you tap Pay in the sidebar.
+                Payment opens instantly in the Razorpay popup when you tap Pay
+                in the sidebar.
               </p>
             </div>
           </div>
@@ -487,7 +491,8 @@ export function RazorpayBriefingCard({
         {/* Supported Payment Channels */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {payment.supportedMethods.map((method, idx) => {
-            const Icon = idx === 0 ? QrCode : idx === 1 ? CreditCard : Building2;
+            const Icon =
+              idx === 0 ? QrCode : idx === 1 ? CreditCard : Building2;
             return (
               <div
                 key={method.category}
@@ -508,7 +513,10 @@ export function RazorpayBriefingCard({
         {/* Guarantees checklist */}
         <div className="rounded-xl bg-muted/40 dark:bg-zinc-900/30 border border-border/50 p-3.5 space-y-1.5">
           {payment.guarantees.map((guarantee) => (
-            <div key={guarantee} className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div
+              key={guarantee}
+              className="flex items-center gap-2 text-xs text-muted-foreground"
+            >
               <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
               <span>{guarantee}</span>
             </div>
@@ -528,7 +536,8 @@ export function CancelBookingFooter({ onCancel }: { onCancel: () => void }) {
           Need to change your plan?
         </p>
         <p className="text-xs text-muted-foreground">
-          Cancelling will release your reserved stations and return to the device selection screen.
+          Cancelling will release your reserved stations and return to the
+          device selection screen.
         </p>
       </div>
 
@@ -544,14 +553,23 @@ export function CancelBookingFooter({ onCancel }: { onCancel: () => void }) {
 }
 
 /* Section: Main Review Client Component */
-export default function ReviewClient({ data }: { data: BookingReviewData }) {
+export default function ReviewClient({
+  data,
+  onCancel,
+  bookingId,
+}: {
+  data: BookingReviewData;
+  onCancel: (
+    bookingId: string,
+  ) => Promise<{ success: boolean; message?: string }>;
+  bookingId: string;
+}) {
   const router = useRouter();
   const { setSelectedDevices, setSelectedFoods } = useBooking();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  function handleCancelBooking() {
-    setSelectedDevices([]);
-    setSelectedFoods([]);
+  async function handleCancelBooking() {
+    const result = await onCancel(bookingId);
     router.push("/book");
   }
 
