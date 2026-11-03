@@ -74,7 +74,7 @@
 - [ ] implement url based stages of booking
 - [x] add use context for booking page
 - [x] add getDevices function in booking page
-- [ ] wire up bookingclient to show real data instead of mock data
+- [x] wire up bookingclient to show real data instead of mock data
 - [x] add foodItems showing section in the sidebar below devices
 - [x] add seed file for foodItems
 - [x] seed file for devices and other things
