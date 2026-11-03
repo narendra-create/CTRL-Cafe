@@ -62,19 +62,19 @@ export const getProfileDetails = async (): Promise<{
     }
 };
 
-export const updateProfile = async (): Promise<{
-    success: boolean;
-    message?: string;
-    data?: typeof profiles.$inferSelect
-}> => {
-    try {
+// export const updateProfile = async (): Promise<{
+//     success: boolean;
+//     message?: string;
+//     data?: typeof profiles.$inferSelect
+// }> => {
+//     try {
 
-    }
-    catch (err) {
-        console.error("[updateProfile]: ", err);
-        return {
-            success: false,
-            message: "Something Went Wrong"
-        }
-    }
-}
+//     }
+//     catch (err) {
+//         console.error("[updateProfile]: ", err);
+//         return {
+//             success: false,
+//             message: "Something Went Wrong"
+//         }
+//     }
+// }
