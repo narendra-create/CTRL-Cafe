@@ -45,9 +45,14 @@ export default function BookingSidebar() {
 
   // Price calculation becomes 3 clean lines:
   const devicePrices = selectedDevices.reduce(
-    (sum, dev) => sum + Number(dev.hourlyRate) * durationHours,
+    (sum, device) =>
+      sum +
+      Number(device.hourlyRate) *
+        Number(device.players) *
+        Number(durationHours),
     0,
   );
+
   const totalDevices = selectedDevices.length;
   const totalPlayers = selectedDevices.reduce((sum, d) => sum + d.players, 0);
   const foodItemPrices = selectedFoods.reduce(
