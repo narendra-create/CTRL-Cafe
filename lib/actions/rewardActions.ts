@@ -43,7 +43,7 @@ export const redeemPoints = async (userId: string): Promise<{
     currentPoints?: string;
     message?: string;
 }> => {
-    const [findUser] = await db.select({ availablePoints: profiles.rewardPoints }).from(profiles).where(eq(profiles.id, userId));
+    const [findUser] = await db.select({ availablePoints: profiles.rewardPoints, id: profiles.id }).from(profiles).where(eq(profiles.id, userId));
     if (!findUser) return { success: false, message: "User Not Found" };
     if (findUser.availablePoints < 65) {
         return {
@@ -53,7 +53,7 @@ export const redeemPoints = async (userId: string): Promise<{
     };
 
     try {
-        const [profile] = await db.update(profiles).set({ rewardPoints: sql`${profiles.rewardPoints} - 65` }).returning({ pointsLeft: profiles.rewardPoints });
+        const [profile] = await db.update(profiles).set({ rewardPoints: sql`${profiles.rewardPoints} - 65` }).where(eq(profiles.id, findUser.id)).returning({ pointsLeft: profiles.rewardPoints });
         return {
             success: true,
             currentPoints: profile.pointsLeft.toString()
