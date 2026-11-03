@@ -82,6 +82,8 @@
 - [ ] Test this flow = Select device - choose snacks - review page - pay
 - [ ] add functionality to get device unit selected into sidebar, means user can select 2 ps4 or 1, and ps4 has total 5 units, each has players count
 - [x] add players rate too in grandtotal in sidebar
+- [ ] add skeletons for booking pages - /book, /snacks and /review
+- [ ] wire up cancel booking logic in cancel button
 
 ## Run this checklist after deployement
 
