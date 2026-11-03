@@ -1,30 +1,49 @@
-export interface StationReviewItem {
+export interface StationSetup {
   id: string;
   name: string;
   stationNumber: number;
   players: number;
   maxPlayers: number;
-  ratePerPlayerPerHour: number;
-  durationHours: number;
-  total: number;
 }
 
-export interface DeviceReviewGroup {
+export interface DeviceSetupCard {
+  id: string;
   deviceType: "CONSOLE" | "PC" | "ARCADE" | "VR";
-  deviceTitle: string;
-  hourlyRateText: string;
-  ratePerPlayerPerHour: number;
-  stations: StationReviewItem[];
+  title: string;
+  count: number;
+  image: string;
+  tagline: string;
+  features: string[];
+  stations: StationSetup[];
 }
 
-export interface SnackReviewItem {
+export interface SnackVisualItem {
   id: string;
   name: string;
   quantity: number;
-  pricePerUnit: number;
-  total: number;
-  imageUrl?: string;
-  category?: string;
+  serves: string;
+  category: string;
+  imageUrl: string;
+  prepNote: string;
+}
+
+export interface RewardsSummary {
+  pointsPerHour: number;
+  hoursBooked: number;
+  totalPointsEarned: number;
+  goalForFreeHour: number;
+  pointsRemainingForFreeHour: number;
+  perks: string[];
+}
+
+export interface RazorpayBriefing {
+  provider: string;
+  encryption: string;
+  supportedMethods: Array<{
+    category: string;
+    description: string;
+  }>;
+  guarantees: string[];
 }
 
 export interface BookingReviewData {
@@ -36,17 +55,12 @@ export interface BookingReviewData {
     durationFormatted: string;
     durationHours: number;
     totalPlayers: number;
+    arrivalWindow: string;
   };
-  deviceChips: Array<{
-    count: number;
-    label: string;
-  }>;
-  deviceGroups: DeviceReviewGroup[];
-  devicesTotal: number;
-  totalPlayers: number;
-  snacks: SnackReviewItem[];
-  snacksTotal: number;
-  grandTotal: number;
+  deviceSetups: DeviceSetupCard[];
+  snacks: SnackVisualItem[];
+  rewards: RewardsSummary;
+  paymentBriefing: RazorpayBriefing;
 }
 
 export const mockBookingReview: BookingReviewData = {
@@ -58,100 +72,130 @@ export const mockBookingReview: BookingReviewData = {
     durationFormatted: "2 hours",
     durationHours: 2,
     totalPlayers: 10,
+    arrivalWindow: "Check-in at front desk 5 mins prior (3:55 PM)",
   },
-  deviceChips: [
-    { count: 3, label: "PS5" },
-    { count: 1, label: "PC" },
-  ],
-  deviceGroups: [
+  deviceSetups: [
     {
+      id: "ps5-squad",
       deviceType: "CONSOLE",
-      deviceTitle: "PlayStation 5",
-      hourlyRateText: "₹50 per player, per hour",
-      ratePerPlayerPerHour: 50,
+      title: "PlayStation 5 Squad Pods",
+      count: 3,
+      image: "/console-cutout.webp",
+      tagline: "Big-screen co-op & rivalry setups",
+      features: [
+        "4K 120Hz Low-Latency Gaming Screens",
+        "DualSense Wireless Haptic Controllers",
+        "Pre-installed: FC 25, Mortal Kombat 1, Tekken 8, Spider-Man 2",
+      ],
       stations: [
         {
           id: "ps5-st-1",
-          name: "PS5 · Station 1",
+          name: "Station 1",
           stationNumber: 1,
           players: 3,
           maxPlayers: 4,
-          ratePerPlayerPerHour: 50,
-          durationHours: 2,
-          total: 300,
         },
         {
           id: "ps5-st-2",
-          name: "PS5 · Station 2",
+          name: "Station 2",
           stationNumber: 2,
           players: 2,
           maxPlayers: 4,
-          ratePerPlayerPerHour: 50,
-          durationHours: 2,
-          total: 200,
         },
         {
           id: "ps5-st-3",
-          name: "PS5 · Station 3",
+          name: "Station 3",
           stationNumber: 3,
           players: 4,
           maxPlayers: 4,
-          ratePerPlayerPerHour: 50,
-          durationHours: 2,
-          total: 400,
         },
       ],
     },
     {
+      id: "pc-battlestation",
       deviceType: "PC",
-      deviceTitle: "Gaming PC",
-      hourlyRateText: "₹60 per player, per hour",
-      ratePerPlayerPerHour: 60,
+      title: "Gaming PC Battlestation",
+      count: 1,
+      image: "/pc-cutout.webp",
+      tagline: "High-FPS precision esports rig",
+      features: [
+        "RTX 4060 GPU · 240Hz Fast IPS Display",
+        "Mechanical Linear Switch Keyboard & Ultralight Mouse",
+        "Pre-tuned Discord, Steam, Valorant, CS2 & GTA V",
+      ],
       stations: [
         {
           id: "pc-st-1",
-          name: "PC · Station 1",
+          name: "Station 1",
           stationNumber: 1,
           players: 1,
           maxPlayers: 1,
-          ratePerPlayerPerHour: 60,
-          durationHours: 2,
-          total: 120,
         },
       ],
     },
   ],
-  devicesTotal: 1020,
-  totalPlayers: 10,
   snacks: [
     {
       id: "snack-1",
       name: "Momos",
       quantity: 2,
-      pricePerUnit: 99,
-      total: 198,
-      imageUrl: "https://images.pexels.com/photos/18803177/pexels-photo-18803177.jpeg",
+      serves: "Serves 1 each",
       category: "Steamed Dumplings",
+      imageUrl: "https://images.pexels.com/photos/18803177/pexels-photo-18803177.jpeg",
+      prepNote: "Steamed fresh with house spicy red chutney",
     },
     {
       id: "snack-2",
       name: "Cheese Burger",
       quantity: 1,
-      pricePerUnit: 129,
-      total: 129,
-      imageUrl: "https://images.pexels.com/photos/32480062/pexels-photo-32480062.jpeg",
+      serves: "Serves 1",
       category: "Signature Burger",
+      imageUrl: "https://images.pexels.com/photos/32480062/pexels-photo-32480062.jpeg",
+      prepNote: "Grilled brioche bun with melted cheddar",
     },
     {
       id: "snack-3",
       name: "Fried Rice",
       quantity: 1,
-      pricePerUnit: 119,
-      total: 119,
-      imageUrl: "https://images.pexels.com/photos/2092906/pexels-photo-2092906.jpeg",
+      serves: "Serves 2",
       category: "Wok Specials",
+      imageUrl: "https://images.pexels.com/photos/2092906/pexels-photo-2092906.jpeg",
+      prepNote: "Wok-tossed hot with vegetables and herbs",
     },
   ],
-  snacksTotal: 446,
-  grandTotal: 1466,
+  rewards: {
+    pointsPerHour: 10,
+    hoursBooked: 2,
+    totalPointsEarned: 20,
+    goalForFreeHour: 65,
+    pointsRemainingForFreeHour: 45,
+    perks: [
+      "+20 CTRL Points credited instantly on checkout",
+      "Points never expire and stack across sessions",
+      "Reach 65 points to redeem a 100% free gaming hour",
+    ],
+  },
+  paymentBriefing: {
+    provider: "Razorpay",
+    encryption: "256-bit SSL Protected",
+    supportedMethods: [
+      {
+        category: "Instant UPI",
+        description: "Google Pay, PhonePe, Paytm, CRED & BHIM",
+      },
+      {
+        category: "Cards & EMI",
+        description: "All major Debit & Credit cards (Visa, Mastercard, RuPay)",
+      },
+      {
+        category: "NetBanking & Wallets",
+        description: "50+ Supported Indian Banks & Digital Wallets",
+      },
+    ],
+    guarantees: [
+      "Instant Station Lock: Your rigs are reserved exclusively; walk-ins cannot claim them",
+      "Immediate digital booking pass sent via WhatsApp and Email",
+      "Snacks delivered hot directly to your rigs during play",
+    ],
+  },
 };

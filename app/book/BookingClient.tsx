@@ -13,11 +13,7 @@ import { TimePicker } from "@/components/ui/time-picker";
 import { Arena, DeviceType } from "@/types/bookingTypes";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 import { ARENAS } from "@/lib/static-data/Booking-data";
-import type { devices } from "@/src/db/schema";
 import { DeviceWithStations } from "@/types/deviceTypes";
-
-type DeviceItem = typeof devices.$inferSelect;
-type SelectedDeviceItem = DeviceItem & { players: number };
 
 export interface BookingClientProps {
   initialDevice: DeviceType;
@@ -520,7 +516,7 @@ export default function BookingClient({
                   Pick your {arena.label.toLowerCase()} devices
                 </SectionLabel>
                 <span className="text-[11px] md:text-[12px] text-red-600 dark:text-red-400 font-semibold -mt-3">
-                  {freeUnits} of {arena.totalUnits} available
+                  {freeUnits} of {totalUnits} available
                 </span>
               </div>
 

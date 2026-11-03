@@ -10,15 +10,24 @@ import {
   Timer,
   Users,
   UtensilsCrossed,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+  CreditCard,
+  QrCode,
+  Building2,
   XCircle,
+  Monitor,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 import type {
   BookingReviewData,
-  DeviceReviewGroup,
-  SnackReviewItem,
-  StationReviewItem,
+  DeviceSetupCard,
+  SnackVisualItem,
+  RewardsSummary,
+  RazorpayBriefing,
 } from "./review-data";
 
 /* Section: Player Dots Indicator */
@@ -62,7 +71,7 @@ export function PlayerDotsIndicator({
 export function ReviewHeader({ onCancel }: { onCancel: () => void }) {
   return (
     <div className="mt-6 md:mt-8 mb-6 md:mb-8">
-      {/* Top bar with Step badge & Cancel option */}
+      {/* Top status bar with Step badge & Cancel option */}
       <div className="flex items-center justify-between gap-3 mb-3">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-3 py-1 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
           <span className="size-1.5 rounded-full bg-accent" />
@@ -85,42 +94,43 @@ export function ReviewHeader({ onCancel }: { onCancel: () => void }) {
       </h1>
 
       <p className="text-muted-foreground text-xs md:text-base mt-2 max-w-[46em] leading-relaxed">
-        Check everything below. Payment opens in Razorpay when you tap Pay in the booking summary.
+        Double check your rigs, food orders, and CTRL rewards below. Payment opens in
+        Razorpay when you tap Pay in the booking summary.
       </p>
     </div>
   );
 }
 
-/* Section: Date and Time */
-export function DateTimeSection({
+/* Section: Schedule & Arrival Briefing */
+export function ScheduleBriefingCard({
   schedule,
 }: {
   schedule: BookingReviewData["schedule"];
 }) {
   const items = [
     { label: "Date", value: schedule.dateFormatted, icon: Calendar },
-    { label: "Starts", value: schedule.startsAt, icon: Clock },
-    { label: "Ends", value: schedule.endsAt, icon: Clock },
+    { label: "Session Window", value: `${schedule.startsAt} – ${schedule.endsAt}`, icon: Clock },
     { label: "Duration", value: schedule.durationFormatted, icon: Timer },
-    { label: "Players", value: `${schedule.totalPlayers}`, icon: Users },
+    { label: "Total Squad", value: `${schedule.totalPlayers} Players`, icon: Users },
   ];
 
   return (
-    <section aria-labelledby="datetime-heading" className="space-y-3">
+    <section aria-labelledby="schedule-heading" className="space-y-3">
       <div className="flex items-center gap-2 pb-1">
         <div className="flex size-7 items-center justify-center rounded-lg bg-accent/20 text-accent-foreground dark:text-accent">
           <Calendar className="size-4" />
         </div>
         <h2
-          id="datetime-heading"
+          id="schedule-heading"
           className="font-heading text-lg md:text-xl font-bold tracking-tight text-foreground uppercase"
         >
-          Date and time
+          Time & Arrival Pass
         </h2>
       </div>
 
-      <div className="rounded-2xl border border-black/10 dark:border-border bg-card/60 dark:bg-card/30 p-4 md:p-5 shadow-[0px_4px_20px_0px_#00000008] dark:shadow-none">
-        <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <div className="rounded-2xl border border-black/10 dark:border-border bg-card/60 dark:bg-card/30 p-4 md:p-5 shadow-[0px_4px_20px_0px_#00000008] dark:shadow-none space-y-4">
+        {/* Facts Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {items.map((item) => {
             const Icon = item.icon;
             return (
@@ -129,251 +139,387 @@ export function DateTimeSection({
                 className="flex flex-col justify-between rounded-xl bg-background/70 dark:bg-zinc-900/40 border border-border/60 p-3.5 transition-colors"
               >
                 <div className="flex items-center justify-between gap-1 mb-2">
-                  <dt className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                     {item.label}
-                  </dt>
+                  </span>
                   <Icon className="size-3.5 text-muted-foreground/70" />
                 </div>
-                <dd className="font-heading text-base md:text-lg font-bold tracking-tight text-foreground tabular-nums">
+                <span className="font-heading text-base md:text-lg font-bold tracking-tight text-foreground tabular-nums">
                   {item.value}
-                </dd>
+                </span>
               </div>
             );
           })}
-        </dl>
+        </div>
+
+        {/* Arrival advisory callout */}
+        <div className="flex items-center gap-3 rounded-xl border border-dashed border-accent/60 bg-accent/10 px-4 py-3 text-xs text-foreground/90">
+          <Clock className="size-4 text-accent-foreground dark:text-accent shrink-0" />
+          <p className="leading-relaxed">
+            <span className="font-semibold text-foreground">Front Desk Advisory:</span>{" "}
+            {schedule.arrivalWindow}. Your stations will be powered up and pre-loaded with games.
+          </p>
+        </div>
       </div>
     </section>
   );
 }
 
-/* Section: Station Row */
-export function StationRow({ station }: { station: StationReviewItem }) {
-  const calculationFormula = `₹${station.ratePerPlayerPerHour} × ${station.players} player${
-    station.players > 1 ? "s" : ""
-  } × ${station.durationHours} hr`;
-
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-1 last:pb-1 transition-colors">
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <span className="font-heading text-sm md:text-base font-bold text-foreground">
-          {station.name}
-        </span>
-
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <PlayerDotsIndicator
-              current={station.players}
-              max={station.maxPlayers}
-            />
-            <span className="text-[12px] font-medium text-foreground/80 dark:text-muted-foreground">
-              {station.players} of {station.maxPlayers} players
-            </span>
-          </div>
-
-          <span className="hidden sm:inline text-border">·</span>
-
-          <span className="font-mono text-[11px] rounded-md bg-muted/80 dark:bg-zinc-800/80 px-2 py-0.5 text-muted-foreground border border-border/50">
-            {calculationFormula}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-border/40">
-        <span className="text-xs text-muted-foreground sm:hidden font-mono uppercase">
-          Subtotal
-        </span>
-        <span className="font-heading text-base md:text-lg font-bold text-foreground tabular-nums">
-          ₹{station.total.toLocaleString("en-IN")}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/* Section: Devices */
-export function DevicesSection({
-  chips,
-  groups,
-  devicesTotal,
-  totalPlayers,
+/* Section: Reserved Rigs & Station Setups */
+export function DeviceSetupsVisual({
+  setups,
 }: {
-  chips: BookingReviewData["deviceChips"];
-  groups: DeviceReviewGroup[];
-  devicesTotal: number;
-  totalPlayers: number;
+  setups: DeviceSetupCard[];
 }) {
   return (
-    <section aria-labelledby="devices-heading" className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
+    <section aria-labelledby="rigs-heading" className="space-y-4">
+      <div className="flex items-center justify-between pb-1">
         <div className="flex items-center gap-2">
           <div className="flex size-7 items-center justify-center rounded-lg bg-accent/20 text-accent-foreground dark:text-accent">
             <Gamepad2 className="size-4" />
           </div>
           <h2
-            id="devices-heading"
+            id="rigs-heading"
             className="font-heading text-lg md:text-xl font-bold tracking-tight text-foreground uppercase"
           >
-            Devices
+            Reserved Gaming Pods & Rigs
           </h2>
         </div>
 
-        {/* Summary Chips */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {chips.map((chip) => (
-            <span
-              key={chip.label}
-              className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/70 px-2.5 py-1 text-xs font-mono font-medium text-foreground"
-            >
-              <b className="font-bold text-accent-foreground dark:text-accent">
-                {chip.count}×
-              </b>{" "}
-              {chip.label}
-            </span>
-          ))}
-        </div>
+        <span className="rounded-full border border-border/70 bg-card px-2.5 py-0.5 text-xs font-mono text-muted-foreground">
+          4 Total Rigs
+        </span>
       </div>
 
-      <div className="rounded-2xl border border-black/10 dark:border-border bg-card/60 dark:bg-card/30 p-4 md:p-6 shadow-[0px_4px_20px_0px_#00000008] dark:shadow-none space-y-6">
-        {groups.map((group) => (
-          <div key={group.deviceTitle} className="space-y-3">
-            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border/60 pb-2.5">
-              <h3 className="font-heading text-base md:text-lg font-bold text-foreground">
-                {group.deviceTitle}
-              </h3>
-              <span className="text-xs font-mono text-muted-foreground bg-muted/60 dark:bg-zinc-800/60 px-2.5 py-0.5 rounded-md border border-border/50">
-                {group.hourlyRateText}
-              </span>
+      <div className="grid grid-cols-1 gap-4">
+        {setups.map((setup) => (
+          <div
+            key={setup.id}
+            className="rounded-2xl border border-black/10 dark:border-border bg-card/60 dark:bg-card/30 p-4 md:p-6 shadow-[0px_4px_20px_0px_#00000008] dark:shadow-none flex flex-col md:flex-row gap-5 items-start md:items-center justify-between"
+          >
+            {/* Visual Cutout + Title */}
+            <div className="flex items-start sm:items-center gap-4">
+              <div className="relative size-20 md:size-24 shrink-0 rounded-2xl bg-muted/60 dark:bg-zinc-900 border border-border/80 flex items-center justify-center p-2 overflow-hidden">
+                <Image
+                  src={setup.image}
+                  alt={setup.title}
+                  width={80}
+                  height={80}
+                  className="object-contain drop-shadow-md"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-heading text-lg md:text-xl font-bold text-foreground">
+                    {setup.title}
+                  </h3>
+                  <span className="font-mono text-xs font-bold rounded-md bg-accent text-accent-foreground px-2 py-0.5">
+                    {setup.count}× Setup{setup.count > 1 ? "s" : ""}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">{setup.tagline}</p>
+
+                {/* Specs / Included gear tags */}
+                <ul className="flex flex-wrap gap-1.5 pt-1.5">
+                  {setup.features.map((feat) => (
+                    <li
+                      key={feat}
+                      className="inline-flex items-center gap-1 rounded-md bg-background/80 dark:bg-zinc-800/60 border border-border/60 px-2 py-0.5 text-[11px] text-muted-foreground"
+                    >
+                      <Check className="size-2.5 text-accent-foreground dark:text-accent" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
-            <div className="divide-y divide-border/40">
-              {group.stations.map((station) => (
-                <StationRow key={station.id} station={station} />
-              ))}
+            {/* Stations list with player dots */}
+            <div className="w-full md:w-auto shrink-0 border-t md:border-t-0 md:border-l border-border/60 pt-3 md:pt-0 md:pl-5 space-y-2">
+              <span className="block text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                Assigned Squad Stations
+              </span>
+              <div className="space-y-1.5">
+                {setup.stations.map((station) => (
+                  <div
+                    key={station.id}
+                    className="flex items-center justify-between md:justify-start gap-4 rounded-lg bg-background/80 dark:bg-zinc-900/60 border border-border/50 px-3 py-1.5 text-xs"
+                  >
+                    <span className="font-semibold text-foreground">
+                      {station.name}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <PlayerDotsIndicator
+                        current={station.players}
+                        max={station.maxPlayers}
+                      />
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {station.players} of {station.maxPlayers}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         ))}
-
-        {/* Devices Summary Row */}
-        <div className="rounded-xl bg-background/80 dark:bg-zinc-900/50 border border-border/80 p-4 mt-4 space-y-2.5">
-          <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5 font-medium">
-              <Users className="size-3.5" /> Total players across stations
-            </span>
-            <span className="font-mono font-semibold text-foreground tabular-nums">
-              {totalPlayers}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-border/50">
-            <span className="font-heading text-sm md:text-base font-bold text-foreground">
-              Devices Subtotal
-            </span>
-            <span className="font-heading text-lg md:text-xl font-black text-foreground tabular-nums">
-              ₹{devicesTotal.toLocaleString("en-IN")}
-            </span>
-          </div>
-        </div>
       </div>
     </section>
   );
 }
 
-/* Section: Snacks */
-export function SnacksSection({
+/* Section: Snack Bar Orders with Item Images x Quantity */
+export function SnackVisualCards({
   snacks,
-  snacksTotal,
 }: {
-  snacks: SnackReviewItem[];
-  snacksTotal: number;
+  snacks: SnackVisualItem[];
 }) {
-  const totalCount = snacks.reduce((sum, item) => sum + item.quantity, 0);
-
   return (
-    <section aria-labelledby="snacks-heading" className="space-y-4">
+    <section aria-labelledby="snacks-visual-heading" className="space-y-4">
       <div className="flex items-center justify-between pb-1">
         <div className="flex items-center gap-2">
           <div className="flex size-7 items-center justify-center rounded-lg bg-accent/20 text-accent-foreground dark:text-accent">
             <UtensilsCrossed className="size-4" />
           </div>
           <h2
-            id="snacks-heading"
+            id="snacks-visual-heading"
             className="font-heading text-lg md:text-xl font-bold tracking-tight text-foreground uppercase"
           >
-            Snacks
+            Snacks & Fuel (Delivered to Rigs)
           </h2>
         </div>
 
         <span className="rounded-full border border-border/70 bg-card px-2.5 py-0.5 text-xs font-mono text-muted-foreground">
-          {totalCount} item{totalCount > 1 ? "s" : ""}
+          3 Items Selected
         </span>
       </div>
 
-      <div className="rounded-2xl border border-black/10 dark:border-border bg-card/60 dark:bg-card/30 p-4 md:p-6 shadow-[0px_4px_20px_0px_#00000008] dark:shadow-none space-y-4">
-        {snacks.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No snacks in this booking.
-          </p>
-        ) : (
-          <div className="divide-y divide-border/40">
-            {snacks.map((snack) => (
-              <div
-                key={snack.id}
-                className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-1"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-muted border border-border/60">
-                    <Image
-                      src={snack.imageUrl || "/food-card-placeholder.webp"}
-                      alt={snack.name}
-                      fill
-                      sizes="48px"
-                      className="object-cover object-center"
-                    />
-                  </div>
+      {/* Visual Image x Quantity Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {snacks.map((snack) => (
+          <div
+            key={snack.id}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-black/10 dark:border-border bg-card/60 dark:bg-card/30 p-3.5 shadow-[0px_4px_20px_0px_#00000008] dark:shadow-none transition-all hover:border-accent/40"
+          >
+            {/* Image Container with Quantity Overlay */}
+            <div className="relative h-36 w-full overflow-hidden rounded-xl bg-muted border border-border/50">
+              <Image
+                src={snack.imageUrl}
+                alt={snack.name}
+                fill
+                sizes="(max-width: 640px) 100vw, 33vw"
+                className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+              />
 
-                  <div className="min-w-0">
-                    <p className="font-heading text-sm md:text-base font-bold text-foreground truncate">
-                      {snack.name}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="font-mono text-[11px] rounded-md bg-muted/80 dark:bg-zinc-800/80 px-2 py-0.5 text-muted-foreground border border-border/50">
-                        {snack.quantity} × ₹{snack.pricePerUnit}
-                      </span>
-                      {snack.category && (
-                        <span className="hidden sm:inline text-xs text-muted-foreground/70">
-                          · {snack.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <span className="font-heading text-base md:text-lg font-bold text-foreground tabular-nums">
-                    ₹{snack.total.toLocaleString("en-IN")}
-                  </span>
-                </div>
+              {/* Quantity Overlay Badge */}
+              <div className="absolute top-2.5 left-2.5 flex items-center gap-1 rounded-lg bg-accent text-accent-foreground px-2.5 py-1 text-xs font-black font-mono shadow-md">
+                <span>{snack.quantity}×</span>
+                <span className="text-[10px] font-sans font-bold uppercase">Ordered</span>
               </div>
-            ))}
-          </div>
-        )}
 
-        <div className="rounded-xl bg-background/80 dark:bg-zinc-900/50 border border-border/80 p-4 mt-2">
-          <div className="flex items-center justify-between">
-            <span className="font-heading text-sm md:text-base font-bold text-foreground">
-              Snacks Subtotal
+              {/* Servings badge */}
+              <div className="absolute bottom-2.5 left-2.5 rounded-md bg-black/70 backdrop-blur-xs px-2 py-0.5 text-[10px] font-mono text-white">
+                {snack.serves}
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="mt-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                {snack.category}
+              </span>
+              <h3 className="font-heading text-base font-bold text-foreground">
+                {snack.name}
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {snack.prepNote}
+              </p>
+            </div>
+
+            {/* Delivery note */}
+            <div className="mt-3 pt-2.5 border-t border-border/50 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <CheckCircle2 className="size-3 text-emerald-500" />
+              <span>Served directly to your rig</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* Section: Rewards Earned After Payment */
+export function RewardsEarnedCard({
+  rewards,
+}: {
+  rewards: RewardsSummary;
+}) {
+  const progressPercent = Math.round(
+    (rewards.totalPointsEarned / rewards.goalForFreeHour) * 100,
+  );
+
+  return (
+    <section aria-labelledby="rewards-heading" className="space-y-3">
+      <div className="flex items-center gap-2 pb-1">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-accent/20 text-accent-foreground dark:text-accent">
+          <Sparkles className="size-4" />
+        </div>
+        <h2
+          id="rewards-heading"
+          className="font-heading text-lg md:text-xl font-bold tracking-tight text-foreground uppercase"
+        >
+          Rewards & Perks Earned
+        </h2>
+      </div>
+
+      <div className="rounded-2xl border-2 border-dashed border-border/80 bg-zinc-50/80 dark:bg-zinc-900/40 p-5 md:p-6 space-y-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              CTRL Points Program
             </span>
-            <span className="font-heading text-lg md:text-xl font-black text-foreground tabular-nums">
-              ₹{snacksTotal.toLocaleString("en-IN")}
+            <div className="flex items-baseline gap-2">
+              <span className="font-heading text-3xl md:text-4xl font-black text-foreground">
+                +{rewards.totalPointsEarned}
+              </span>
+              <span className="font-heading text-lg font-bold text-accent-foreground dark:text-accent">
+                Points with this session
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Earned at {rewards.pointsPerHour} points/hour across {rewards.hoursBooked} hours of booked play.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-accent-foreground font-mono text-xs font-bold shadow-2xs">
+            <Sparkles className="size-3.5" />
+            <span>Instant Wallet Credit</span>
+          </div>
+        </div>
+
+        {/* Free Hour Goal Bar */}
+        <div className="space-y-2 rounded-xl bg-background/80 dark:bg-zinc-900/80 border border-border/60 p-4">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold text-foreground">
+              Progress to 1 Free Gaming Hour
+            </span>
+            <span className="font-mono text-muted-foreground">
+              {rewards.totalPointsEarned} / {rewards.goalForFreeHour} points ({progressPercent}%)
             </span>
           </div>
+
+          {/* Progress bar */}
+          <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-accent transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          <p className="text-[11px] text-muted-foreground pt-0.5">
+            You're just{" "}
+            <span className="font-bold text-foreground">
+              {rewards.pointsRemainingForFreeHour} more points
+            </span>{" "}
+            away from unlocking a completely free 1-hour gaming session.
+          </p>
+        </div>
+
+        {/* Perks list */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+          {rewards.perks.map((perk) => (
+            <div
+              key={perk}
+              className="flex items-center gap-2 rounded-lg bg-background/60 dark:bg-zinc-900/40 border border-border/40 p-2.5 text-xs text-muted-foreground"
+            >
+              <Check className="size-3 text-emerald-500 shrink-0" />
+              <span>{perk}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-/* Section: Cancel Booking Confirmation / Footer Action */
+/* Section: Razorpay Payment & Security Briefing */
+export function RazorpayBriefingCard({
+  payment,
+}: {
+  payment: RazorpayBriefing;
+}) {
+  return (
+    <section aria-labelledby="razorpay-heading" className="space-y-3">
+      <div className="flex items-center gap-2 pb-1">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-accent/20 text-accent-foreground dark:text-accent">
+          <ShieldCheck className="size-4" />
+        </div>
+        <h2
+          id="razorpay-heading"
+          className="font-heading text-lg md:text-xl font-bold tracking-tight text-foreground uppercase"
+        >
+          Payment & Instant Station Lock
+        </h2>
+      </div>
+
+      <div className="rounded-2xl border border-black/10 dark:border-border bg-card/60 dark:bg-card/30 p-4 md:p-6 shadow-[0px_4px_20px_0px_#00000008] dark:shadow-none space-y-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground font-black font-heading text-sm">
+              RZP
+            </div>
+            <div>
+              <p className="font-heading text-base font-bold text-foreground flex items-center gap-2">
+                <span>Processed securely by {payment.provider}</span>
+                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {payment.encryption}
+                </span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Payment opens instantly in the Razorpay popup when you tap Pay in the sidebar.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Supported Payment Channels */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {payment.supportedMethods.map((method, idx) => {
+            const Icon = idx === 0 ? QrCode : idx === 1 ? CreditCard : Building2;
+            return (
+              <div
+                key={method.category}
+                className="rounded-xl bg-background/70 dark:bg-zinc-900/50 border border-border/60 p-3.5 space-y-1"
+              >
+                <div className="flex items-center gap-2 text-foreground font-semibold text-xs">
+                  <Icon className="size-3.5 text-accent-foreground dark:text-accent" />
+                  <span>{method.category}</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {method.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Guarantees checklist */}
+        <div className="rounded-xl bg-muted/40 dark:bg-zinc-900/30 border border-border/50 p-3.5 space-y-1.5">
+          {payment.guarantees.map((guarantee) => (
+            <div key={guarantee} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+              <span>{guarantee}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* Section: Cancel Booking Banner Action */
 export function CancelBookingFooter({ onCancel }: { onCancel: () => void }) {
   return (
     <div className="rounded-2xl border border-dashed border-border/80 bg-background/40 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -382,7 +528,7 @@ export function CancelBookingFooter({ onCancel }: { onCancel: () => void }) {
           Need to change your plan?
         </p>
         <p className="text-xs text-muted-foreground">
-          Cancelling will release your reserved stations and return to the main booking screen.
+          Cancelling will release your reserved stations and return to the device selection screen.
         </p>
       </div>
 
@@ -404,7 +550,6 @@ export default function ReviewClient({ data }: { data: BookingReviewData }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   function handleCancelBooking() {
-    // Clear booking state and route back to device selection
     setSelectedDevices([]);
     setSelectedFoods([]);
     router.push("/book");
@@ -414,19 +559,15 @@ export default function ReviewClient({ data }: { data: BookingReviewData }) {
     <div className="flex flex-col gap-6 md:gap-8 pb-12">
       <ReviewHeader onCancel={() => setShowConfirmModal(true)} />
 
-      <DateTimeSection schedule={data.schedule} />
+      <ScheduleBriefingCard schedule={data.schedule} />
 
-      <DevicesSection
-        chips={data.deviceChips}
-        groups={data.deviceGroups}
-        devicesTotal={data.devicesTotal}
-        totalPlayers={data.totalPlayers}
-      />
+      <DeviceSetupsVisual setups={data.deviceSetups} />
 
-      <SnacksSection
-        snacks={data.snacks}
-        snacksTotal={data.snacksTotal}
-      />
+      <SnackVisualCards snacks={data.snacks} />
+
+      <RewardsEarnedCard rewards={data.rewards} />
+
+      <RazorpayBriefingCard payment={data.paymentBriefing} />
 
       <CancelBookingFooter onCancel={() => setShowConfirmModal(true)} />
 
