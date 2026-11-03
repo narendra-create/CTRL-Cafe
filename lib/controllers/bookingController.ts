@@ -605,6 +605,12 @@ export const cancelBooking = async (inputBookingId: string): Promise<{
             }
         };
         const now = new Date();
+        if (bookingFound.startTime <= now) {
+            return {
+                success: false,
+                message: "You Can't Cancel Current bookings"
+            }
+        }
 
         if (bookingFound.bookingStatus === "confirmed") {
             await db.transaction(async (tx) => {
