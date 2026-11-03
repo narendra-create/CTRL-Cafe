@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/src/index";
 import { bookingItems, bookings, bookingStations, devices, foodItems, gameStations, profiles } from "@/src/db/schema";
-import { eq, and, gte, lt, asc, desc, inArray, gt, ne, or } from "drizzle-orm";
+import { eq, and, gte, lt, asc, desc, inArray, gt, ne, or, sql } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { BookSeatInput, bookSeatSchema, getBookingDetailsInput, getBookingDetailsSchema, SeatHoldeInput, seatHoldSchema, verifyPaymentSchema, VerifySignatureInput } from "@/lib/validations/bookingValidation";
 import { razorpay } from "@/lib/setup-files/razorpay.config";
@@ -9,6 +9,8 @@ import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils"
 import { formatToNormalDate, formatToNormalTime, rupeesToPaise } from "@/lib/utils/tools";
 import { BookingDetailsResponse } from "@/types/bookingTypes";
 import { addPoints, redeemPoints } from "@/lib/actions/rewardActions";
+import { resendClient } from "@/lib/setup-files/resend-client";
+import z from "zod";
 
 //Main functions
 export const getCurrentBookings = async (): Promise<{
@@ -568,14 +570,21 @@ export const bookSeat = async (input: BookSeatInput): Promise<{
     }
 };
 
-export const cancelBooking = async (bookingId: string): Promise<{
+export const cancelBooking = async (inputBookingId: string): Promise<{
     success: boolean;
     message?: string;
 }> => {
     try {
         const { error: authError, dbuser } = await resolveAuthenticatedUser("user");
         if (authError) return authError;
-        if (!bookingId) return { success: false, message: "Please Provide booking Id" };
+        if (!inputBookingId) return { success: false, message: "Please Provide booking Id" };
+        const bookingId = z.uuid().safeParse(inputBookingId);
+        if (bookingId) {
+            return {
+                success: false,
+                message: "Please Provide valid bookingid"
+            }
+        }
         const [bookingFound] = await db.select().from(bookings).where(and(
             eq(bookings.userId, dbuser.userId),
             eq(bookings.id, bookingId),
@@ -603,6 +612,7 @@ export const cancelBooking = async (bookingId: string): Promise<{
                     bookingStatus: "cancelled",
                     cancelledAt: now,
                     holdExpiresAt: now,
+                    rewardGranted: false
                 }).where(and(
                     eq(bookings.userId, dbuser.userId),
                     eq(bookings.id, bookingFound.id)
@@ -610,25 +620,22 @@ export const cancelBooking = async (bookingId: string): Promise<{
 
                 if (bookingFound.rewardGranted) {
                     await tx.update(profiles).set({
-                        rewardPoints: Math.max(0, Number(profiles.rewardPoints) - 65)
-                    });
+                        rewardPoints: sql`GREATEST(0, ${profiles.rewardPoints} - 10)`
+                    }).where(eq(profiles.id, dbuser.userId));
                 };
 
                 await tx.delete(bookingStations).where(and(
                     eq(bookingStations.bookingId, bookingFound.id)
                 ));
             });
-            return {
-                success: true,
-                message: "Booking Cancelled"
-            }
         }
         else {
             await db.transaction(async (tx) => {
                 await tx.update(bookings).set({
                     bookingStatus: "cancelled",
                     cancelledAt: now,
-                    holdExpiresAt: now
+                    holdExpiresAt: now,
+                    rewardGranted: false
                 }).where(and(
                     eq(bookings.id, bookingFound.id),
                     eq(bookings.userId, dbuser.userId),
@@ -637,11 +644,22 @@ export const cancelBooking = async (bookingId: string): Promise<{
 
                 await tx.delete(bookingStations).where(eq(bookingStations.bookingId, bookingFound.id));
             });
+        };
 
-            return {
-                success: true,
-                message: "Booking Cancelled"
-            }
+        await resendClient.emails.send({
+            to: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "websitet547@gmail.com",
+            subject: "Booking Cancelled - Refund",
+            text: `
+            Booking ${bookingFound.id} Cancelled by user here are the details: 
+            
+            ${bookingFound}
+            `,
+            from: "websitet547@gmail.com"
+        });
+
+        return {
+            success: true,
+            message: "Booking Cancelled"
         }
     }
     catch (err) {
