@@ -1,3 +1,9 @@
+import type { DeviceType } from "@/types/bookingTypes";
+
+/* ─────────────────────────────────────────────
+   Shared Interfaces
+───────────────────────────────────────────── */
+
 export interface StationSetup {
   id: string;
   name: string;
@@ -18,16 +24,17 @@ export interface DeviceSetupCard {
 }
 
 export interface SnackVisualItem {
-  id: string;
+  id: string | number;
   name: string;
-  qty: number;
+  quantity: number;
   serves: string;
   category: string;
   imageUrl: string;
-  description: string;
+  prepNote: string;
 }
 
 export interface RewardsSummary {
+  currentPoints: number;
   pointsPerHour: number;
   hoursBooked: number;
   totalPointsEarned: number;
@@ -63,139 +70,93 @@ export interface BookingReviewData {
   paymentBriefing: RazorpayBriefing;
 }
 
-export const mockBookingReview: BookingReviewData = {
-  schedule: {
-    dateFormatted: "Mon, 2 Nov 2026",
-    isoDate: "2026-11-02",
-    startsAt: "4:00 PM",
-    endsAt: "6:00 PM",
-    durationFormatted: "2 hours",
-    durationHours: 2,
-    totalPlayers: 10,
-    arrivalWindow: "Check-in at front desk 5 mins prior (3:55 PM)",
+/* ─────────────────────────────────────────────
+   Static Device Metadata (image, tagline, features per arena type)
+   Dynamic fields (count, stations, title) come from context at runtime.
+───────────────────────────────────────────── */
+
+export const DEVICE_STATIC: Record<
+  DeviceType,
+  { image: string; tagline: string; features: string[] }
+> = {
+  CONSOLE: {
+    image: "/console-cutout.webp",
+    tagline: "Big-screen co-op & rivalry setups",
+    features: [
+      "4K 120Hz Low-Latency Gaming Screens",
+      "DualSense Wireless Haptic Controllers",
+      "Pre-installed: FC 25, Mortal Kombat 1, Tekken 8, Spider-Man 2",
+    ],
   },
-  deviceSetups: [
+  PC: {
+    image: "/pc-cutout.webp",
+    tagline: "High-FPS precision esports rig",
+    features: [
+      "RTX 4060 GPU · 240Hz Fast IPS Display",
+      "Mechanical Linear Switch Keyboard & Ultralight Mouse",
+      "Pre-tuned Discord, Steam, Valorant, CS2 & GTA V",
+    ],
+  },
+  ARCADE: {
+    image: "/arcade-cutout.webp",
+    tagline: "Classic cabinets, new rivalries",
+    features: [
+      "Dedicated Arcade Joystick & Button Panel",
+      "Racing Wheels & Fighting Sticks Available",
+      "Curated: Street Fighter 6, Tekken, Initial D",
+    ],
+  },
+  VR: {
+    image: "/vr-cutout.webp",
+    tagline: "Full-room immersive VR experience",
+    features: [
+      "Meta Quest Pro / PSVR2 Headsets",
+      "Full-Room Motion Tracking",
+      "Curated: Beat Saber, Superhot VR, Walkabout Golf",
+    ],
+  },
+};
+
+/* ─────────────────────────────────────────────
+   Static Rewards Config (points/hour, goal, perks)
+   Dynamic fields (hoursBooked, totalPointsEarned, pointsRemainingForFreeHour)
+   are computed from context at runtime.
+───────────────────────────────────────────── */
+
+export const STATIC_REWARDS = {
+  pointsPerHour: 10,
+  goalForFreeHour: 65,
+  perks: [
+    "Points credited instantly to your wallet on checkout",
+    "Points never expire and stack across sessions",
+    "Reach 65 points to redeem a 100% free gaming hour",
+  ],
+} as const;
+
+/* ─────────────────────────────────────────────
+   Static Payment Briefing (fully static, never changes)
+───────────────────────────────────────────── */
+
+export const STATIC_PAYMENT_BRIEFING: RazorpayBriefing = {
+  provider: "Razorpay",
+  encryption: "256-bit SSL Protected",
+  supportedMethods: [
     {
-      id: "ps5-squad",
-      deviceType: "CONSOLE",
-      title: "PlayStation 5 Squad Pods",
-      count: 3,
-      image: "/console-cutout.webp",
-      tagline: "Big-screen co-op & rivalry setups",
-      features: [
-        "4K 120Hz Low-Latency Gaming Screens",
-        "DualSense Wireless Haptic Controllers",
-        "Pre-installed: FC 25, Mortal Kombat 1, Tekken 8, Spider-Man 2",
-      ],
-      stations: [
-        {
-          id: "ps5-st-1",
-          name: "Station 1",
-          stationNumber: 1,
-          players: 3,
-          maxPlayers: 4,
-        },
-        {
-          id: "ps5-st-2",
-          name: "Station 2",
-          stationNumber: 2,
-          players: 2,
-          maxPlayers: 4,
-        },
-        {
-          id: "ps5-st-3",
-          name: "Station 3",
-          stationNumber: 3,
-          players: 4,
-          maxPlayers: 4,
-        },
-      ],
+      category: "Instant UPI",
+      description: "Google Pay, PhonePe, Paytm, CRED & BHIM",
     },
     {
-      id: "pc-battlestation",
-      deviceType: "PC",
-      title: "Gaming PC Battlestation",
-      count: 1,
-      image: "/pc-cutout.webp",
-      tagline: "High-FPS precision esports rig",
-      features: [
-        "RTX 4060 GPU · 240Hz Fast IPS Display",
-        "Mechanical Linear Switch Keyboard & Ultralight Mouse",
-        "Pre-tuned Discord, Steam, Valorant, CS2 & GTA V",
-      ],
-      stations: [
-        {
-          id: "pc-st-1",
-          name: "Station 1",
-          stationNumber: 1,
-          players: 1,
-          maxPlayers: 1,
-        },
-      ],
+      category: "Cards & EMI",
+      description: "All major Debit & Credit cards (Visa, Mastercard, RuPay)",
+    },
+    {
+      category: "NetBanking & Wallets",
+      description: "50+ Supported Indian Banks & Digital Wallets",
     },
   ],
-  snacks: [
-    {
-      id: "snack-1",
-      name: "Momos",
-      qty: 2,
-      serves: "Serves 1 each",
-      category: "Steamed Dumplings",
-      imageUrl: "https://images.pexels.com/photos/18803177/pexels-photo-18803177.jpeg",
-      description: "Steamed fresh with house spicy red chutney",
-    },
-    {
-      id: "snack-2",
-      name: "Cheese Burger",
-      qty: 1,
-      serves: "Serves 1",
-      category: "Signature Burger",
-      imageUrl: "https://images.pexels.com/photos/32480062/pexels-photo-32480062.jpeg",
-      description: "Grilled brioche bun with melted cheddar",
-    },
-    {
-      id: "snack-3",
-      name: "Fried Rice",
-      qty: 1,
-      serves: "Serves 2",
-      category: "Wok Specials",
-      imageUrl: "https://images.pexels.com/photos/2092906/pexels-photo-2092906.jpeg",
-      description: "Wok-tossed hot with vegetables and herbs",
-    },
+  guarantees: [
+    "Instant Station Lock: Your rigs are reserved exclusively; walk-ins cannot claim them",
+    "Immediate digital booking pass sent via WhatsApp and Email",
+    "Snacks delivered hot directly to your rigs during play",
   ],
-  rewards: {
-    pointsPerHour: 10,
-    hoursBooked: 2,
-    totalPointsEarned: 20,
-    goalForFreeHour: 65,
-    pointsRemainingForFreeHour: 45,
-    perks: [
-      "+20 CTRL Points credited instantly on checkout",
-      "Points never expire and stack across sessions",
-      "Reach 65 points to redeem a 100% free gaming hour",
-    ],
-  },
-  paymentBriefing: {
-    provider: "Razorpay",
-    encryption: "256-bit SSL Protected",
-    supportedMethods: [
-      {
-        category: "Instant UPI",
-        description: "Google Pay, PhonePe, Paytm, CRED & BHIM",
-      },
-      {
-        category: "Cards & EMI",
-        description: "All major Debit & Credit cards (Visa, Mastercard, RuPay)",
-      },
-      {
-        category: "NetBanking & Wallets",
-        description: "50+ Supported Indian Banks & Digital Wallets",
-      },
-    ],
-    guarantees: [
-      "Instant Station Lock: Your rigs are reserved exclusively; walk-ins cannot claim them",
-      "Immediate digital booking pass sent via WhatsApp and Email",
-      "Snacks delivered hot directly to your rigs during play",
-    ],
-  },
 };

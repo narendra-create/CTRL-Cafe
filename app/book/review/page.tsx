@@ -1,7 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
 import ReviewClient from "./ReviewClient";
-import { mockBookingReview } from "./review-data";
 import { redirect } from "next/navigation";
 import { cancelBooking } from "@/lib/controllers/bookingController";
 
@@ -24,6 +23,7 @@ export default async function ReviewPage({ searchParams }: Props) {
   }
 
   async function handleCancelBooking(bookingId: string) {
+    "use server";
     try {
       const result = await cancelBooking(bookingId);
       if (!result.success) {
@@ -42,11 +42,16 @@ export default async function ReviewPage({ searchParams }: Props) {
       };
     }
   }
+
+  // User can fetch points here on server and pass down
+  const currentPoints = 0;
+
   return (
     <ReviewClient
-      data={mockBookingReview}
       bookingId={bookingId}
       onCancel={handleCancelBooking}
+      currentPoints={currentPoints}
     />
   );
 }
+

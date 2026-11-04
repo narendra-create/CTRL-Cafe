@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { formatTimeLabel } from "@/lib/utils/tools";
 import {
   Calendar,
   Clock,
@@ -28,6 +29,11 @@ import type {
   SnackVisualItem,
   RewardsSummary,
   RazorpayBriefing,
+} from "./review-data";
+import {
+  DEVICE_STATIC,
+  STATIC_REWARDS,
+  STATIC_PAYMENT_BRIEFING,
 } from "./review-data";
 
 /* Section: Player Dots Indicator */
@@ -194,7 +200,7 @@ export function DeviceSetupsVisual({ setups }: { setups: DeviceSetupCard[] }) {
         </div>
 
         <span className="rounded-full border border-border/70 bg-card px-2.5 py-0.5 text-xs font-mono text-muted-foreground">
-          4 Total Rigs
+          {setups.reduce((sum, s) => sum + s.stations.length, 0)} Total Rigs
         </span>
       </div>
 
@@ -294,7 +300,7 @@ export function SnackVisualCards({ snacks }: { snacks: SnackVisualItem[] }) {
         </div>
 
         <span className="rounded-full border border-border/70 bg-card px-2.5 py-0.5 text-xs font-mono text-muted-foreground">
-          3 Items Selected
+          {snacks.length} Item{snacks.length !== 1 ? "s" : ""} Selected
         </span>
       </div>
 
@@ -317,7 +323,7 @@ export function SnackVisualCards({ snacks }: { snacks: SnackVisualItem[] }) {
 
               {/* Quantity Overlay Badge */}
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1 rounded-lg bg-accent text-accent-foreground px-2.5 py-1 text-xs font-black font-mono shadow-md">
-                <span>{snack.qty}×</span>
+                <span>{snack.quantity}×</span>
                 <span className="text-[10px] font-sans font-bold uppercase">
                   Ordered
                 </span>
@@ -338,7 +344,7 @@ export function SnackVisualCards({ snacks }: { snacks: SnackVisualItem[] }) {
                 {snack.name}
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                {snack.description}
+                {snack.prepNote}
               </p>
             </div>
 
@@ -552,42 +558,185 @@ export function CancelBookingFooter({ onCancel }: { onCancel: () => void }) {
   );
 }
 
-/* Section: Main Review Client Component */
-export default function ReviewClient({
-  data,
-  onCancel,
-  bookingId,
-}: {
-  data: BookingReviewData;
+export interface ReviewClientProps {
   onCancel: (
     bookingId: string,
   ) => Promise<{ success: boolean; message?: string }>;
   bookingId: string;
-}) {
+  currentPoints?: number;
+}
+
+/* Section: Main Review Client Component */
+export default function ReviewClient({
+  onCancel,
+  bookingId,
+  currentPoints = 0,
+}: ReviewClientProps) {
   const router = useRouter();
-  const { setSelectedDevices, setSelectedFoods } = useBooking();
+  const { selectedDevices, selectedFoods, date, startTime, endTime } =
+    useBooking();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  /* Section: Build dynamic BookingReviewData from context */
+  const data: BookingReviewData = useMemo(() => {
+    /* ── Schedule ── */
+    const [year, month, day] = date.split("-").map(Number);
+    const dateObj = new Date(Date.UTC(year, month - 1, day));
+    const dateFormatted = dateObj.toLocaleDateString("en-IN", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "Asia/Kolkata",
+    });
+
+    const [startH, startM] = startTime.split(":").map(Number);
+    const [endH, endM] = endTime.split(":").map(Number);
+    const durationHours = (endH * 60 + endM - (startH * 60 + startM)) / 60;
+
+    const arrivalH = startH;
+    const arrivalM = startM - 5 < 0 ? 55 : startM - 5;
+    const arrivalDisplayH = arrivalH % 12 || 12;
+    const arrivalPeriod = arrivalH >= 12 ? "PM" : "AM";
+    const arrivalDisplay = `${arrivalDisplayH}:${String(arrivalM).padStart(2, "0")} ${arrivalPeriod}`;
+
+    const totalPlayers = selectedDevices.reduce((s, d) => s + d.players, 0);
+
+    /* ── Device Setups: group by deviceName ── */
+    const groupsMap = new Map<
+      string,
+      { deviceType: string; deviceId: string; stations: typeof selectedDevices }
+    >();
+
+    for (const device of selectedDevices) {
+      const key = device.deviceName;
+      if (!groupsMap.has(key)) {
+        groupsMap.set(key, {
+          deviceType: device.deviceName.toUpperCase(),
+          deviceId: device.deviceId,
+          stations: [],
+        });
+      }
+      groupsMap.get(key)!.stations.push(device);
+    }
+
+    const deviceSetups: DeviceSetupCard[] = Array.from(
+      groupsMap.entries(),
+    ).map(([name, group], groupIdx) => {
+      /* Match to a known arena type for static metadata */
+      const arenaKey = (["CONSOLE", "PC", "ARCADE", "VR"] as const).find(
+        (k) => group.deviceType.includes(k),
+      ) ?? "CONSOLE";
+      const staticMeta = DEVICE_STATIC[arenaKey];
+
+      return {
+        id: `device-group-${groupIdx}`,
+        deviceType: arenaKey,
+        title: name,
+        count: group.stations.length,
+        image: staticMeta.image,
+        tagline: staticMeta.tagline,
+        features: staticMeta.features,
+        stations: group.stations.map((s, stIdx) => ({
+          id: s.stationId,
+          name: s.stationLabel || `Station ${stIdx + 1}`,
+          stationNumber: stIdx + 1,
+          players: s.players,
+          maxPlayers: s.maxPlayers,
+        })),
+      };
+    });
+
+    /* ── Snacks: map context food items ── */
+    const snacks: SnackVisualItem[] = selectedFoods.map((food) => ({
+      id: food.id,
+      name: food.name,
+      quantity: food.quantity,
+      serves: `Serves ${food.serves}`,
+      category: food.name,
+      imageUrl: food.imageUrl ?? "/food-card-placeholder.webp",
+      prepNote: food.description ?? "Freshly prepared and delivered to your rig",
+    }));
+
+    /* ── Rewards: driven by currentPoints prop ── */
+    const totalPointsEarned = Math.floor(
+      durationHours * STATIC_REWARDS.pointsPerHour,
+    );
+    const pointsRemainingForFreeHour = Math.max(
+      0,
+      STATIC_REWARDS.goalForFreeHour - currentPoints,
+    );
+
+    return {
+      schedule: {
+        dateFormatted,
+        isoDate: date,
+        startsAt: formatTimeLabel(startTime),
+        endsAt: formatTimeLabel(endTime),
+        durationFormatted:
+          durationHours === 1
+            ? "1 hour"
+            : `${durationHours} hour${durationHours !== 1 ? "s" : ""}`,
+        durationHours,
+        totalPlayers,
+        arrivalWindow: `Check-in at front desk 5 mins prior (${arrivalDisplay})`,
+      },
+      deviceSetups,
+      snacks,
+      rewards: {
+        currentPoints,
+        pointsPerHour: STATIC_REWARDS.pointsPerHour,
+        hoursBooked: durationHours,
+        totalPointsEarned,
+        goalForFreeHour: STATIC_REWARDS.goalForFreeHour,
+        pointsRemainingForFreeHour,
+        perks: [...STATIC_REWARDS.perks],
+      },
+      paymentBriefing: STATIC_PAYMENT_BRIEFING,
+    };
+  }, [selectedDevices, selectedFoods, date, startTime, endTime, currentPoints]);
 
   async function handleCancelBooking() {
+    setIsCancelling(true);
+    setCancelError(null);
     const result = await onCancel(bookingId);
+    if (!result.success) {
+      setCancelError(result.message || "Failed to cancel booking. Please try again.");
+      setIsCancelling(false);
+      return;
+    }
     router.push("/book");
+  }
+
+  function openConfirmModal() {
+    setCancelError(null);
+    setShowConfirmModal(true);
+  }
+
+  function closeConfirmModal() {
+    setCancelError(null);
+    setShowConfirmModal(false);
   }
 
   return (
     <div className="flex flex-col gap-6 md:gap-8 pb-12">
-      <ReviewHeader onCancel={() => setShowConfirmModal(true)} />
+      <ReviewHeader onCancel={openConfirmModal} />
 
       <ScheduleBriefingCard schedule={data.schedule} />
 
       <DeviceSetupsVisual setups={data.deviceSetups} />
 
-      <SnackVisualCards snacks={data.snacks} />
+      {data.snacks.length > 0 && (
+        <SnackVisualCards snacks={data.snacks} />
+      )}
 
       <RewardsEarnedCard rewards={data.rewards} />
 
       <RazorpayBriefingCard payment={data.paymentBriefing} />
 
-      <CancelBookingFooter onCancel={() => setShowConfirmModal(true)} />
+      <CancelBookingFooter onCancel={openConfirmModal} />
 
       {/* Confirmation Dialog Modal */}
       {showConfirmModal && (
@@ -616,20 +765,28 @@ export default function ReviewClient({
               You will be redirected back to the device booking page.
             </p>
 
+            {cancelError && (
+              <p role="alert" className="text-xs font-semibold text-destructive">
+                {cancelError}
+              </p>
+            )}
+
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => setShowConfirmModal(false)}
-                className="rounded-xl border border-border px-4 py-2 text-xs font-semibold hover:bg-muted transition-colors cursor-pointer"
+                onClick={closeConfirmModal}
+                disabled={isCancelling}
+                className="rounded-xl border border-border px-4 py-2 text-xs font-semibold hover:bg-muted transition-colors cursor-pointer disabled:opacity-50"
               >
                 Keep booking
               </button>
               <button
                 type="button"
                 onClick={handleCancelBooking}
-                className="rounded-xl bg-destructive text-white px-4 py-2 text-xs font-bold hover:bg-destructive/90 transition-colors cursor-pointer"
+                disabled={isCancelling}
+                className="rounded-xl bg-destructive text-white px-4 py-2 text-xs font-bold hover:bg-destructive/90 transition-colors cursor-pointer disabled:opacity-50"
               >
-                Yes, cancel booking
+                {isCancelling ? "Cancelling..." : "Yes, cancel booking"}
               </button>
             </div>
           </div>
@@ -638,3 +795,4 @@ export default function ReviewClient({
     </div>
   );
 }
+
