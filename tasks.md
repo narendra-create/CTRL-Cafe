@@ -72,7 +72,7 @@
 - [x] Make Footer
 - [ ] Wire up new profile controller functions in setttings page
 - [x] add checks in booking page for date, time, user logged in or not
-- [ ] make handlesubmit in sidebar
+- [x] make handlesubmit in sidebar
 - [x] implement url based stages of booking
 - [x] add use context for booking page
 - [x] add getDevices function in booking page
