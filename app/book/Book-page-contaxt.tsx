@@ -46,6 +46,8 @@ type BookingContextType = {
   setSelectedDevices: Dispatch<SetStateAction<SelectedDeviceArrayType[]>>;
   setFoodQuantity: (foodId: string, quantity: number) => void;
   addFood: (food: FoodItemType, quantity?: number) => void;
+  setRazorpayOrderId: Dispatch<SetStateAction<string | null>>;
+  razorpayOrderId: string | null;
 };
 const BookingContext = createContext<BookingContextType | null>(null);
 
@@ -55,6 +57,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     SelectedDeviceArrayType[]
   >([]);
   const [selectedFoods, setSelectedFoods] = useState<cartItemType[]>([]);
+  const [razorpayOrderId, setRazorpayOrderId] = useState<string | null>(null);
 
   const [date, setDate] = useState(() => getIndiaDateKey());
   const [startTime, setStartTime] = useState("10:00");
@@ -140,6 +143,8 @@ export function BookingProvider({ children }: { children: ReactNode }) {
         setSelectedFoods,
         setFoodQuantity,
         addFood,
+        setRazorpayOrderId,
+        razorpayOrderId,
       }}
     >
       {children}

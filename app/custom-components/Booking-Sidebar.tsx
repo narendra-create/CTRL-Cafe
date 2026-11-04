@@ -2,8 +2,13 @@
 import React, { useState } from "react";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 import { ARENAS } from "@/lib/static-data/Booking-data";
-import { toMinutes } from "@/lib/utils/tools";
+import { toIndiaDateTime, toMinutes } from "@/lib/utils/tools";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { bookSeat, holdSeat } from "@/lib/controllers/bookingController";
+import {
+  BookSeatInput,
+  SeatHoldeInput,
+} from "@/lib/validations/bookingValidation";
 
 /* Section: Main Component */
 
@@ -14,6 +19,9 @@ export default function BookingSidebar() {
     startTime,
     endTime,
     selectedFoods,
+    razorpayOrderId,
+    setRazorpayOrderId,
+    date,
   } = useBooking();
 
   const [error, seterror] = useState<string | null>(null);
@@ -67,13 +75,79 @@ export default function BookingSidebar() {
     setSelectedDevices([]);
   }
 
+  async function handleHold() {
+    setpending(true);
+    try {
+      if (selectedDevices.length <= 0) {
+        return;
+      }
+      const totalplayers = selectedDevices.reduce(
+        (sum, d) => sum + d.players,
+        0,
+      );
+      const payload: SeatHoldeInput = {
+        gameStations: selectedDevices.map((d) => {
+          return {
+            playersCount: d.players,
+            stationId: d.stationId,
+          };
+        }),
+        playersCount: totalplayers,
+        endTime: toIndiaDateTime(date, endTime),
+        startTime: toIndiaDateTime(date, startTime),
+      };
+      const result = await holdSeat(payload);
+      if (!result.success || !result.data) {
+        seterror(result.message!);
+        return;
+      }
+
+      router.push(`/book/snacks?bookingId=${result.data?.id ?? null}`);
+    } catch (err) {
+      seterror("Something Went wrong");
+    } finally {
+      setpending(false);
+    }
+  }
+
+  async function handleBook() {
+    setpending(true);
+    if (!bookingId || bookingId.length === 0) {
+      seterror("Please Provide bookingId");
+      setpending(false);
+      return;
+    }
+    try {
+      const payload: BookSeatInput = {
+        bookingId: bookingId,
+        foodItems: selectedFoods.map((food) => {
+          return {
+            foodItemId: food.id,
+            qty: food.quantity,
+          };
+        }),
+      };
+      const result = await bookSeat(payload);
+      if (!result.success || !result.data?.razorpay_orderId) {
+        return seterror(result.message ?? "Razorpay Order Id not found");
+      } else {
+        setRazorpayOrderId(result.data.razorpay_orderId);
+        router.push(`/book/review?bookingId=${bookingId}`);
+      }
+    } catch (err) {
+      seterror("something Went Wrong");
+    } finally {
+      setpending(false);
+    }
+  }
+
   async function handleProceed() {
     if (isReviewStep) {
-      alert("Razorpay Opens");
+      alert(`Razorpay order id - ${razorpayOrderId}`);
     } else if (isFoodStep) {
-      router.push("/book/review");
+      await handleBook();
     } else {
-      router.push("/book/snacks");
+      await handleHold();
     }
   }
 
@@ -219,7 +293,7 @@ export default function BookingSidebar() {
           <button
             type="button"
             onClick={handleProceed}
-            disabled={!canProceed}
+            disabled={!canProceed || pending}
             className="w-full bg-accent text-accent-foreground rounded-xl py-3.5 text-[14px] font-[700] cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-lg disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {proceedLabel}
@@ -248,7 +322,7 @@ export default function BookingSidebar() {
           <button
             type="button"
             onClick={handleProceed}
-            disabled={!canProceed}
+            disabled={!canProceed || pending}
             className="bg-accent text-accent-foreground rounded-xl px-5 py-3 text-[14px] font-[700] cursor-pointer transition-all duration-150 whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
           >
             {proceedLabel}

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import ReviewClient from "./ReviewClient";
 import { redirect } from "next/navigation";
 import { cancelBooking } from "@/lib/controllers/bookingController";
+import { getCurrentPoints } from "@/lib/controllers/profileController";
 
 export const metadata: Metadata = {
   title: "Review Your Booking | CTRL-CAFE",
@@ -21,6 +22,8 @@ export default async function ReviewPage({ searchParams }: Props) {
   if (!bookingId) {
     return redirect("/book");
   }
+  const result = await getCurrentPoints();
+  let currentPoints = result ?? 0;
 
   async function handleCancelBooking(bookingId: string) {
     "use server";
@@ -43,9 +46,6 @@ export default async function ReviewPage({ searchParams }: Props) {
     }
   }
 
-  // User can fetch points here on server and pass down
-  const currentPoints = 0;
-
   return (
     <ReviewClient
       bookingId={bookingId}
@@ -54,4 +54,3 @@ export default async function ReviewPage({ searchParams }: Props) {
     />
   );
 }
-
