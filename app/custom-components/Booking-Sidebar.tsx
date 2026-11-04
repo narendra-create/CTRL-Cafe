@@ -170,18 +170,15 @@ export default function BookingSidebar() {
                 Clear all
               </button>
             )}
-            {error && (
-              <p role="alert" className="mt-2 text-sm text-destructive">
-                {error}
-              </p>
-            )}
           </div>
           <p className="text-[22px] md:text-2xl font-bold tracking-[-0.03em] leading-tight">
             {canProceed ? `₹${grandTotal}` : "₹0"}
           </p>
           <p className="text-[12px] md:text-[15px] text-foreground/60 dark:text-muted-foreground mt-1">
             {!canProceed
-              ? "Pick a device to start"
+              ? totalDevices === 0
+                ? "Pick a device to start"
+                : "Minimum duration is 30 minutes"
               : `${totalDevices} device${totalDevices > 1 ? "s" : ""} · ${totalPlayers} player${totalPlayers > 1 ? "s" : ""} · ${durationHours} hr`}
           </p>
         </div>
@@ -290,17 +287,25 @@ export default function BookingSidebar() {
 
         {/* Section: Sidebar CTA */}
         <div className="px-5 pb-5">
+          {error && (
+            <p role="alert" className="mb-2 text-xs md:text-sm font-semibold text-destructive text-center">
+              {error}
+            </p>
+          )}
           <button
             type="button"
             onClick={handleProceed}
             disabled={!canProceed || pending}
+            aria-busy={pending}
             className="w-full bg-accent text-accent-foreground rounded-xl py-3.5 text-[14px] font-[700] cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-lg disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {proceedLabel}
           </button>
           {!canProceed && (
             <p className="text-[11px] text-muted-foreground text-center mt-2.5">
-              Select at least one device to continue
+              {totalDevices === 0
+                ? "Select at least one device to continue"
+                : "Minimum booking duration is 30 minutes"}
             </p>
           )}
         </div>
@@ -308,6 +313,11 @@ export default function BookingSidebar() {
 
       {/* Section: Mobile Summary Bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border px-4 py-3 z-40">
+        {error && (
+          <p role="alert" className="mb-2 text-xs font-semibold text-destructive text-center">
+            {error}
+          </p>
+        )}
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-[22px] font-[700] tracking-[-0.03em] leading-tight">
@@ -315,7 +325,9 @@ export default function BookingSidebar() {
             </p>
             <p className="text-[12px] text-muted-foreground mt-0.5">
               {!canProceed
-                ? "Pick a device to start"
+                ? totalDevices === 0
+                  ? "Pick a device to start"
+                  : "Min. 30 mins duration"
                 : `${totalDevices} device${totalDevices > 1 ? "s" : ""} · ${totalPlayers} player${totalPlayers > 1 ? "s" : ""} · ${durationHours} hr`}
             </p>
           </div>
@@ -323,6 +335,7 @@ export default function BookingSidebar() {
             type="button"
             onClick={handleProceed}
             disabled={!canProceed || pending}
+            aria-busy={pending}
             className="bg-accent text-accent-foreground rounded-xl px-5 py-3 text-[14px] font-[700] cursor-pointer transition-all duration-150 whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
           >
             {proceedLabel}
