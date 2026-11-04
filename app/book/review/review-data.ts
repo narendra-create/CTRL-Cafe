@@ -20,11 +20,11 @@ export interface DeviceSetupCard {
 export interface SnackVisualItem {
   id: string;
   name: string;
-  quantity: number;
+  qty: number;
   serves: string;
   category: string;
   imageUrl: string;
-  prepNote: string;
+  description: string;
 }
 
 export interface RewardsSummary {
@@ -138,29 +138,29 @@ export const mockBookingReview: BookingReviewData = {
     {
       id: "snack-1",
       name: "Momos",
-      quantity: 2,
+      qty: 2,
       serves: "Serves 1 each",
       category: "Steamed Dumplings",
       imageUrl: "https://images.pexels.com/photos/18803177/pexels-photo-18803177.jpeg",
-      prepNote: "Steamed fresh with house spicy red chutney",
+      description: "Steamed fresh with house spicy red chutney",
     },
     {
       id: "snack-2",
       name: "Cheese Burger",
-      quantity: 1,
+      qty: 1,
       serves: "Serves 1",
       category: "Signature Burger",
       imageUrl: "https://images.pexels.com/photos/32480062/pexels-photo-32480062.jpeg",
-      prepNote: "Grilled brioche bun with melted cheddar",
+      description: "Grilled brioche bun with melted cheddar",
     },
     {
       id: "snack-3",
       name: "Fried Rice",
-      quantity: 1,
+      qty: 1,
       serves: "Serves 2",
       category: "Wok Specials",
       imageUrl: "https://images.pexels.com/photos/2092906/pexels-photo-2092906.jpeg",
-      prepNote: "Wok-tossed hot with vegetables and herbs",
+      description: "Wok-tossed hot with vegetables and herbs",
     },
   ],
   rewards: {

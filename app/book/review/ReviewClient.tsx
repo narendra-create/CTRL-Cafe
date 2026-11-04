@@ -317,7 +317,7 @@ export function SnackVisualCards({ snacks }: { snacks: SnackVisualItem[] }) {
 
               {/* Quantity Overlay Badge */}
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1 rounded-lg bg-accent text-accent-foreground px-2.5 py-1 text-xs font-black font-mono shadow-md">
-                <span>{snack.quantity}×</span>
+                <span>{snack.qty}×</span>
                 <span className="text-[10px] font-sans font-bold uppercase">
                   Ordered
                 </span>
@@ -338,7 +338,7 @@ export function SnackVisualCards({ snacks }: { snacks: SnackVisualItem[] }) {
                 {snack.name}
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                {snack.prepNote}
+                {snack.description}
               </p>
             </div>
 
