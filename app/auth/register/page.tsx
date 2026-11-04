@@ -119,7 +119,7 @@ export default function RegisterPage() {
               {/* Session Loader Visual */}
               <div className="relative mb-6 2xl:mb-8 flex items-center justify-center">
                 <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-[#FACC15]/20 animate-ping absolute"></div>
-                <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-t-[#FACC15] border-r-[#FACC15]/40 border-b-transparent border-l-transparent animate-spin"></div>
+                <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-t-[#FACC15] border-r-[#FACC15]/40 border-b-transparent border-l-transparent animate-spin absolute"></div>
                 <div className="w-11 h-11 md:w-12 md:h-12 2xl:w-14 2xl:h-14 rounded-full bg-[#202b29] dark:bg-white/5 border border-[#FACC15]/30 flex items-center justify-center text-[#FACC15] shadow-inner">
                   <svg
                     width="20"

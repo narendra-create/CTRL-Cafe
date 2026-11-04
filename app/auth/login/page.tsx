@@ -101,11 +101,11 @@ export default function LoginPage() {
 
           {/* Checking Session Section */}
           <section className="bg-[#f4efe7] dark:bg-[#15191a] text-[#19201f] dark:text-[#f7f3ed] p-[31px_23px_42px] md:p-[clamp(27px,5vw,70px)] 2xl:p-18 flex items-center justify-center min-h-[calc(100dvh-265px)] md:min-h-0 transition-colors duration-300">
-            <div className="w-full max-w-[390px] 2xl:max-w-[460px] mx-auto flex flex-col items-center text-center">
+            <div className="w-full max-w-97.5 2xl:max-w-115 mx-auto flex flex-col items-center justify-center text-center">
               {/* Session Loader Visual */}
               <div className="relative mb-6 2xl:mb-8 flex items-center justify-center">
                 <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-[#FACC15]/20 animate-ping absolute"></div>
-                <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-t-[#FACC15] border-r-[#FACC15]/40 border-b-transparent border-l-transparent animate-spin"></div>
+                <div className="w-18 h-18 md:w-20 md:h-20 2xl:w-24 2xl:h-24 rounded-full border-2 border-t-[#FACC15] border-r-[#FACC15]/40 border-b-transparent border-l-transparent animate-spin absolute"></div>
                 <div className="w-11 h-11 md:w-12 md:h-12 2xl:w-14 2xl:h-14 rounded-full bg-[#202b29] dark:bg-white/5 border border-[#FACC15]/30 flex items-center justify-center text-[#FACC15] shadow-inner">
                   <svg
                     width="20"
@@ -376,7 +376,7 @@ export default function LoginPage() {
               >
                 {loading && (
                   <svg
-                    className="animate-spin h-[16px] w-[16px]"
+                    className="animate-spin h-4 w-4"
                     viewBox="0 0 24 24"
                     fill="none"
                   >

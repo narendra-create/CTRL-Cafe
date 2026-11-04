@@ -1,5 +1,6 @@
 "use client";
 import FoodCard from "@/app/custom-components/cards/FoodCard";
+import SnacksPageSkeleton from "@/app/custom-components/skeletons/SnacksPageSkeleton";
 import React, { useEffect, useState } from "react";
 import { getFoodItems } from "@/lib/controllers/foodController";
 import { foodItems } from "@/src/db/schema";
@@ -30,7 +31,7 @@ const SnacksClient = ({ bookingId }: { bookingId: string }) => {
   }, []);
 
   if (Loading) {
-    return <div>Loading...</div>;
+    return <SnacksPageSkeleton />;
   }
 
   return (
