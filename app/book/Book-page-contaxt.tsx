@@ -2,6 +2,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   type Dispatch,
   type ReactNode,
@@ -24,6 +25,12 @@ export type SelectedDeviceArrayType = {
   maxPlayers: number;
   players: number;
   units?: number | string;
+};
+
+type DateandTimeObject = {
+  startTime: string;
+  endTime: string;
+  date: string;
 };
 
 type BookingContextType = {
@@ -62,6 +69,58 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const [date, setDate] = useState(() => getIndiaDateKey());
   const [startTime, setStartTime] = useState("10:00");
   const [endTime, setEndTime] = useState("20:00");
+
+  //Populating states with localstorage values
+  useEffect(() => {
+    const storeddevices = localStorage.getItem("ctrl_cafe_selecteddevices");
+    const storedfooditems = localStorage.getItem("ctrl_cafe_selectedfooditems");
+    const storedrazorpayorderid = localStorage.getItem("ctrl_cafe_razorpayorderid");
+    const storedtimes = localStorage.getItem("ctrl_cafe_storedtimes");
+
+    if (storeddevices) {
+      setSelectedDevices(JSON.parse(storeddevices));
+    }
+    if (storedfooditems) {
+      setSelectedFoods(JSON.parse(storedfooditems));
+    }
+    if (storedrazorpayorderid) {
+      setRazorpayOrderId(JSON.parse(storedrazorpayorderid));
+    }
+    if (storedtimes) {
+      const timesObject: DateandTimeObject = JSON.parse(storedtimes);
+      setStartTime(timesObject.startTime);
+      setEndTime(timesObject.endTime);
+      setDate(timesObject.date);
+    }
+  }, []);
+  //Writitng into localstorage
+  useEffect(() => {
+    localStorage.setItem(
+      "ctrl_cafe_selecteddevices",
+      JSON.stringify(selectedDevices),
+    );
+  }, [selectedDevices]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "ctrl_cafe_selectedfooditems",
+      JSON.stringify(selectedFoods),
+    );
+  }, [selectedFoods]);
+
+  useEffect(() => {
+    localStorage.setItem("ctrl_cafe_razorpayorderid", JSON.stringify(razorpayOrderId));
+  }, [razorpayOrderId]);
+
+  useEffect(() => {
+    const payload: DateandTimeObject = {
+      date: date,
+      endTime: endTime,
+      startTime: startTime,
+    };
+
+    localStorage.setItem("ctrl_cafe_storedtimes", JSON.stringify(payload));
+  }, [startTime, endTime, date]);
 
   function addFood(food: FoodItemType, quantity = 1) {
     setSelectedFoods((currentfoods) => {

@@ -43,7 +43,7 @@
 - [x] review bookingcontroller function - holdseat and bookseat and verifypayment then move to the next task
 - [ ] add a seed file for devices + games + some bookings and fooditem
 - [ ] test the booking system from start to end
-- [ ] Save bookingdetails to localhost to prevent data loss on refresh for /book pages
+- [x] Save bookingdetails to localhost to prevent data loss on refresh for /book pages
 - [ ] add razorpay sdk open in handleBook function of sidebar
 
 ## Importent on 09/11/2026
