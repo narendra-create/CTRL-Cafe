@@ -129,10 +129,15 @@ export default function BookingSidebar() {
       };
       const result = await bookSeat(payload);
       if (!result.success || !result.data?.razorpay_orderId) {
-        return seterror(result.message ?? "Razorpay Order Id not found");
+        seterror(
+          result.message ??
+            "Razorpay Order Id not found" + " Redirecting to book page",
+        );
+        return setTimeout(() => {
+          router.push("/book");
+        }, 5000);
       } else {
-        setRazorpayOrderId(result.data.razorpay_orderId);
-        router.push(`/book/review?bookingId=${bookingId}`);
+        //Add razorpay sdk opening here
       }
     } catch (err) {
       seterror("something Went Wrong");
@@ -145,7 +150,7 @@ export default function BookingSidebar() {
     if (isReviewStep) {
       alert(`Razorpay order id - ${razorpayOrderId}`);
     } else if (isFoodStep) {
-      await handleBook();
+      router.push(`/book/review?bookingId=${bookingId}`);
     } else {
       await handleHold();
     }
@@ -288,7 +293,10 @@ export default function BookingSidebar() {
         {/* Section: Sidebar CTA */}
         <div className="px-5 pb-5">
           {error && (
-            <p role="alert" className="mb-2 text-xs md:text-sm font-semibold text-destructive text-center">
+            <p
+              role="alert"
+              className="mb-2 text-xs md:text-sm font-semibold text-destructive text-center"
+            >
               {error}
             </p>
           )}
@@ -314,7 +322,10 @@ export default function BookingSidebar() {
       {/* Section: Mobile Summary Bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border px-4 py-3 z-40">
         {error && (
-          <p role="alert" className="mb-2 text-xs font-semibold text-destructive text-center">
+          <p
+            role="alert"
+            className="mb-2 text-xs font-semibold text-destructive text-center"
+          >
             {error}
           </p>
         )}
