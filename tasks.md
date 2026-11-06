@@ -93,6 +93,8 @@
 - [ ] add booking id check in snacks page
 - [ ] add upi id method in razorpay
 - [ ] remove extra cancel button from review page
+- [ ] make /currentBooking/[bookingId] page
+- [ ] add /book/snacks and review pages into proxy
 
 ## Run this checklist after deployement
 

@@ -83,16 +83,6 @@ export function ReviewHeader({ onCancel }: { onCancel: () => void }) {
           <span className="size-1.5 rounded-full bg-accent" />
           Step 3 of 3 · Final Review
         </span>
-
-        {/* Cancel Booking Action */}
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors py-1 px-2.5 rounded-lg hover:bg-destructive/10 cursor-pointer"
-        >
-          <XCircle className="size-3.5" />
-          <span>Cancel booking</span>
-        </button>
       </div>
 
       <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-tight">
