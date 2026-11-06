@@ -41,10 +41,10 @@
 - [x] Get booked seats
 - [x] IMPORTENT = make bookingController capable of handling many devices and stations booking at once
 - [x] review bookingcontroller function - holdseat and bookseat and verifypayment then move to the next task
-- [ ] add a seed file for devices + games + some bookings and fooditem
+- [x] add a seed file for devices + games + some bookings and fooditem
 - [ ] test the booking system from start to end
 - [ ] Save bookingdetails to localhost to prevent data loss on refresh for /book pages
-- [ ] add razorpay sdk open in handleBook function of sidebar
+- [x] add razorpay sdk open in handleBook function of sidebar
 
 ## Importent on 09/11/2026
 
@@ -86,9 +86,9 @@
 - [x] add players rate too in grandtotal in sidebar
 - [x] add skeletons for booking pages - /book, /snacks and /review
 - [x] wire up cancel booking logic in cancel button
-- [ ] Make Payment Success and Failure pages'
+- [x] Make Payment Success and Failure pages'
 - [ ] Make Booking Pass page
-- [ ] redirect user to booking details when payment succeeds
+- [x] redirect user to booking details when payment succeeds
 - [ ] update review page, remove placeholder games from devices
 
 ## Run this checklist after deployement
