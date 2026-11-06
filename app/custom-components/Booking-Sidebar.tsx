@@ -2,16 +2,22 @@
 import React, { useState } from "react";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 import { ARENAS } from "@/lib/static-data/Booking-data";
-import { toIndiaDateTime, toMinutes } from "@/lib/utils/tools";
+import { rupeesToPaise, toIndiaDateTime, toMinutes } from "@/lib/utils/tools";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { bookSeat, holdSeat } from "@/lib/controllers/bookingController";
+import {
+  bookSeat,
+  holdSeat,
+  verifyPayment,
+} from "@/lib/controllers/bookingController";
 import {
   BookSeatInput,
   SeatHoldeInput,
 } from "@/lib/validations/bookingValidation";
+import Script from "next/script";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/components/ui/toast";
 
 /* Section: Main Component */
-
 export default function BookingSidebar() {
   const {
     setSelectedDevices,
@@ -113,7 +119,22 @@ export default function BookingSidebar() {
   async function handleBook() {
     setpending(true);
     if (!bookingId || bookingId.length === 0) {
-      seterror("Please Provide bookingId");
+      const msg = "Please Provide bookingId";
+      seterror(msg);
+      toast.add({ type: "error", title: "Missing Booking", description: msg });
+      setpending(false);
+      return;
+    }
+    // Safety check for Razorpay SDK availability
+    if (typeof window === "undefined" || !(window as any).Razorpay) {
+      const msg =
+        "Payment gateway is still loading. Please try again in a few seconds.";
+      seterror(msg);
+      toast.add({
+        type: "warning",
+        title: "Please wait",
+        description: msg,
+      });
       setpending(false);
       return;
     }
@@ -129,18 +150,121 @@ export default function BookingSidebar() {
       };
       const result = await bookSeat(payload);
       if (!result.success || !result.data?.razorpay_orderId) {
-        seterror(
-          result.message ??
-            "Razorpay Order Id not found" + " Redirecting to book page",
-        );
+        const msg =
+          result.message ?? "Razorpay Order Id not found. Redirecting...";
+        seterror(msg);
+        toast.add({
+          type: "error",
+          title: "Booking Failed",
+          description: msg,
+        });
         return setTimeout(() => {
           router.push("/book");
         }, 5000);
       } else {
-        //Add razorpay sdk opening here
+        const supabase = createClient();
+        const claims = await supabase.auth.getClaims();
+        if (!claims.data) {
+          toast.add({
+            type: "error",
+            title: "Authentication Required",
+            description: "Please sign in to complete your booking.",
+          });
+          return;
+        }
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
+          amount: rupeesToPaise(result.data.updatedBooking.totalAmount),
+          currency: "INR",
+          name: "CTRL Cafe",
+          description: "For booking Gaming sesssion",
+          image: `${window.location.origin}/CTRL-CAFE-ICON.webp`,
+          order_id: result.data.razorpay_orderId,
+          prefill: {
+            name: claims.data.claims.user_metadata?.full_name ?? "Gamer",
+            email: claims.data.claims.email || "",
+          },
+          notes: {
+            Slot: `${startTime} - ${endTime}`,
+            Date: new Date(date).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "long",
+              year: "2-digit",
+              timeZone: "Asia/Kolkata",
+            }),
+          },
+          theme: {
+            color: "#fac800",
+          },
+          modal: {
+            ondismiss: () => {
+              setpending(false);
+            },
+          },
+          handler: async function (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) {
+            try {
+              setpending(true);
+              const verification = await verifyPayment({
+                bookingId: result.data?.updatedBooking.id ?? bookingId,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+
+              if (verification.success) {
+                toast.add({
+                  type: "success",
+                  title: "Booking Confirmed!",
+                  description:
+                    "Your session and snacks are booked successfully.",
+                });
+                router.push(`/payment/success?bookingId=${bookingId}`);
+              } else {
+                const msg =
+                  verification.message || "Payment verification failed.";
+                seterror(msg);
+                toast.add({
+                  type: "error",
+                  title: "Verification Failed",
+                  description: msg,
+                });
+              }
+            } catch {
+              toast.add({
+                type: "error",
+                title: "Verification Error",
+                description:
+                  "An unexpected error occurred while verifying payment.",
+              });
+            } finally {
+              setpending(false);
+            }
+          },
+        };
+        const razorpayClientForPayment = new (window as any).Razorpay(options);
+        razorpayClientForPayment.on("payment.failed", (res: any) => {
+          setpending(false);
+          toast.add({
+            type: "error",
+            title: "Payment Failed",
+            description:
+              res.error?.description || "Payment could not be completed.",
+          });
+        });
+        razorpayClientForPayment.open();
       }
     } catch (err) {
-      seterror("something Went Wrong");
+      const msg = "Something went wrong while initiating payment.";
+      seterror(msg);
+      toast.add({
+        type: "error",
+        title: "Error",
+        description: msg,
+      });
     } finally {
       setpending(false);
     }
@@ -148,7 +272,7 @@ export default function BookingSidebar() {
 
   async function handleProceed() {
     if (isReviewStep) {
-      alert(`Razorpay order id - ${razorpayOrderId}`);
+      await handleBook();
     } else if (isFoodStep) {
       router.push(`/book/review?bookingId=${bookingId}`);
     } else {
@@ -160,6 +284,11 @@ export default function BookingSidebar() {
     <>
       {/* Section: Desktop Sidebar Card */}
       <div className="lg:sticky lg:top-28 mb-5 md:mb-0 rounded-2xl border border-black/20 shadow-[0px_4px_10px_0px_#e2e8f0] dark:shadow-none dark:border-border bg-background overflow-hidden">
+        {/* Razorpay CheckOut Script */}
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="afterInteractive"
+        />
         {/* Section: Sidebar Header */}
         <div className="px-5 py-4">
           <div className="flex items-center justify-between gap-2 mb-0.5">
@@ -305,7 +434,7 @@ export default function BookingSidebar() {
             onClick={handleProceed}
             disabled={!canProceed || pending}
             aria-busy={pending}
-            className="w-full bg-accent text-accent-foreground rounded-xl py-3.5 text-[14px] font-[700] cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-lg disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            className="w-full bg-accent text-accent-foreground rounded-xl py-3.5 text-[14px] font-bold cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-lg disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {proceedLabel}
           </button>
