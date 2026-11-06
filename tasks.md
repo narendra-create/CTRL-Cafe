@@ -95,6 +95,7 @@
 - [ ] remove extra cancel button from review page
 - [ ] make /currentBooking/[bookingId] page
 - [ ] add /book/snacks and review pages into proxy
+- [ ] Hide error automatically after 2 seconds in booking sidebar
 
 ## Run this checklist after deployement
 
