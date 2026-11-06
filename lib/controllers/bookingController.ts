@@ -578,13 +578,15 @@ export const cancelBooking = async (inputBookingId: string): Promise<{
         const { error: authError, dbuser } = await resolveAuthenticatedUser("user");
         if (authError) return authError;
         if (!inputBookingId) return { success: false, message: "Please Provide booking Id" };
-        const bookingId = z.uuid().safeParse(inputBookingId);
-        if (bookingId) {
+        const parsedbookingId = z.uuid().safeParse(inputBookingId);
+        if (!parsedbookingId.success) {
             return {
                 success: false,
                 message: "Please Provide valid bookingid"
             }
-        }
+        };
+
+        const bookingId = parsedbookingId.data;
         const [bookingFound] = await db.select().from(bookings).where(and(
             eq(bookings.userId, dbuser.userId),
             eq(bookings.id, bookingId),
