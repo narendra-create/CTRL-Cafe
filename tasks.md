@@ -89,6 +89,7 @@
 - [ ] Make Payment Success and Failure pages'
 - [ ] Make Booking Pass page
 - [ ] redirect user to booking details when payment succeeds
+- [ ] update review page, remove placeholder games from devices
 
 ## Run this checklist after deployement
 
