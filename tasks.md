@@ -86,6 +86,9 @@
 - [x] add players rate too in grandtotal in sidebar
 - [x] add skeletons for booking pages - /book, /snacks and /review
 - [x] wire up cancel booking logic in cancel button
+- [ ] Make Payment Success and Failure pages'
+- [ ] Make Booking Pass page
+- [ ] redirect user to booking details when payment succeeds
 
 ## Run this checklist after deployement
 
