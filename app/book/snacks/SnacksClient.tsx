@@ -26,8 +26,8 @@ const SnacksClient = ({ bookingId }: { bookingId: string }) => {
       setLoading(false);
       return;
     }
-    // fetchFoodItems();
-    setFoodItems(mockFoodItems);
+    fetchFoodItems();
+    // setFoodItems(mockFoodItems);
   }, []);
 
   if (Loading) {
