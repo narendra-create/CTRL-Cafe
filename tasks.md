@@ -42,7 +42,7 @@
 - [x] IMPORTENT = make bookingController capable of handling many devices and stations booking at once
 - [x] review bookingcontroller function - holdseat and bookseat and verifypayment then move to the next task
 - [x] add a seed file for devices + games + some bookings and fooditem
-- [ ] test the booking system from start to end
+- [x] test the booking system from start to end
 - [ ] Save bookingdetails to localhost to prevent data loss on refresh for /book pages
 - [x] add razorpay sdk open in handleBook function of sidebar
 
@@ -81,7 +81,7 @@
 - [x] add seed file for foodItems
 - [x] seed file for devices and other things
 - [x] redirect user to /book if booking id not provided in /snacks and /review endpoints
-- [ ] Test this flow = Select device - choose snacks - review page - pay
+- [x] Test this flow = Select device - choose snacks - review page - pay
 - [ ] add functionality to get device unit selected into sidebar, means user can select 2 ps4 or 1, and ps4 has total 5 units, each has players count
 - [x] add players rate too in grandtotal in sidebar
 - [x] add skeletons for booking pages - /book, /snacks and /review
@@ -90,6 +90,9 @@
 - [ ] Make Booking Pass page
 - [x] redirect user to booking details when payment succeeds
 - [ ] update review page, remove placeholder games from devices
+- [ ] add booking id check in snacks page
+- [ ] add upi id method in razorpay
+- [ ] remove extra cancel button from review page
 
 ## Run this checklist after deployement
 
