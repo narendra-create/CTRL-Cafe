@@ -85,7 +85,6 @@ export const DEVICE_STATIC: Record<
     features: [
       "4K 120Hz Low-Latency Gaming Screens",
       "DualSense Wireless Haptic Controllers",
-      "Pre-installed: FC 25, Mortal Kombat 1, Tekken 8, Spider-Man 2",
     ],
   },
   PC: {
@@ -94,7 +93,6 @@ export const DEVICE_STATIC: Record<
     features: [
       "RTX 4060 GPU · 240Hz Fast IPS Display",
       "Mechanical Linear Switch Keyboard & Ultralight Mouse",
-      "Pre-tuned Discord, Steam, Valorant, CS2 & GTA V",
     ],
   },
   ARCADE: {
@@ -103,7 +101,6 @@ export const DEVICE_STATIC: Record<
     features: [
       "Dedicated Arcade Joystick & Button Panel",
       "Racing Wheels & Fighting Sticks Available",
-      "Curated: Street Fighter 6, Tekken, Initial D",
     ],
   },
   VR: {
@@ -112,7 +109,6 @@ export const DEVICE_STATIC: Record<
     features: [
       "Meta Quest Pro / PSVR2 Headsets",
       "Full-Room Motion Tracking",
-      "Curated: Beat Saber, Superhot VR, Walkabout Golf",
     ],
   },
 };

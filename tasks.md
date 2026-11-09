@@ -89,7 +89,7 @@
 - [x] Make Payment Success and Failure pages'
 - [ ] Make Booking Pass page
 - [x] redirect user to booking details when payment succeeds
-- [ ] update review page, remove placeholder games from devices
+- [x] update review page, remove placeholder games from devices
 - [ ] add booking id check in snacks page
 - [ ] add upi id method in razorpay
 - [ ] remove extra cancel button from review page
