@@ -106,3 +106,55 @@ export const updateProfile = async (input: UpdateProfileInput): Promise<{
         }
     }
 };
+
+export const deleteProfile = async (): Promise<{
+    success: boolean;
+    message?: string;
+}> => {
+    try {
+        const supabase = await createClient();
+        const claims = await supabase.auth.getClaims();
+        if (!claims.data) {
+            return {
+                success: false,
+                message: "Please Log in first"
+            }
+        };
+        const [findUserInDB] = await db.select({ deletedAt: profiles.deletedAt, id: profiles.id }).from(profiles).where(eq(profiles.id, claims.data.claims.sub));
+        if (!findUserInDB) {
+            return {
+                success: false,
+                message: "User Not Found"
+            }
+        };
+        if (findUserInDB.deletedAt) {
+            return {
+                success: false,
+                message: "Already Deleted"
+            }
+        };
+
+        const now = new Date();
+
+        await db.update(profiles).set({
+            fullName: "Deleted User",
+            phone: null,
+            avatarUrl: null,
+            dateOfBirth: null,
+            gender: null,
+            rewardPoints: 0,
+            deletedAt: now
+        }).where(eq(profiles.id, findUserInDB.id));
+
+        return {
+            success: true
+        }
+    }
+    catch (err) {
+        console.error("[deleteProfile]: ", err);
+        return {
+            success: false,
+            message: "Something Went Wrong"
+        }
+    }
+};
