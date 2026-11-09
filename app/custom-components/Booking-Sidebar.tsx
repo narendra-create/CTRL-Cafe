@@ -25,8 +25,6 @@ export default function BookingSidebar() {
     startTime,
     endTime,
     selectedFoods,
-    razorpayOrderId,
-    setRazorpayOrderId,
     date,
   } = useBooking();
 

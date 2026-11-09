@@ -46,3 +46,21 @@ export interface DeviceSelection {
 
 /* all selections across arenas: arena key → DeviceSelection */
 export type AllSelections = Partial<Record<DeviceType, DeviceSelection>>;
+
+export interface StoredBookingDraft {
+    version: 1;
+    selectedArena: "CONSOLE" | "PC" | "ARCADE" | "VR";
+    date: string;       // e.g. "2026-11-10"
+    startTime: string;  // e.g. "14:00"
+    endTime: string;    // e.g. "16:00"
+    // Storing only station IDs and player counts
+    selectedStations: Array<{
+        stationId: string;
+        players: number;
+    }>;
+    // Storing only food IDs and quantities
+    selectedFoods: Array<{
+        foodId: string;
+        quantity: number;
+    }>;
+}
