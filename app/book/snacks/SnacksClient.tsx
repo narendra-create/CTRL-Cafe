@@ -7,7 +7,7 @@ import { foodItems } from "@/src/db/schema";
 import mockFoodItems from "@/app/mockdata";
 import { useBooking } from "@/app/book/Book-page-contaxt";
 
-const SnacksClient = ({ bookingId }: { bookingId: string }) => {
+const SnacksClient = () => {
   const [FoodItems, setFoodItems] = useState<Array<
     typeof foodItems.$inferSelect
   > | null>(null);

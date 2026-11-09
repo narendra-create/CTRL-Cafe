@@ -90,7 +90,7 @@
 - [ ] Make Booking Pass page
 - [x] redirect user to booking details when payment succeeds
 - [x] update review page, remove placeholder games from devices
-- [ ] add booking id check in snacks page
+- [x] remove booking id in snacks page
 - [ ] add upi id method in razorpay
 - [ ] remove extra cancel button from review page
 - [ ] make /currentBooking/[bookingId] page
