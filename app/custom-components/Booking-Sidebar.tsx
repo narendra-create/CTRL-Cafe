@@ -105,12 +105,18 @@ export default function BookingSidebar() {
       const result = await holdSeat(payload);
       if (!result.success || !result.data) {
         seterror(result.message!);
+        setTimeout(() => {
+          seterror(null);
+        }, 10000);
         return;
       }
 
       router.push(`/book/snacks?bookingId=${result.data?.id ?? null}`);
     } catch (err) {
       seterror("Something Went wrong");
+      setTimeout(() => {
+        seterror(null);
+      }, 10000);
     } finally {
       setpending(false);
     }
@@ -121,6 +127,9 @@ export default function BookingSidebar() {
     if (!bookingId || bookingId.length === 0) {
       const msg = "Please Provide bookingId";
       seterror(msg);
+      setTimeout(() => {
+        seterror(null);
+      }, 10000);
       toast.add({ type: "error", title: "Missing Booking", description: msg });
       setpending(false);
       return;
@@ -130,6 +139,9 @@ export default function BookingSidebar() {
       const msg =
         "Payment gateway is still loading. Please try again in a few seconds.";
       seterror(msg);
+      setTimeout(() => {
+        seterror(null);
+      }, 10000);
       toast.add({
         type: "warning",
         title: "Please wait",
@@ -153,6 +165,9 @@ export default function BookingSidebar() {
         const msg =
           result.message ?? "Razorpay Order Id not found. Redirecting...";
         seterror(msg);
+        setTimeout(() => {
+          seterror(null);
+        }, 10000);
         toast.add({
           type: "error",
           title: "Booking Failed",
@@ -227,6 +242,9 @@ export default function BookingSidebar() {
                 const msg =
                   verification.message || "Payment verification failed.";
                 seterror(msg);
+                setTimeout(() => {
+                  seterror(null);
+                }, 10000);
                 toast.add({
                   type: "error",
                   title: "Verification Failed",
@@ -260,6 +278,9 @@ export default function BookingSidebar() {
     } catch (err) {
       const msg = "Something went wrong while initiating payment.";
       seterror(msg);
+      setTimeout(() => {
+        seterror(null);
+      }, 10000);
       toast.add({
         type: "error",
         title: "Error",

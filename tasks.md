@@ -94,7 +94,7 @@
 - [x] remove extra cancel button from review page
 - [ ] make /currentBooking/[bookingId] page
 - [x] add /book/snacks and review pages into proxy
-- [ ] Hide error automatically after 2 seconds in booking sidebar
+- [x] Hide error automatically after 2 seconds in booking sidebar
 - [ ] Automatically select current time in starttime and block past times so that user never gets starttime must be in future error
 
 ## Run this checklist after deployement
