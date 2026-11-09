@@ -1,4 +1,5 @@
 "use server";
+import { checkAccountType } from "@/lib/actions/authorizationCheck";
 import { createClient } from "@/lib/supabase/serverClient";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { profiles } from "@/src/db/schema";
@@ -62,19 +63,34 @@ export const getProfileDetails = async (): Promise<{
     }
 };
 
-// export const updateProfile = async (): Promise<{
-//     success: boolean;
-//     message?: string;
-//     data?: typeof profiles.$inferSelect
-// }> => {
-//     try {
+export const updateProfile = async (): Promise<{
+    success: boolean;
+    message?: string;
+    data?: typeof profiles.$inferSelect
+}> => {
+    try {
+        const { userId, success: authSuccess, message: authError } = await checkAccountType();
+        if (!authSuccess) {
+            return {
+                success: false,
+                message: authError
+            }
+        };
 
-//     }
-//     catch (err) {
-//         console.error("[updateProfile]: ", err);
-//         return {
-//             success: false,
-//             message: "Something Went Wrong"
-//         }
-//     }
-// }
+        const [updatedProfile] = await db.update(profiles).set({
+            gender: "male"
+        }).where(eq(profiles.id, userId!)).returning();
+
+        return {
+            success: true,
+            data: updatedProfile
+        }
+    }
+    catch (err) {
+        console.error("[updateProfile]: ", err);
+        return {
+            success: false,
+            message: "Something Went Wrong"
+        }
+    }
+}

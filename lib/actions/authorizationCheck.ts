@@ -19,27 +19,42 @@ export async function isLoggedIn(): Promise<boolean> {
 };
 
 export async function checkAccountType(): Promise<{
-    userId: string | null;
-    isAdmin: boolean;
+    userId?: string | null;
+    isAdmin?: boolean;
+    success: boolean;
+    message?: string;
 }> {
     const supabase = await createClient();
     const { data: user, error } = await supabase.auth.getClaims();
     if (error) {
-        throw new Error(error.message);
+        return {
+            success: false,
+            message: error.message
+        }
     };
     if (!user) {
-        throw new Error("Please Log in first")
+        return {
+            message: "Please Log in first",
+            success: false
+        }
     };
     const [account] = await db.select({ accountType: profiles.accountType, userId: profiles.id }).from(profiles).where(eq(profiles.id, user.claims.sub));
-
+    if (!account) {
+        return {
+            success: false,
+            message: "User Not Found"
+        }
+    }
     if (account.accountType === "admin") {
         return {
             isAdmin: true,
-            userId: account.userId
+            userId: account.userId,
+            success: true
         };
     };
     return {
         isAdmin: false,
-        userId: null
+        userId: null,
+        success: true
     };
 }
