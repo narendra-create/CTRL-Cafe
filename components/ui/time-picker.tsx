@@ -7,6 +7,8 @@ type TimePickerProps = {
   options: string[];
   value: string;
   onChange: (value: string) => void;
+  selectedDate: string; // YYYY-MM-DD
+  timeZone?: string;
   placeholder?: string;
   ariaLabel?: string;
   name?: string;
@@ -14,10 +16,72 @@ type TimePickerProps = {
   className?: string;
 };
 
+// Get the date in the booking location's timezone.
+function getDateKeyInTimeZone(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+// Get current hour and minute in the booking location's timezone.
+function getMinutesInTimeZone(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  const hour = Number(parts.find((part) => part.type === "hour")?.value);
+
+  const minute = Number(parts.find((part) => part.type === "minute")?.value);
+
+  return hour * 60 + minute;
+}
+
+// Convert "14:30" or "2:30 PM" into minutes since midnight.
+function parseTimeToMinutes(time: string): number | null {
+  const match = time.trim().match(/^(\d{1,2}):([0-5]\d)\s*(AM|PM)?$/i);
+
+  if (!match) return null;
+
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const period = match[3]?.toUpperCase();
+
+  if (period) {
+    if (hour < 1 || hour > 12) return null;
+
+    hour = (hour % 12) + (period === "PM" ? 12 : 0);
+  } else if (hour > 23) {
+    return null;
+  }
+
+  return hour * 60 + minute;
+}
+
+function isTimeDisabled(time: string, isToday: boolean, nowMinutes: number) {
+  if (!isToday) return false;
+
+  const optionMinutes = parseTimeToMinutes(time);
+
+  return optionMinutes === null || optionMinutes < nowMinutes;
+}
+
 export function TimePicker({
   options,
   value,
   onChange,
+  selectedDate,
+  timeZone = "Asia/Kolkata",
   placeholder = "Select time",
   ariaLabel,
   name,
@@ -26,22 +90,84 @@ export function TimePicker({
   id,
 }: TimePickerProps) {
   const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(() =>
-    Math.max(options.indexOf(value), 0),
+  const [nowMinutes, setNowMinutes] = useState(() =>
+    getMinutesInTimeZone(new Date(), timeZone),
   );
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listboxId = useId();
 
+  const todayKey = getDateKeyInTimeZone(new Date(), timeZone);
+  const isToday = selectedDate === todayKey;
+
   const selectedIndex = options.indexOf(value);
 
+  const isOptionDisabled = (option: string) =>
+    isTimeDisabled(option, isToday, nowMinutes);
+
+  const enabledIndices = options.reduce<number[]>((indices, option, index) => {
+    if (!isOptionDisabled(option)) {
+      indices.push(index);
+    }
+
+    return indices;
+  }, []);
+
+  // Keep current time updated while the component is mounted.
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      const currentMinutes = getMinutesInTimeZone(new Date(), timeZone);
+
+      setNowMinutes((previous) =>
+        previous === currentMinutes ? previous : currentMinutes,
+      );
+    }, 15_000);
+
+    return () => window.clearInterval(interval);
+  }, [timeZone]);
+
+  // Automatically select the first available time for today.
+  useEffect(() => {
+    if (!isToday) return;
+
+    const selectedIsValid = options.includes(value) && !isOptionDisabled(value);
+
+    if (selectedIsValid) return;
+
+    const firstAvailable =
+      options.find((option) => !isOptionDisabled(option)) ?? "";
+
+    if (value !== firstAvailable) {
+      onChange(firstAvailable);
+    }
+  }, [isToday, nowMinutes, options, value, onChange]);
+
   const openDropdown = () => {
-    setActiveIndex(Math.max(options.indexOf(value), 0));
+    const selectedIsAvailable =
+      selectedIndex >= 0 && !isOptionDisabled(options[selectedIndex]);
+
+    setActiveIndex(
+      selectedIsAvailable ? selectedIndex : (enabledIndices[0] ?? -1),
+    );
+
     setOpen(true);
   };
 
   const selectOption = (option: string) => {
+    // Recheck the actual current time before accepting a selection.
+    const currentDate = new Date();
+
+    const currentlyToday =
+      selectedDate === getDateKeyInTimeZone(currentDate, timeZone);
+
+    const currentMinutes = getMinutesInTimeZone(currentDate, timeZone);
+
+    if (isTimeDisabled(option, currentlyToday, currentMinutes)) {
+      return;
+    }
+
     onChange(option);
     setOpen(false);
     triggerRef.current?.focus();
@@ -64,14 +190,40 @@ export function TimePicker({
     };
   }, [open]);
 
-  // Keep the active option visible while navigating with the keyboard.
+  // Move active index if the currently active option becomes disabled.
   useEffect(() => {
-    if (!open) return;
+    if (!open || enabledIndices.includes(activeIndex)) return;
+
+    setActiveIndex(enabledIndices[0] ?? -1);
+  }, [open, activeIndex, nowMinutes, isToday, options]);
+
+  // Keep the active option visible during keyboard navigation.
+  useEffect(() => {
+    if (!open || activeIndex < 0) return;
 
     document
       .getElementById(`${listboxId}-option-${activeIndex}`)
       ?.scrollIntoView({ block: "nearest" });
   }, [activeIndex, open, listboxId]);
+
+  const moveActive = (direction: -1 | 1) => {
+    if (!enabledIndices.length) return;
+
+    setActiveIndex((current) => {
+      const position = enabledIndices.indexOf(current);
+
+      if (position === -1) {
+        return direction === 1
+          ? enabledIndices[0]
+          : enabledIndices[enabledIndices.length - 1];
+      }
+
+      const nextPosition =
+        (position + direction + enabledIndices.length) % enabledIndices.length;
+
+      return enabledIndices[nextPosition];
+    });
+  };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "Escape" && open) {
@@ -93,26 +245,19 @@ export function TimePicker({
         return;
       }
 
-      if (!options.length) return;
-
-      setActiveIndex((current) =>
-        event.key === "ArrowDown"
-          ? (current + 1) % options.length
-          : (current - 1 + options.length) % options.length,
-      );
-
+      moveActive(event.key === "ArrowDown" ? 1 : -1);
       return;
     }
 
-    if (event.key === "Home" && open && options.length) {
+    if (event.key === "Home" && open && enabledIndices.length) {
       event.preventDefault();
-      setActiveIndex(0);
+      setActiveIndex(enabledIndices[0]);
       return;
     }
 
-    if (event.key === "End" && open && options.length) {
+    if (event.key === "End" && open && enabledIndices.length) {
       event.preventDefault();
-      setActiveIndex(options.length - 1);
+      setActiveIndex(enabledIndices[enabledIndices.length - 1]);
       return;
     }
 
@@ -121,7 +266,7 @@ export function TimePicker({
 
       if (!open) {
         openDropdown();
-      } else if (options[activeIndex] !== undefined) {
+      } else if (activeIndex >= 0 && options[activeIndex]) {
         selectOption(options[activeIndex]);
       }
     }
@@ -143,7 +288,10 @@ export function TimePicker({
         aria-expanded={open}
         aria-controls={listboxId}
         aria-activedescendant={
-          open && options[activeIndex] !== undefined
+          open &&
+          activeIndex >= 0 &&
+          options[activeIndex] &&
+          !isOptionDisabled(options[activeIndex])
             ? `${listboxId}-option-${activeIndex}`
             : undefined
         }
@@ -206,9 +354,16 @@ export function TimePicker({
             dark:bg-[#211b1d]
           "
         >
+          {isToday && enabledIndices.length === 0 && (
+            <p className="px-3 py-2 text-sm text-muted-foreground">
+              No remaining time slots for today.
+            </p>
+          )}
+
           {options.map((option, index) => {
             const selected = option === value;
             const active = index === activeIndex;
+            const optionDisabled = isOptionDisabled(option);
 
             return (
               <div
@@ -216,18 +371,23 @@ export function TimePicker({
                 id={`${listboxId}-option-${index}`}
                 role="option"
                 aria-selected={selected}
-                onMouseEnter={() => setActiveIndex(index)}
+                aria-disabled={optionDisabled}
+                onMouseEnter={() => {
+                  if (!optionDisabled) setActiveIndex(index);
+                }}
                 onClick={() => selectOption(option)}
                 className={`
-                  flex cursor-pointer items-center justify-between
+                  flex items-center justify-between
                   rounded-lg px-3 py-2.5
                   text-sm transition-colors duration-150
                   ${
-                    selected
-                      ? "bg-yellow-400 font-semibold text-[#181214]"
-                      : active
-                        ? "bg-foreground/5 text-foreground dark:bg-white/[0.06] dark:text-[#F7F4EC]"
-                        : "text-foreground hover:bg-foreground/5 dark:text-[#F7F4EC] dark:hover:bg-white/[0.06]"
+                    optionDisabled
+                      ? "cursor-not-allowed text-muted-foreground/40"
+                      : selected
+                        ? "cursor-pointer bg-yellow-400 font-semibold text-[#181214]"
+                        : active
+                          ? "cursor-pointer bg-foreground/5 text-foreground dark:bg-white/[0.06] dark:text-[#F7F4EC]"
+                          : "cursor-pointer text-foreground hover:bg-foreground/5 dark:text-[#F7F4EC] dark:hover:bg-white/[0.06]"
                   }
                 `}
               >

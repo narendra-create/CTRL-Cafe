@@ -366,6 +366,8 @@ export default function BookingClient({
               <TimePicker
                 id="book-start"
                 ariaLabel="Start time"
+                selectedDate={date}
+                timeZone="Asia/Kolkata"
                 placeholder="Select start time"
                 options={startTimeSlots.map((slot) => slot.label)}
                 value={
@@ -406,6 +408,8 @@ export default function BookingClient({
               <TimePicker
                 id="book-end"
                 ariaLabel="End time"
+                selectedDate={date}
+                timeZone="Asia/Kolkata"
                 placeholder="Select end time"
                 options={endTimeSlots.map((slot) => slot.label)}
                 value={
