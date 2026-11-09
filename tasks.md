@@ -91,7 +91,6 @@
 - [x] redirect user to booking details when payment succeeds
 - [x] update review page, remove placeholder games from devices
 - [x] remove booking id in snacks page
-- [ ] add upi id method in razorpay
 - [x] remove extra cancel button from review page
 - [ ] make /currentBooking/[bookingId] page
 - [ ] add /book/snacks and review pages into proxy
