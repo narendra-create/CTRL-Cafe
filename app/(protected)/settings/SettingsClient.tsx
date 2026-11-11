@@ -11,6 +11,12 @@ import {
   getInitials,
 } from "@/lib/utils/tools";
 import { toast } from "@/components/ui/toast";
+import {
+  deleteProfile,
+  updateProfile,
+} from "@/lib/controllers/profileController";
+import { Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const GOAL = 65;
 
@@ -23,7 +29,6 @@ type Props = {
 };
 
 /* Section: Sub-components */
-
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="mb-3 text-[10px] font-[800] tracking-[0.14em] text-muted-foreground uppercase">
@@ -121,13 +126,18 @@ export default function SettingsClient({
   /* Section: Profile State */
   const [name, setName] = useState(userDetails.fullName ?? "");
   const [phone, setPhone] = useState(userDetails.phone ?? "");
-  const [gender, setGender] = useState<string>(userDetails.gender ?? "male");
+  const [gender, setGender] = useState<"male" | "female" | "other" | undefined>(
+    userDetails.gender ?? "male",
+  );
   const [dob, setDob] = useState<string>(
     userDetails.dateOfBirth
       ? String(userDetails.dateOfBirth).split("T")[0]
       : "",
   );
-  const [avatarUrl] = useState<string | null>(userDetails.avatarUrl);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    userDetails.avatarUrl,
+  );
+  const [avatarLoading, setavatarLoading] = useState(false);
   const [profileStatus, setProfileStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -153,6 +163,21 @@ export default function SettingsClient({
     e.preventDefault();
     setProfileStatus("saving");
     try {
+      const result = await updateProfile({
+        dateOfBirth: dob,
+        fullName: name,
+        gender: gender,
+        phone: phone,
+      });
+      if (!result.success) {
+        toast.add({
+          type: "error",
+          title: "Unable to Update Profile",
+          description: result.message,
+        });
+        setProfileStatus("error");
+        return;
+      }
       setProfileStatus("saved");
       toast.add({
         type: "success",
@@ -174,15 +199,25 @@ export default function SettingsClient({
   async function handleSignOut() {
     setSignOutLoading(true);
     try {
+      const supabase = createClient();
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        toast.add({
+          type: "error",
+          description: signOutError.message,
+        });
+        return;
+      }
       router.push("/auth/login");
     } catch (err: any) {
-      setSignOutLoading(false);
       const errorMsg = err?.message || "Failed to sign out.";
       toast.add({
         type: "error",
         title: "Sign out failed",
         description: errorMsg,
       });
+    } finally {
+      setSignOutLoading(false);
     }
   }
 
@@ -190,20 +225,34 @@ export default function SettingsClient({
     setDeleteLoading(true);
     try {
       setShowDeleteConfirm(false);
-      setDeleteLoading(false);
+      const result = await deleteProfile();
+      if (!result.success) {
+        toast.add({
+          type: "error",
+          title: "Unable To Delete This account",
+          description:
+            result.message ?? "Please Try again Later or contact support",
+          priority: "high",
+        });
+        return;
+      }
       toast.add({
-        type: "info",
+        type: "success",
         title: "Delete account",
-        description: "Account deletion to be handled by controller.",
+        description: "Account Deleted",
       });
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/auth/login");
     } catch (err: any) {
-      setDeleteLoading(false);
       const errorMsg = err?.message || "Failed to delete account.";
       toast.add({
         type: "error",
         title: "Error",
         description: errorMsg,
       });
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -232,6 +281,35 @@ export default function SettingsClient({
     }
     setPwStatus("saving");
     try {
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: pwForm.current,
+      });
+
+      if (signInError) {
+        setPwError("Current Password is Incorrect");
+        toast.add({
+          type: "error",
+          description: "Incorrect Password",
+        });
+        setPwStatus("error");
+        return;
+      }
+
+      const { error: updatePasswordError } = await supabase.auth.updateUser({
+        password: pwForm.next,
+      });
+
+      if (updatePasswordError) {
+        setPwError(updatePasswordError.message);
+        toast.add({
+          type: "error",
+          description: "Something Went wrong",
+        });
+        setPwStatus("error");
+        return;
+      }
       setPwStatus("saved");
       toast.add({
         type: "success",
@@ -249,6 +327,115 @@ export default function SettingsClient({
         title: "Update failed",
         description: msg,
       });
+    }
+  }
+
+  async function UploadAvatar(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.add({
+        type: "error",
+        title: "Invalid file",
+        description: "Please select an image file.",
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB limit
+      toast.add({
+        type: "error",
+        title: "File too large",
+        description: "Image must be under 5MB.",
+      });
+      return;
+    }
+    setavatarLoading(true);
+    try {
+      const signres = await fetch("/api/cloudinary-sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          folder: "ctrl-cafe/avatars",
+          public_id: userDetails.id,
+        }),
+      });
+      const { public_id, timestamp, signature } = await signres.json();
+      if (!signres.ok) {
+        toast.add({
+          title: "Failed To upload image",
+          description: "We are facing internal issues, Please try again",
+          type: "error",
+          priority: "high",
+        });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      //Some keys and server things
+      formData.append("api_key", process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!);
+      formData.append("timestamp", timestamp);
+      formData.append("signature", signature);
+      //Folder and public id
+      formData.append("folder", "ctrl-cafe/avatars");
+      formData.append("public_id", public_id);
+
+      //Uploading directly to cloudinary
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      if (!cloudName) {
+        toast.add({
+          type: "error",
+          priority: "high",
+          title: "Server error",
+          description: "Something went wrong, try again later",
+        });
+        return;
+      }
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+      const uploadRes = await fetch(uploadUrl, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await uploadRes.json();
+      if (!uploadRes.ok) {
+        toast.add({
+          type: "error",
+          title: "Upload Failed",
+          description: result.error?.message ?? "Internal error",
+          priority: "high",
+        });
+        console.error(result, "This is result for debugging");
+        return;
+      }
+
+      const secureUrl = result.secure_url;
+      const dbresult = await updateProfile({ avatarUrl: secureUrl });
+      if (!dbresult.success) {
+        toast.add({
+          type: "error",
+          priority: "high",
+          title: "Upload Failed",
+          description: dbresult.message!,
+        });
+        return;
+      }
+      toast.add({
+        type: "success",
+        description: "Upload SuccessFull",
+      });
+      setAvatarUrl(secureUrl);
+      router.refresh();
+      return;
+    } catch (err) {
+      toast.add({
+        type: "error",
+        description: "Server Error",
+      });
+      console.error("Error while uploading profile image", err);
+      return;
+    } finally {
+      setavatarLoading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   }
 
@@ -339,16 +526,24 @@ export default function SettingsClient({
                     </p>
                     <button
                       type="button"
+                      disabled={avatarLoading}
                       onClick={() => fileRef.current?.click()}
-                      className="mt-2 text-[12px] font-[700] text-accent-foreground dark:text-accent underline underline-offset-2 cursor-pointer hover:opacity-75 transition-opacity"
+                      className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-[700] text-accent-foreground dark:text-accent underline underline-offset-2 cursor-pointer hover:opacity-75 transition-opacity disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Change photo
+                      {avatarLoading && (
+                        <Loader2 className="size-3 animate-spin" />
+                      )}
+                      {avatarLoading ? "Uploading…" : "Change photo"}
                     </button>
                     <input
                       ref={fileRef}
                       type="file"
                       accept="image/*"
                       className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) UploadAvatar(file);
+                      }}
                     />
                   </div>
                 </div>
@@ -387,7 +582,9 @@ export default function SettingsClient({
                       <select
                         id="gender"
                         value={gender}
-                        onChange={(e) => setGender(e.target.value)}
+                        onChange={(e) =>
+                          setGender(e.target.value as typeof gender)
+                        }
                         disabled={profileStatus === "saving"}
                         className="w-full border border-[#d7d2c8] dark:border-white/10 bg-[#fffdf9] dark:bg-white/5 rounded-[10px] px-[14px] py-[11px] text-[14px] text-[#1c2422] dark:text-[#f7f3ed] outline-none transition-all duration-200 focus:border-accent dark:focus:border-accent focus:shadow-[0_0_0_3px_rgba(250,204,21,0.13)] disabled:opacity-50"
                       >
