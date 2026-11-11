@@ -208,6 +208,7 @@ export default function SettingsClient({
         });
         return;
       }
+      router.refresh();
       router.push("/auth/login");
     } catch (err: any) {
       const errorMsg = err?.message || "Failed to sign out.";
@@ -500,6 +501,8 @@ export default function SettingsClient({
           type: "success",
           description: `${provider} has been Disconnected`,
         });
+        if (provider === "google") isGoogle = false;
+        if (provider === "discord") isDiscord = false;
         return router.refresh();
       }
     } catch (err) {
@@ -512,8 +515,8 @@ export default function SettingsClient({
     }
   }
 
-  const isGoogle = providers.includes("google");
-  const isDiscord = providers.includes("discord");
+  let isGoogle = providers.includes("google");
+  let isDiscord = providers.includes("discord");
   const hasPassword = !providers.length || providers.includes("email");
   const initials = getInitials(name || userDetails.fullName || email);
 
@@ -599,14 +602,18 @@ export default function SettingsClient({
                     </p>
                     <button
                       type="button"
-                      disabled={avatarLoading}
+                      disabled={avatarLoading || isGoogle || isDiscord}
                       onClick={() => fileRef.current?.click()}
                       className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-[700] text-accent-foreground dark:text-accent underline underline-offset-2 cursor-pointer hover:opacity-75 transition-opacity disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {avatarLoading && (
                         <Loader2 className="size-3 animate-spin" />
                       )}
-                      {avatarLoading ? "Uploading…" : "Change photo"}
+                      {avatarLoading
+                        ? "Uploading…"
+                        : !isGoogle && !isDiscord
+                          ? "Change Photo"
+                          : "You Can Change your Profile Image in your Social Account"}
                     </button>
                     <input
                       ref={fileRef}
