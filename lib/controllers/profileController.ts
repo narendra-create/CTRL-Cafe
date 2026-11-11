@@ -87,7 +87,7 @@ export const updateProfile = async (input: UpdateProfileInput): Promise<{
 
         const [updatedProfile] = await db.update(profiles).set({
             avatarUrl: data.avatarUrl,
-            dateOfBirth: data.dateOfBirth,
+            dateOfBirth: data.dateOfBirth && data.dateOfBirth.trim() !== "" ? data.dateOfBirth : null,
             fullName: data.fullName,
             phone: data.phone,
             gender: data.gender,
