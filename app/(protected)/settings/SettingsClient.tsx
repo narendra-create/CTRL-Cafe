@@ -439,6 +439,79 @@ export default function SettingsClient({
     }
   }
 
+  async function LinkAccountAction(
+    provider: "google" | "discord",
+    method: "connect" | "disconnect",
+  ) {
+    try {
+      const supabase = createClient();
+      if (method === "connect") {
+        const { error: accountConnectError } = await supabase.auth.linkIdentity(
+          {
+            provider: provider,
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
+            },
+          },
+        );
+        if (accountConnectError) {
+          toast.add({
+            type: "error",
+            title: "Unable to connect",
+            description: accountConnectError.message,
+          });
+          return;
+        }
+      } else {
+        const { error: IdentityError, data } =
+          await supabase.auth.getUserIdentities();
+        if (IdentityError) {
+          toast.add({
+            type: "error",
+            title: "Error",
+            description: "Could not fetch connected accounts.",
+          });
+          return;
+        }
+
+        const identity = data.identities.find((id) => id.provider === provider);
+        if (!identity) {
+          toast.add({
+            type: "error",
+            description: `No ${provider} account found to disconnect.`,
+          });
+          return;
+        }
+
+        const { error: disconnectAccountError } =
+          await supabase.auth.unlinkIdentity(identity);
+        if (disconnectAccountError) {
+          toast.add({
+            type: "error",
+            title: "Failed to disconnect",
+            description: disconnectAccountError.message,
+          });
+          return;
+        }
+      }
+
+      if (method === "disconnect") {
+        toast.add({
+          type: "success",
+          description: `${provider} has been Disconnected`,
+        });
+        return router.refresh();
+      }
+    } catch (err) {
+      toast.add({
+        type: "error",
+        description: "Unable To connect",
+      });
+      console.error(err, "Connection error");
+      return;
+    }
+  }
+
   const isGoogle = providers.includes("google");
   const isDiscord = providers.includes("discord");
   const hasPassword = !providers.length || providers.includes("email");
@@ -667,14 +740,13 @@ export default function SettingsClient({
                       </div>
                       <button
                         type="button"
-                        onClick={() =>
-                          toast.add({
-                            type: "info",
-                            title: "Google connection",
-                            description:
-                              "OAuth handling will be wired with controller.",
-                          })
-                        }
+                        onClick={async () => {
+                          if (isGoogle) {
+                            await LinkAccountAction("google", "disconnect");
+                          } else {
+                            await LinkAccountAction("google", "connect");
+                          }
+                        }}
                         className="text-[12px] font-[700] px-3.5 py-1.5 rounded-[8px] border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
                       >
                         {isGoogle ? "Disconnect" : "Connect"}
@@ -697,14 +769,13 @@ export default function SettingsClient({
                       </div>
                       <button
                         type="button"
-                        onClick={() =>
-                          toast.add({
-                            type: "info",
-                            title: "Discord connection",
-                            description:
-                              "OAuth handling will be wired with controller.",
-                          })
-                        }
+                        onClick={async () => {
+                          if (isDiscord) {
+                            await LinkAccountAction("discord", "disconnect");
+                          } else {
+                            await LinkAccountAction("discord", "connect");
+                          }
+                        }}
                         className="text-[12px] font-[700] px-3.5 py-1.5 rounded-[8px] border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
                       >
                         {isDiscord ? "Disconnect" : "Connect"}
