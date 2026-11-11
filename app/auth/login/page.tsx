@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -34,6 +35,8 @@ export default function LoginPage() {
 
     return () => subscription.unsubscribe();
   }, [supabase]);
+
+  const router = useRouter();
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -182,6 +185,7 @@ export default function LoginPage() {
       return;
     }
     setLoading(false);
+    router.refresh();
     redirect("/");
   };
 
