@@ -17,8 +17,11 @@ const Navbar = async () => {
     claims?.user_metadata?.full_name ?? // Google OAuth
     claims?.user_metadata?.global_name; // Discord OAuth
   let image = claims?.user_metadata?.avatar_url; // Google & Discord only
+  const isOAuth =
+    claims?.app_metadata?.providers?.includes("google") ||
+    claims?.app_metadata?.providers?.includes("discord");
   // null for email/password users
-  if (claims) {
+  if (claims && !isOAuth) {
     const profileDetailsRes = await getProfileDetails();
     if (profileDetailsRes.success && profileDetailsRes.data) {
       if (profileDetailsRes.data.avatarUrl) {
