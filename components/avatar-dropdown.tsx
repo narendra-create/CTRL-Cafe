@@ -46,8 +46,8 @@ export function AvatarDropdown(props: Props) {
       />
       <DropdownMenuContent className="w-32">
         <DropdownMenuGroup>
-          <Link href={"/profile"}>
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+          <Link href={"/dashboard"}>
+            <DropdownMenuItem>Dashboard</DropdownMenuItem>
           </Link>
           <Link href={"/bookings"}>
             <DropdownMenuItem>Bookings</DropdownMenuItem>

@@ -11,7 +11,9 @@ export default async function SettingsPage() {
   if (!profileResult.success || !profileResult.data) {
     return (
       <UnauthenticatedView
-        message={profileResult.message || "Please log in to view your settings."}
+        message={
+          profileResult.message || "Please log in to view your settings."
+        }
       />
     );
   }

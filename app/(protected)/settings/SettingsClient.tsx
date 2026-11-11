@@ -264,7 +264,7 @@ export default function SettingsClient({
   ];
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 md:px-8">
+    <div className="min-h-screen pt-24 md:mt-15 pb-16 px-4 md:px-8">
       <div className="max-w-[1080px] mx-auto">
         {/* Section: Page Header */}
         <div className="mb-10 md:mb-12">
