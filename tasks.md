@@ -96,6 +96,7 @@
 - [x] add /book/snacks and review pages into proxy
 - [x] Hide error automatically after 2 seconds in booking sidebar
 - [x] Automatically select current time in starttime and block past times so that user never gets starttime must be in future error
+- [ ] Increase Text sizes in settings page
 
 ## Run this checklist after deployement
 
