@@ -100,6 +100,8 @@
 ## Run this checklist after deployement
 
 - [ ] Run sql code for triggers and hooks in supabase dashboard
+- [ ] Enable OAuth in supabase
+- [ ] Enable Manual linking by going into - Authentication > Providers
 - [ ] Update otp verification email template - privacy policy link and ctrl cafe logo
 - [ ] cron jobs for cleaning hold/pending status bookings and their bookingStation table rows
 
