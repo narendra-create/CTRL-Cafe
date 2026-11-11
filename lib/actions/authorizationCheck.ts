@@ -54,7 +54,7 @@ export async function checkAccountType(): Promise<{
     };
     return {
         isAdmin: false,
-        userId: null,
+        userId: account.userId,
         success: true
     };
 }
