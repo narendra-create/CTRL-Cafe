@@ -25,7 +25,7 @@ export default async function SettingsPage() {
 
   const historyResult = await getBookingHistory();
   const bookingHistory = historyResult.success
-    ? (historyResult.data ?? [])
+    ? historyResult.data!
     : [];
 
   return (

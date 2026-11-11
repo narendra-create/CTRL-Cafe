@@ -123,7 +123,9 @@ export default function SettingsClient({
   const [phone, setPhone] = useState(userDetails.phone ?? "");
   const [gender, setGender] = useState<string>(userDetails.gender ?? "male");
   const [dob, setDob] = useState<string>(
-    userDetails.dateOfBirth ? String(userDetails.dateOfBirth).split("T")[0] : ""
+    userDetails.dateOfBirth
+      ? String(userDetails.dateOfBirth).split("T")[0]
+      : "",
   );
   const [avatarUrl] = useState<string | null>(userDetails.avatarUrl);
   const [profileStatus, setProfileStatus] = useState<
@@ -410,7 +412,8 @@ export default function SettingsClient({
                     <FieldLabel htmlFor="email">Email address</FieldLabel>
                     <TextInput id="email" type="email" value={email} readOnly />
                     <p className="mt-1.5 text-[11px] text-muted-foreground">
-                      Verified. Used for sign-in codes and booking confirmations.
+                      Verified. Used for sign-in codes and booking
+                      confirmations.
                     </p>
                   </div>
 
@@ -471,7 +474,8 @@ export default function SettingsClient({
                           toast.add({
                             type: "info",
                             title: "Google connection",
-                            description: "OAuth handling will be wired with controller.",
+                            description:
+                              "OAuth handling will be wired with controller.",
                           })
                         }
                         className="text-[12px] font-[700] px-3.5 py-1.5 rounded-[8px] border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
@@ -500,7 +504,8 @@ export default function SettingsClient({
                           toast.add({
                             type: "info",
                             title: "Discord connection",
-                            description: "OAuth handling will be wired with controller.",
+                            description:
+                              "OAuth handling will be wired with controller.",
                           })
                         }
                         className="text-[12px] font-[700] px-3.5 py-1.5 rounded-[8px] border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
@@ -696,7 +701,8 @@ export default function SettingsClient({
 
                   {pts >= GOAL && (
                     <div className="mb-6 rounded-[10px] bg-accent/20 border border-accent/30 px-4 py-3 text-[13px] font-[700] text-accent-foreground">
-                      🎉 Free hour unlocked! Head to the Rewards page to redeem it.
+                      🎉 Free hour unlocked! Head to the Rewards page to redeem
+                      it.
                     </div>
                   )}
 
@@ -776,43 +782,9 @@ export default function SettingsClient({
                   </div>
                 ) : (
                   <ul>
-                    {bookingHistory.map((b, i) => (
-                      <li
-                        key={b.id}
-                        className={`flex items-center justify-between gap-4 px-6 py-4 ${
-                          i !== bookingHistory.length - 1
-                            ? "border-b border-border"
-                            : ""
-                        }`}
-                      >
-                        <div className="min-w-0">
-                          <p className="text-[13px] font-[700] truncate">
-                            {formatToNormalDate(b.startTime)}
-                          </p>
-                          <p className="text-[12px] text-muted-foreground mt-0.5">
-                            {formatToNormalTime(b.startTime)} –{" "}
-                            {formatToNormalTime(b.endTime)}
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-[13px] font-[800]">
-                            ₹{Number(b.totalAmount).toFixed(0)}
-                          </p>
-                          <span
-                            className={`inline-block text-[11px] font-[700] mt-0.5 rounded-full px-2 py-0.5 ${
-                              b.bookingStatus === "confirmed" ||
-                              b.bookingStatus === "completed"
-                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                : b.bookingStatus === "cancelled"
-                                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                  : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {b.bookingStatus}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
+                    <li className="text-center px-6 py-14">
+                      No bookings Found
+                    </li>
                   </ul>
                 )}
               </div>
