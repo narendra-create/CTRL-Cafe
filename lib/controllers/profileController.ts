@@ -70,13 +70,13 @@ export const updateProfile = async (input: UpdateProfileInput): Promise<{
     data?: typeof profiles.$inferSelect
 }> => {
     try {
-        const { userId, success: authSuccess, message: authError } = await checkAccountType();
-        if (!authSuccess) {
-            return {
-                success: false,
-                message: authError
-            }
+        const supabase = await createClient();
+        const { data: claimsData } = await supabase.auth.getClaims();
+        if (!claimsData?.claims?.sub) {
+            return { success: false, message: "Unauthorized" };
         };
+
+        const userId = claimsData.claims.sub;
         const { error: zodError, data, success: zodsuccess } = updateProfileSchema.safeParse(input);
         if (!zodsuccess) {
             return {
