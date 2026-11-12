@@ -533,10 +533,10 @@ export default function SettingsClient({
       <div className="max-w-[1080px] mx-auto">
         {/* Section: Page Header */}
         <div className="mb-10 md:mb-12">
-          <h1 className="text-[28px] md:text-[34px] font-[800] tracking-[-0.05em] leading-tight">
+          <h1 className="text-[28px] md:text-6xl font-bold tracking-tighter leading-tight">
             Settings
           </h1>
-          <p className="mt-1.5 text-[14px] text-muted-foreground">
+          <p className="mt-1.5 text-[14px] md:text-lg text-muted-foreground">
             Manage your profile, account, and preferences.
           </p>
         </div>
@@ -551,7 +551,7 @@ export default function SettingsClient({
                   key={id}
                   type="button"
                   onClick={() => setActiveSection(id)}
-                  className={`flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[13px] font-[700] text-left whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                  className={`flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[13px] md:text-lg font-bold text-left whitespace-nowrap transition-all duration-150 cursor-pointer ${
                     active
                       ? "bg-accent text-accent-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -559,7 +559,7 @@ export default function SettingsClient({
                 >
                   <Icon active={active} />
                   <span className="hidden md:block">{label}</span>
-                  <span className="md:hidden text-[12px]">{label}</span>
+                  <span className="md:hidden text-[12px] md:text-lg">{label}</span>
                 </button>
               );
             })}
@@ -571,7 +571,7 @@ export default function SettingsClient({
             {activeSection === "profile" && (
               <div className="rounded-[16px] border border-border bg-background p-6 md:p-8 shadow-sm">
                 <SectionLabel>Profile</SectionLabel>
-                <h2 className="text-[20px] font-[800] tracking-tight mb-1">
+                <h2 className="text-[20px] font-extrabold tracking-tight mb-1">
                   Your public profile
                 </h2>
                 <p className="text-[13px] text-muted-foreground mb-8">
