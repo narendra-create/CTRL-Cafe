@@ -77,3 +77,20 @@ body {
     @apply font-sans;
   }
 }
+
+/* Custom css class for BookingTicketCard.tsx */
+@utility ticket-notch {
+  --notch: 12px;
+  mask-image:
+    radial-gradient(
+      circle var(--notch) at var(--cut-1),
+      transparent 97%,
+      #000 100%
+    ),
+    radial-gradient(
+      circle var(--notch) at var(--cut-2),
+      transparent 97%,
+      #000 100%
+    );
+  mask-composite: intersect;
+}
