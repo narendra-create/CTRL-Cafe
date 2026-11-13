@@ -45,7 +45,7 @@
 - [x] test the booking system from start to end
 - [ ] Save bookingdetails to localhost to prevent data loss on refresh for /book pages
 - [x] add razorpay sdk open in handleBook function of sidebar
-- [ ] Add a controller to check scanned booking if it is okey or not
+- [x] Add a controller to check scanned booking if it is okey or not
 
 ## Importent on 09/11/2026
 
