@@ -10,7 +10,7 @@ import { formatToNormalDate, formatToNormalTime, rupeesToPaise } from "@/lib/uti
 import { BookingDetailsResponse } from "@/types/bookingTypes";
 import { addPoints, redeemPoints } from "@/lib/actions/rewardActions";
 import { resendClient } from "@/lib/setup-files/resend-client";
-import z from "zod";
+import z, { input } from "zod";
 
 //Main functions
 export const getCurrentBookings = async (): Promise<{
@@ -804,6 +804,63 @@ export const verifyPayment = async (input: VerifySignatureInput): Promise<{
         return {
             success: false,
             message: "Something Went Wrong while verifying payment"
+        }
+    }
+};
+
+export const checkBooking = async (bookingId: string): Promise<{
+    success: boolean;
+    message?: string;
+    isValid?: boolean;
+}> => {
+    try {
+        const { error: authError } = await resolveAuthenticatedUser("admin");
+        if (authError) return { success: false, message: authError.message, isValid: false };
+
+        if (bookingId.length <= 5) {
+            return {
+                success: false,
+                message: "Please put valid booking Id",
+                isValid: false
+            }
+        };
+
+        const [bookingFound] = await db.select().from(bookings).where(eq(bookings.id, bookingId));
+        if (!bookingFound) {
+            return {
+                success: false,
+                message: "Booking Not Found",
+                isValid: false
+            }
+        };
+
+        const now = new Date();
+        if (bookingFound.endTime < now) {
+            return {
+                success: false,
+                isValid: false,
+                message: "Booking Expired"
+            }
+        };
+
+        if (bookingFound.bookingStatus !== "confirmed") {
+            return {
+                success: false,
+                isValid: false,
+                message: `Payment Pending of ${bookingFound.totalAmount}`
+            }
+        };
+
+        return {
+            success: true,
+            isValid: true
+        }
+    }
+    catch (err) {
+        console.error("[checkBooking]: ", err);
+        return {
+            success: false,
+            message: "Something Went Wrong"
         }
     }
 };
