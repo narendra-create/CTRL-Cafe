@@ -254,39 +254,69 @@ export const formatMoneydash = (amount: number): string => {
 const TIME_ZONE = "Asia/Kolkata";
 
 function parseTimestamp(value: string | Date): Date {
-  const normalized =
-    value instanceof Date
-      ? value
-      : value
-          .replace(" ", "T")
-          .replace(/([+-]\d{2})$/, "$1:00");
+    const normalized =
+        value instanceof Date
+            ? value
+            : value
+                .replace(" ", "T")
+                .replace(/([+-]\d{2})$/, "$1:00");
 
-  const date = new Date(normalized);
+    const date = new Date(normalized);
 
-  if (Number.isNaN(date.getTime())) {
-    throw new Error("Invalid timestamp");
-  }
+    if (Number.isNaN(date.getTime())) {
+        throw new Error("Invalid timestamp");
+    }
 
-  return date;
+    return date;
 }
 
 // Thu, 12 Nov 2026
 export function formatDateIntoShortReadableText(value: string | Date) {
-  return new Intl.DateTimeFormat("en-GB", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: TIME_ZONE,
-  }).format(parseTimestamp(value));
+    return new Intl.DateTimeFormat("en-GB", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: TIME_ZONE,
+    }).format(parseTimestamp(value));
 }
 
 // 10:00 AM
 export function formatTimeIntoShortReadableText(value: string | Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: TIME_ZONE,
-  }).format(parseTimestamp(value));
+    return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: TIME_ZONE,
+    }).format(parseTimestamp(value));
+};
+
+export function toPostgresTimestamp(date: Date) {
+    return date.toISOString()
+        .slice(0, 19)
+        .replace("T", " ") + "+00";
+};
+
+export function calculateDuration(
+    startTime: Date | string,
+    endTime: Date | string
+): number | null {
+    const parseDate = (value: Date | string) => {
+        if (value instanceof Date) {
+            return value.getTime();
+        }
+        const normalized = value
+            .trim()
+            .replace(/^(\d{4}-\d{2}-\d{2})\s+/, "$1T")
+            .replace(/([+-]\d{2})$/, "$1:00");
+        const timestamp = Date.parse(normalized);
+        return Number.isFinite(timestamp) ? timestamp : null;
+    };
+    const start = parseDate(startTime);
+    const end = parseDate(endTime);
+    if (start === null || end === null || end < start) {
+        return null;
+    }
+    const hours = (end - start) / (1000 * 60 * 60);
+    return Number(hours.toFixed(2));
 }

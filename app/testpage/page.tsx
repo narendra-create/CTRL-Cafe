@@ -6,6 +6,7 @@ import RewardsSection from "@/app/custom-components/ui-sections/Reward-Sections"
 import ComingSoon from "@/app/custom-components/ComingSoon";
 import SettingsClient from "@/app/(protected)/settings/SettingsClient";
 import BookingTicketCard from "@/app/custom-components/cards/BookingTicketCard";
+import { toPostgresTimestamp } from "@/lib/utils/tools";
 
 const TestPage = () => {
   // const [lastItem, setLastItem] = useState<{ id: string | number; quantity: number } | null>(null);
@@ -14,6 +15,9 @@ const TestPage = () => {
   //   setLastItem({ id, quantity });
   // };
   const today = new Date().toLocaleDateString;
+  const now = new Date();
+  const startTime = toPostgresTimestamp(now);
+  const endTime = toPostgresTimestamp(new Date(now.getTime() + 60 * 60 * 1000));
 
   return (
     // <main className="min-h-screen w-full bg-zinc-50 px-4 py-12 dark:bg-zinc-950 md:px-8 2xl:px-16">
@@ -68,11 +72,10 @@ const TestPage = () => {
               },
             ],
             bookingId: "fjakldfjdklj2323fdaag45afd",
-            date: today.toString(),
-            endTime: "8:15 PM",
-            startTime: "7:15 PM",
+            endTime: endTime,
+            startTime: startTime,
             isRewardGranted: true,
-            orderedSnacks: [{ snackname: "Salted Popcorn", qty: 2 }],
+            orderedSnacks: [{ snackname: "Salted Popcorn", qty: 2 }, { snackname: "Salteda Popcorn", qty: 2 }, { snackname: "Saltedn Popcorn", qty: 2 }],
             paidAmount: 1253.12,
             razorpayOrderId: "dfadfjkl2233a8a8d849a",
           }}
