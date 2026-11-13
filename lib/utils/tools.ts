@@ -247,6 +247,46 @@ export function toIndiaDateTime(date: string, time: string): string {
     return `${date}T${time}:00+05:30`;
 };
 
-const formatMoneydash = (amount: number): string => {
+export const formatMoneydash = (amount: number): string => {
     return new Intl.NumberFormat("en-IN").format(amount);
 };
+
+const TIME_ZONE = "Asia/Kolkata";
+
+function parseTimestamp(value: string | Date): Date {
+  const normalized =
+    value instanceof Date
+      ? value
+      : value
+          .replace(" ", "T")
+          .replace(/([+-]\d{2})$/, "$1:00");
+
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("Invalid timestamp");
+  }
+
+  return date;
+}
+
+// Thu, 12 Nov 2026
+export function formatDateIntoShortReadableText(value: string | Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: TIME_ZONE,
+  }).format(parseTimestamp(value));
+}
+
+// 10:00 AM
+export function formatTimeIntoShortReadableText(value: string | Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: TIME_ZONE,
+  }).format(parseTimestamp(value));
+}
