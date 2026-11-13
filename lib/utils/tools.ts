@@ -245,4 +245,8 @@ export function formatConsoleName(input: string): string {
 
 export function toIndiaDateTime(date: string, time: string): string {
     return `${date}T${time}:00+05:30`;
-}
+};
+
+const formatMoneydash = (amount: number): string => {
+    return new Intl.NumberFormat("en-IN").format(amount);
+};
