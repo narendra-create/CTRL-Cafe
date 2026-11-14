@@ -102,6 +102,7 @@
 - [x] Make Booking Ticket Scanner page for admin
 - [ ] Update booking Details response object acording to ticket card
 - [x] Fix the both copy button checked upon pressing one issue
+- [ ] Add retry booking feature in frontend
 
 ## Run this checklist after deployement
 
