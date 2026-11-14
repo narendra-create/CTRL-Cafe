@@ -8,7 +8,6 @@ import {
 import React, { useState } from "react";
 import { Copy, Check, Star } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { toast } from "@/components/ui/toast";
 
 export type TicketStationsDetails = {
   parentdevicename: string;
@@ -61,7 +60,7 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
   return (
     <section className="grid w-full grid-cols-1 md:grid-cols-[4fr_1.1fr] md:min-h-120">
       {/* Red Section */}
-      <div className="ticket-notch md:flex flex-col justify-start px-5 pt-5 pb-10 md:p-8 min-h-100 rounded-t-3xl bg-linear-to-b from-[#E02A35] to-[#A81A24] [--cut-1:0_100%] [--cut-2:100%_100%] md:min-h-96 md:rounded-l-3xl md:rounded-r-none md:[--cut-1:100%_0]">
+      <div className="ticket-notch text-background dark:text-foreground md:flex flex-col justify-start px-5 pt-5 pb-10 md:p-8 min-h-100 rounded-t-3xl bg-linear-to-b from-[#E02A35] to-[#A81A24] [--cut-1:0_100%] [--cut-2:100%_100%] md:min-h-96 md:rounded-l-3xl md:rounded-r-none md:[--cut-1:100%_0]">
         <div className="flex flex-col md:flex-row justify-center items-start md:justify-between md:max-w-[88%] w-full">
           <div className="mb-2">
             <h6 className="font-sans font-semibold text-sm md:text-lg">
@@ -100,13 +99,13 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
                 Props.bookedStations.map((station, index) => (
                   <li
                     key={station.stationlabel}
-                    className={`flex justify-between text-foreground items-center pr-5 pt-2 pl-3 md:pl-0.5 ${index !== 0 && "border-t mt-1.5 pt-1.5 border-foreground/50"} ${index === Props.bookedStations.length - 1 && "border-b mb-1.5 pb-1.5 "}`}
+                    className={`flex justify-between dark:text-foreground text-background items-center pr-5 pt-2 pl-3 md:pl-0.5 ${index !== 0 && "border-t mt-1.5 pt-1.5 border-foreground/50"} ${index === Props.bookedStations.length - 1 && "border-b mb-1.5 pb-1.5 "}`}
                   >
                     <div>
                       <h6 className="font-semibold text-[15px]">
                         {station.parentdevicename}
                       </h6>
-                      <p className="text-sm font-light text-foreground/85">
+                      <p className="text-sm font-light dark:text-foreground/85 text-background/85">
                         {station.stationlabel}
                       </p>
                     </div>
@@ -235,7 +234,7 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
           </div>
           <div className="flex flex-col items-start md:items-center justify-center my-2">
             <p className="text-gray-300/70">Date</p>
-            <h4 className="font-bold font-heading md:text-xl">
+            <h4 className="font-bold font-heading md:text-xl text-background dark:text-foreground">
               {formattedDate}
             </h4>
           </div>

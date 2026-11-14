@@ -150,19 +150,20 @@ export default function QrCodeScanner() {
   const [paused, setPaused] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [manualId, setManualId] = useState("");
 
-  /* Section: Scan Handler */
-  async function handleScan(detectedCodes: IDetectedBarcode[]) {
-    if (!detectedCodes.length || paused) return;
+  /* Section: Verification Handler */
+  async function checkTicket(bookingId: string) {
+    const trimmedId = bookingId.trim();
+    if (!trimmedId) return;
 
-    const bookingId = detectedCodes[0].rawValue;
     setPaused(true);
     setIsActive(false);
     setVerify({ status: "verifying" });
 
     /* Section: Server Verification */
     try {
-      const response = await checkBooking(bookingId);
+      const response = await checkBooking(trimmedId);
       if (!response.success && !response.isValid) {
         setVerify({ status: "server_error", message: response.message });
         return;
@@ -174,6 +175,13 @@ export default function QrCodeScanner() {
     } finally {
       setScanStatus("success");
     }
+  }
+
+  /* Section: Scan Handler */
+  async function handleScan(detectedCodes: IDetectedBarcode[]) {
+    if (!detectedCodes.length || paused) return;
+    const bookingId = detectedCodes[0].rawValue;
+    await checkTicket(bookingId);
   }
 
   /* Section: Camera Error Handler */
@@ -193,6 +201,7 @@ export default function QrCodeScanner() {
     setCameraError(null);
     setPaused(false);
     setIsActive(true);
+    setManualId("");
   }
 
   function resetScanner() {
@@ -201,6 +210,7 @@ export default function QrCodeScanner() {
     setCameraError(null);
     setPaused(false);
     setIsActive(false);
+    setManualId("");
   }
 
   const hasResult = verify.status !== "idle";
@@ -281,34 +291,71 @@ export default function QrCodeScanner() {
             </div>
 
             {/* Section: Camera Controls */}
-            <div className="p-4 md:p-5 flex items-center gap-3 border-t border-border">
-              {!isActive ? (
-                <button
-                  type="button"
-                  onClick={startScanning}
-                  className="flex-1 rounded-xl py-3 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-sm font-extrabold transition-all duration-150 hover:-translate-y-px hover:shadow-md cursor-pointer active:scale-98"
+            <div className="p-4 md:p-5 flex flex-col gap-4 border-t border-border">
+              <div className="flex items-center gap-3">
+                {!isActive ? (
+                  <button
+                    type="button"
+                    onClick={startScanning}
+                    className="flex-1 rounded-xl py-3 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-sm font-extrabold transition-all duration-150 hover:-translate-y-px hover:shadow-md cursor-pointer active:scale-98"
+                  >
+                    {showScanAgain ? "Scan Again" : "Start Scanning"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={resetScanner}
+                    className="flex-1 rounded-xl py-3 border border-border text-muted-foreground hover:text-foreground text-sm font-extrabold transition-all cursor-pointer hover:border-foreground/40"
+                  >
+                    Cancel
+                  </button>
+                )}
+                {showScanAgain && !isActive && (
+                  <button
+                    type="button"
+                    onClick={resetScanner}
+                    title="Reset"
+                    className="rounded-xl p-3 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
+                  >
+                    <RefreshCw className="size-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Section: Manual Booking ID */}
+              <div className="pt-4 border-t border-border">
+                <label
+                  htmlFor="manualBookingId"
+                  className="block text-xs md:text-sm font-bold text-muted-foreground mb-2"
                 >
-                  {showScanAgain ? "Scan Again" : "Start Scanning"}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={resetScanner}
-                  className="flex-1 rounded-xl py-3 border border-border text-muted-foreground hover:text-foreground text-sm font-extrabold transition-all cursor-pointer hover:border-foreground/40"
+                  Unable to scan ? Type BookingId below
+                </label>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (manualId.trim()) {
+                      checkTicket(manualId);
+                    }
+                  }}
+                  className="flex flex-col sm:flex-row items-center gap-2.5"
                 >
-                  Cancel
-                </button>
-              )}
-              {showScanAgain && !isActive && (
-                <button
-                  type="button"
-                  onClick={resetScanner}
-                  title="Reset"
-                  className="rounded-xl p-3 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-all cursor-pointer"
-                >
-                  <RefreshCw className="size-4" />
-                </button>
-              )}
+                  <input
+                    id="manualBookingId"
+                    type="text"
+                    value={manualId}
+                    onChange={(e) => setManualId(e.target.value)}
+                    placeholder="Enter Booking ID"
+                    className="w-full flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-muted-foreground"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!manualId.trim() || verify.status === "verifying"}
+                    className="w-full sm:w-auto rounded-xl px-5 py-2.5 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-sm font-extrabold transition-all duration-150 hover:-translate-y-px hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  >
+                    Verify
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
 
