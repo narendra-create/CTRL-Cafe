@@ -53,7 +53,7 @@ export default async function PaymentSuccessPage(props: SuccessPageProps) {
         {/* Section: Actions */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Link
-            href={bookingId ? `/currentBookings/${bookingId}` : "/currentBookings"}
+            href={bookingId ? `/Bookings/Ticket/${bookingId}` : "/currentBookings"}
             className="flex-1"
           >
             <Button className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl cursor-pointer transition-all">

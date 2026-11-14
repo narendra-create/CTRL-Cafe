@@ -99,8 +99,10 @@
 - [x] Automatically select current time in starttime and block past times so that user never gets starttime must be in future error
 - [x] Increase Text sizes in settings page
 - [x] complete BookingTicketCard ui
-- [ ] Add real data fetch in booking ticketcard and make Booking Details page for it
-- [ ] Make Booking Ticket Scanner page for admin
+- [x] Add real data fetch in booking ticketcard and make Booking Details page for it
+- [x] Make Booking Ticket Scanner page for admin
+- [ ] Update booking Details response object acording to ticket card
+- [ ] Fix the both copy button checked upon pressing one issue
 
 ## Run this checklist after deployement
 
