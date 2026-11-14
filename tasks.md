@@ -71,7 +71,7 @@
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
 - [x] fix layout issue in register page
 - [x] Make Footer
-- [ ] Wire up new profile controller functions in setttings page
+- [x] Wire up new profile controller functions in setttings page
 - [x] add checks in booking page for date, time, user logged in or not
 - [x] make handlesubmit in sidebar
 - [x] implement url based stages of booking
