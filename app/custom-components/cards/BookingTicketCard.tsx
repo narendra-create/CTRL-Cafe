@@ -45,12 +45,12 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
 
   async function handleCopy(type: "bookingId" | "paymentId") {
     try {
-      await navigator.clipboard.writeText(String(Props.bookingId));
-
       if (type === "bookingId") {
+        await navigator.clipboard.writeText(String(Props.bookingId));
         setBookingIdCopied(true);
         setTimeout(() => setBookingIdCopied(false), 1800);
       } else {
+        await navigator.clipboard.writeText(String(Props.razorpayOrderId));
         setPaymentIdCopied(true);
         setTimeout(() => setPaymentIdCopied(false), 1800);
       }
@@ -59,9 +59,9 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
     }
   }
   return (
-    <section className="grid w-full grid-cols-1 md:grid-cols-[4fr_1fr] md:min-h-120">
+    <section className="grid w-full grid-cols-1 md:grid-cols-[4fr_1.1fr] md:min-h-120">
       {/* Red Section */}
-      <div className="ticket-notch px-5 pt-5 pb-10 md:p-8 min-h-100 rounded-t-3xl bg-linear-to-b from-[#E02A35] to-[#A81A24] [--cut-1:0_100%] [--cut-2:100%_100%] md:min-h-96 md:rounded-l-3xl md:rounded-r-none md:[--cut-1:100%_0]">
+      <div className="ticket-notch md:flex flex-col justify-start px-5 pt-5 pb-10 md:p-8 min-h-100 rounded-t-3xl bg-linear-to-b from-[#E02A35] to-[#A81A24] [--cut-1:0_100%] [--cut-2:100%_100%] md:min-h-96 md:rounded-l-3xl md:rounded-r-none md:[--cut-1:100%_0]">
         <div className="flex flex-col md:flex-row justify-center items-start md:justify-between md:max-w-[88%] w-full">
           <div className="mb-2">
             <h6 className="font-sans font-semibold text-sm md:text-lg">
@@ -178,7 +178,7 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
             </div>
             <h6 className="text-xs font-medium mt-2.5">Payment ID</h6>
             <div className="flex items-center gap-2 break-all">
-              <p className="font-medium text-sm">{Props.bookingId}</p>
+              <p className="font-medium text-sm">{Props.razorpayOrderId}</p>
               <button
                 type="button"
                 onClick={() => handleCopy("paymentId")}
