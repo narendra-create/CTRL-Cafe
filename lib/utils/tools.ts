@@ -1,3 +1,4 @@
+import { BookingDetailsData } from "@/types/bookingTypes";
 import { randomInt } from "node:crypto";
 
 export function generateOTP(): string {
@@ -319,4 +320,87 @@ export function calculateDuration(
     }
     const hours = (end - start) / (1000 * 60 * 60);
     return Number(hours.toFixed(2));
+};
+
+
+function formatIcsDate(value: Date | string): string {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        throw new Error("Invalid booking timestamp");
+    }
+
+    return date
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .replace(/\.\d{3}Z$/, "Z");
+}
+
+function escapeIcsText(value: string): string {
+    return value
+        .replace(/\\/g, "\\\\")
+        .replace(/\r\n|\n|\r/g, "\\n")
+        .replace(/,/g, "\\,")
+        .replace(/;/g, "\\;");
+}
+
+export function downloadBookingCalendar(
+    booking: BookingDetailsData
+) {
+    const foodDescription = booking.foodItems
+        .map((item) => `${item.qty}x ${item.name}`)
+        .join(", ");
+
+    const description = [
+        `Booking ID: ${booking.id}`,
+        `Device: ${booking.deviceName}`,
+        `Players: ${booking.playersCount}`,
+        foodDescription
+            ? `Food Items: ${foodDescription}`
+            : "",
+    ]
+        .filter(Boolean)
+        .join("\n");
+
+    const event = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//CTRL Cafe//Booking//EN",
+        "CALSCALE:GREGORIAN",
+        "BEGIN:VEVENT",
+
+        `UID:${escapeIcsText(booking.id)}@ctrl-cafe`,
+        `DTSTAMP:${formatIcsDate(new Date())}`,
+        `DTSTART:${formatIcsDate(booking.startTime)}`,
+        `DTEND:${formatIcsDate(booking.endTime)}`,
+
+        `SUMMARY:${escapeIcsText(
+            `CTRL Cafe - ${booking.deviceName}`
+        )}`,
+        `DESCRIPTION:${escapeIcsText(description)}`,
+        "LOCATION:CTRL Cafe",
+
+        "STATUS:CONFIRMED",
+        "END:VEVENT",
+        "END:VCALENDAR",
+        "",
+    ].join("\r\n");
+
+    const blob = new Blob([event], {
+        type: "text/calendar;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `ctrl-cafe-${booking.id}.ics`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1000);
 }

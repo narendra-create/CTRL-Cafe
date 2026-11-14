@@ -42,7 +42,7 @@ export async function updateSession(request: NextRequest) {
 
     const user = data?.claims;
     const isProtected =
-        request.nextUrl.pathname.startsWith('/admin') ||
+        // request.nextUrl.pathname.startsWith('/admin') ||
         request.nextUrl.pathname.startsWith('/Dashboard') ||
         request.nextUrl.pathname.startsWith('/profile') ||
         request.nextUrl.pathname.startsWith('/settings') ||
