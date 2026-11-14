@@ -52,7 +52,7 @@ const TestPage = () => {
       {/* <RewardsSection /> */}
       {/* <ComingSoon /> */}
       {/* <SettingsClient /> */}
-      <div className="md:w-[60vw] hidden md:flex mx-5 md:mx-auto md:h-[80vh] items-center justify-center">
+      <div className="md:w-[60vw] hidden  mx-5 md:mx-auto md:h-[80vh] items-center justify-center">
         <BookingTicketCard
           Props={{
             bookedStations: [

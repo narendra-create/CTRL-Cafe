@@ -15,8 +15,9 @@ import {
   deleteProfile,
   updateProfile,
 } from "@/lib/controllers/profileController";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Gamepad2, Loader2, Trash2, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { deleteBooking } from "@/lib/controllers/bookingController";
 
 const GOAL = 65;
 
@@ -254,6 +255,33 @@ export default function SettingsClient({
       });
     } finally {
       setDeleteLoading(false);
+    }
+  }
+
+  /* Section: Booking Handlers */
+  async function handleDeleteBooking(bookingId: string) {
+    try {
+      const result = await deleteBooking(bookingId);
+      if (!result.success) {
+        toast.add({
+          type: "error",
+          description: `${result.message!}`,
+        });
+        return;
+      }
+
+      toast.add({
+        type: "success",
+        description: "Booking Deleted",
+      });
+      router.refresh();
+      return;
+    } catch (err) {
+      toast.add({
+        type: "error",
+        description: "Server Issue",
+      });
+      return console.error("handleDelete: ", err);
     }
   }
 
@@ -559,7 +587,9 @@ export default function SettingsClient({
                 >
                   <Icon active={active} />
                   <span className="hidden md:block">{label}</span>
-                  <span className="md:hidden text-[12px] md:text-lg">{label}</span>
+                  <span className="md:hidden text-[12px] md:text-lg">
+                    {label}
+                  </span>
                 </button>
               );
             })}
@@ -1026,13 +1056,13 @@ export default function SettingsClient({
 
             {/* Section: Booking History */}
             {activeSection === "history" && (
-              <div className="rounded-[16px] border border-border bg-background shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-border bg-background shadow-sm overflow-hidden">
                 <div className="p-6 md:p-8 border-b border-border">
                   <SectionLabel>Activity</SectionLabel>
-                  <h2 className="text-[20px] font-[800] tracking-tight mb-1">
+                  <h2 className="text-xl font-extrabold font-heading tracking-tight mb-1 text-foreground">
                     Booking history
                   </h2>
-                  <p className="text-[13px] text-muted-foreground">
+                  <p className="text-sm font-sans text-muted-foreground">
                     Your past sessions and what you spent.
                   </p>
                 </div>
@@ -1042,25 +1072,116 @@ export default function SettingsClient({
                     <div className="size-14 rounded-full bg-muted flex items-center justify-center mb-4">
                       <HistoryIcon active={false} size={24} />
                     </div>
-                    <p className="text-[15px] font-[700] mb-1">
+                    <p className="text-base font-bold font-heading mb-1 text-foreground">
                       No bookings yet
                     </p>
-                    <p className="text-[13px] text-muted-foreground max-w-[26ch]">
+                    <p className="text-sm font-sans text-muted-foreground max-w-xs">
                       Your completed sessions will show up here.
                     </p>
                     <Link
                       href="/book"
-                      className="mt-5 inline-flex items-center gap-2 rounded-[10px] px-5 py-2.5 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-[13px] font-[800] transition-all duration-150 hover:-translate-y-px hover:shadow-md"
+                      className="mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 bg-[#202b29] dark:bg-accent text-white dark:text-accent-foreground text-sm font-extrabold font-heading transition-all duration-150 hover:-translate-y-px hover:shadow-md cursor-pointer"
                     >
                       Book a seat
                     </Link>
                   </div>
                 ) : (
-                  <ul>
-                    <li className="text-center px-6 py-14">
-                      No bookings Found
-                    </li>
-                  </ul>
+                  <div className="p-4 sm:p-6 flex flex-col gap-3">
+                    {bookingHistory.map((booking) => {
+                      const formattedDate = formatToNormalDate(
+                        booking.startTime,
+                      );
+                      const startTimeStr = formatToNormalTime(
+                        booking.startTime,
+                      );
+                      const endTimeStr = formatToNormalTime(booking.endTime);
+                      const stationsCount = (booking as any).stationsCount ?? 1;
+                      const stationName =
+                        (booking as any).stationLabel ??
+                        (booking as any).deviceName ??
+                        "Station";
+
+                      return (
+                        <div
+                          key={booking.id}
+                          className="rounded-xl border border-border bg-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 transition-all hover:border-foreground/40"
+                        >
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <span className="font-sans text-xs font-semibold text-muted-foreground select-all">
+                                ID: {booking.id}
+                              </span>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold font-heading uppercase tracking-wide ${
+                                  booking.bookingStatus === "confirmed"
+                                    ? "bg-emerald-600 text-white"
+                                    : booking.bookingStatus === "cancelled"
+                                      ? "bg-red-600 text-white"
+                                      : booking.bookingStatus === "completed"
+                                        ? "bg-zinc-600 text-white"
+                                        : "bg-yellow-400 text-black"
+                                }`}
+                              >
+                                {booking.bookingStatus}
+                              </span>
+                            </div>
+
+                            <div className="flex items-baseline gap-2.5 flex-wrap">
+                              <h3 className="font-heading font-black text-lg sm:text-xl text-foreground">
+                                {formattedDate}
+                              </h3>
+                              <span className="font-heading font-bold text-sm sm:text-base text-foreground/80">
+                                {startTimeStr} – {endTimeStr}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 flex-wrap pt-0.5">
+                              <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-bold font-heading text-foreground">
+                                <Users className="size-3.5 text-amber-500" />
+                                <span>
+                                  {booking.playersCount}{" "}
+                                  {booking.playersCount > 1
+                                    ? "Players"
+                                    : "Player"}
+                                </span>
+                              </span>
+                              <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-bold font-heading text-foreground">
+                                <Gamepad2 className="size-3.5 text-amber-500" />
+                                <span>
+                                  {stationsCount}{" "}
+                                  {stationsCount > 1 ? "Stations" : "Station"} (
+                                  {stationName})
+                                </span>
+                              </span>
+                              {booking.totalAmount && (
+                                <span className="inline-flex items-center rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-extrabold font-heading text-foreground">
+                                  ₹{booking.totalAmount}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-border">
+                            <Link
+                              href={`/Bookings/Ticket/${booking.id}`}
+                              className="inline-flex items-center gap-1.5 font-heading font-bold text-sm text-foreground hover:underline underline-offset-4 cursor-pointer"
+                            >
+                              <span>View details</span>
+                              <ArrowRight className="size-4" />
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteBooking(booking.id)}
+                              className="p-2 rounded-lg border border-border bg-background text-foreground hover:text-destructive hover:border-destructive/50 transition-colors cursor-pointer"
+                              title="Delete booking"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             )}
