@@ -88,7 +88,6 @@
 - [x] add skeletons for booking pages - /book, /snacks and /review
 - [x] wire up cancel booking logic in cancel button
 - [x] Make Payment Success and Failure pages'
-- [ ] Make Booking Pass page
 - [x] redirect user to booking details when payment succeeds
 - [x] update review page, remove placeholder games from devices
 - [x] remove booking id in snacks page
