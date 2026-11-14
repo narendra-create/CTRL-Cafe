@@ -255,6 +255,16 @@ export default function QrCodeScanner() {
                     },
                   }}
                 />
+              ) : scanStatus === "success" ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-black">
+                  <CheckCircle
+                    className="size-14 md:size-20 text-green-400"
+                    strokeWidth={1.5}
+                  />
+                  <p className="text-white/90 text-base md:text-lg font-semibold">
+                    Scanned
+                  </p>
+                </div>
               ) : scanStatus === "error" ? (
                 <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-black px-6 text-center">
                   <XCircle
