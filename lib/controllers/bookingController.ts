@@ -864,3 +864,47 @@ export const checkBooking = async (bookingId: string): Promise<{
         }
     }
 };
+
+export const deleteBooking = async (bookingId: string): Promise<{
+    success: boolean;
+    message?: string;
+}> => {
+    try {
+        const { error: authError, dbuser } = await resolveAuthenticatedUser("user");
+        if (authError) return authError;
+
+        const [findBooking] = await db.select().from(bookings).where(and(
+            eq(bookings.id, bookingId),
+            eq(bookings.userId, dbuser.userId)
+        ));
+
+        if (!findBooking) {
+            return {
+                success: false,
+                message: "Booking Not Found"
+            }
+        };
+        if (findBooking.isArchived) {
+            return {
+                success: false,
+                message: "Booking Already Deleted"
+            }
+        };
+
+        await db.update(bookings).set({ isArchived: true }).where(and(
+            eq(bookings.id, findBooking.id),
+            eq(bookings.userId, dbuser.userId)
+        ));
+
+        return {
+            success: true
+        };
+    }
+    catch (err) {
+        console.error("[deleteBooking]: ", err);
+        return {
+            success: false,
+            message: "Something went Wrong"
+        }
+    }
+};
