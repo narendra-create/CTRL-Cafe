@@ -93,7 +93,7 @@
 - [x] update review page, remove placeholder games from devices
 - [x] remove booking id in snacks page
 - [x] remove extra cancel button from review page
-- [ ] make /currentBooking/[bookingId] page
+- [x] make /currentBooking/[bookingId] page
 - [x] add /book/snacks and review pages into proxy
 - [x] Hide error automatically after 2 seconds in booking sidebar
 - [x] Automatically select current time in starttime and block past times so that user never gets starttime must be in future error
