@@ -102,7 +102,7 @@
 - [x] Add real data fetch in booking ticketcard and make Booking Details page for it
 - [x] Make Booking Ticket Scanner page for admin
 - [ ] Update booking Details response object acording to ticket card
-- [ ] Fix the both copy button checked upon pressing one issue
+- [x] Fix the both copy button checked upon pressing one issue
 
 ## Run this checklist after deployement
 

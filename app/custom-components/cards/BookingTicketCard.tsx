@@ -32,7 +32,9 @@ export type TicketCardProps = {
 };
 
 const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
-  const [Copied, setCopied] = useState(false);
+  const [bookingIdCopied, setBookingIdCopied] = useState(false);
+  const [paymentIdCopied, setPaymentIdCopied] = useState(false);
+
   const formattedStartTime = formatTimeIntoShortReadableText(Props.startTime);
   const formattedEndTime = formatTimeIntoShortReadableText(Props.endTime);
   const formattedDate = formatDateIntoShortReadableText(Props.startTime);
@@ -41,12 +43,17 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
     Props.endTime.toString(),
   );
 
-  async function handleCopy() {
+  async function handleCopy(type: "bookingId" | "paymentId") {
     try {
       await navigator.clipboard.writeText(String(Props.bookingId));
 
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
+      if (type === "bookingId") {
+        setBookingIdCopied(true);
+        setTimeout(() => setBookingIdCopied(false), 1800);
+      } else {
+        setPaymentIdCopied(true);
+        setTimeout(() => setPaymentIdCopied(false), 1800);
+      }
     } catch (error) {
       console.error("Failed to copy booking ID:", error);
     }
@@ -151,14 +158,14 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
               <p className="font-medium text-sm">{Props.bookingId}</p>
               <button
                 type="button"
-                onClick={handleCopy}
+                onClick={() => handleCopy("bookingId")}
                 aria-label="Copy booking ID"
-                title={Copied ? "Copied!" : "Copy booking ID"}
+                title={bookingIdCopied ? "Copied!" : "Copy booking ID"}
                 className={`rounded-full p-2 transition-all duration-200
                 bg-foreground/8 backdrop-blur-sm border border-foreground/50 active:scale-90
-                ${Copied ? "text-green-300 scale-110" : "text-white/78 hover:text-white hover:bg-foreground/20"}`}
+                ${bookingIdCopied ? "text-green-300 scale-110" : "text-white/78 hover:text-white hover:bg-foreground/20"}`}
               >
-                {Copied ? (
+                {bookingIdCopied ? (
                   <Check
                     size={16}
                     strokeWidth={5}
@@ -174,14 +181,14 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
               <p className="font-medium text-sm">{Props.bookingId}</p>
               <button
                 type="button"
-                onClick={handleCopy}
-                aria-label="Copy booking ID"
-                title={Copied ? "Copied!" : "Copy booking ID"}
+                onClick={() => handleCopy("paymentId")}
+                aria-label="Copy payment ID"
+                title={paymentIdCopied ? "Copied!" : "Copy Payment ID"}
                 className={`rounded-full p-2 transition-all duration-200
                 bg-foreground/8 backdrop-blur-sm border border-foreground/50 active:scale-90
-                ${Copied ? "text-green-300 scale-110" : "text-white/78 hover:text-white hover:bg-foreground/20"}`}
+                ${paymentIdCopied ? "text-green-300 scale-110" : "text-white/78 hover:text-white hover:bg-foreground/20"}`}
               >
-                {Copied ? (
+                {paymentIdCopied ? (
                   <Check
                     size={16}
                     strokeWidth={5}
@@ -228,11 +235,13 @@ const BookingTicketCard = ({ Props }: { Props: TicketCardProps }) => {
           </div>
           <div className="flex flex-col items-start md:items-center justify-center my-2">
             <p className="text-gray-300/70">Date</p>
-            <h4 className="font-bold font-heading md:text-xl">{formattedDate}</h4>
+            <h4 className="font-bold font-heading md:text-xl">
+              {formattedDate}
+            </h4>
           </div>
           <div className="bg-accent text-accent-foreground flex text-xs md:text-sm px-2 py-1.5 mt-3 mb-2 rounded-xl items-center justify-center gap-1">
-            <Star fill="black" size={17} className="mb-0.5 hidden md:block"/>
-            <Star fill="black" size={13} className="mb-0.5 md:hidden"/>
+            <Star fill="black" size={17} className="mb-0.5 hidden md:block" />
+            <Star fill="black" size={13} className="mb-0.5 md:hidden" />
             <span>
               <span>+</span>
               <span className="font-[1000] md:font-bold">10 pts earned</span>
