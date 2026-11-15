@@ -100,7 +100,7 @@
 - [x] complete BookingTicketCard ui
 - [x] Add real data fetch in booking ticketcard and make Booking Details page for it
 - [x] Make Booking Ticket Scanner page for admin
-- [ ] Update booking Details response object acording to ticket card
+- [x] Update booking Details response object acording to ticket card
 - [x] Fix the both copy button checked upon pressing one issue
 - [ ] Add retry booking feature in frontend
 
