@@ -8,6 +8,7 @@ import SettingsClient from "@/app/(protected)/settings/SettingsClient";
 import BookingTicketCard from "@/app/custom-components/cards/BookingTicketCard";
 import { toPostgresTimestamp } from "@/lib/utils/tools";
 import QrCodeScanner from "@/app/Features/QrCodeScanner";
+import RewardsClient from "@/app/(protected)/Rewards/RewardsClient";
 
 const TestPage = () => {
   // const [lastItem, setLastItem] = useState<{ id: string | number; quantity: number } | null>(null);
@@ -52,7 +53,7 @@ const TestPage = () => {
       {/* <RewardsSection /> */}
       {/* <ComingSoon /> */}
       {/* <SettingsClient /> */}
-      <div className="md:w-[60vw] hidden  mx-5 md:mx-auto md:h-[80vh] items-center justify-center">
+      {/* <div className="md:w-[60vw] hidden  mx-5 md:mx-auto md:h-[80vh] items-center justify-center">
         <BookingTicketCard
           Props={{
             bookedStations: [
@@ -82,7 +83,8 @@ const TestPage = () => {
           }}
         />
       </div>
-      <QrCodeScanner />
+      <QrCodeScanner /> */}
+      <RewardsClient />
     </main>
   );
 };
