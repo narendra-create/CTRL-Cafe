@@ -1,5 +1,4 @@
 "use server";
-import { checkAccountType } from "@/lib/actions/authorizationCheck";
 import { createClient } from "@/lib/supabase/serverClient";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { UpdateProfileInput, updateProfileSchema } from "@/lib/validations/profileValidation";

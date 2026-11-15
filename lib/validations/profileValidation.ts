@@ -1,5 +1,5 @@
 import { profiles } from "@/src/db/schema";
-import z from "zod";
+import z, { TypeOf } from "zod";
 
 export const updateProfileSchema = z.object({
     fullName: z.string(),
