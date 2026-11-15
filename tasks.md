@@ -46,6 +46,11 @@
 - [ ] Save bookingdetails to localhost to prevent data loss on refresh for /book pages
 - [x] add razorpay sdk open in handleBook function of sidebar
 - [x] Add a controller to check scanned booking if it is okey or not
+- [ ] Make functions for rewards page (generateRedeemCode, getMyRedeemCodes)
+- [ ] Make A table for redeem codes on schema
+- [ ] Add some values in bookings table for offline bookings
+- [ ] Make controller functions for admin to register walk in bookings
+- [ ] Wire up redeemRewards in book page
 
 ## Importent on 09/11/2026
 
@@ -103,6 +108,8 @@
 - [x] Update booking Details response object acording to ticket card
 - [x] Fix the both copy button checked upon pressing one issue
 - [ ] Add retry booking feature in frontend
+- [ ] Wire up rewards page
+- [ ] Add a input for redeem code on book page
 
 ## Run this checklist after deployement
 
