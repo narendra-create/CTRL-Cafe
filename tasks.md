@@ -65,7 +65,7 @@
 - [x] Make homepage UI.
 - [x] Add a theme changing button
 - [x] Make a minimal navbar.
-- [ ] Make the rewards page.
+- [x] Make the rewards page.
 - [x] Add goodlooking react icons in all pages.
 - [ ] add cloudinary signature generate in frontend
 - [ ] add cloudinary image upload then food item upload in fooditems page of frontend
