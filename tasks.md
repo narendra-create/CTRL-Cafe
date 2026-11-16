@@ -47,10 +47,11 @@
 - [x] add razorpay sdk open in handleBook function of sidebar
 - [x] Add a controller to check scanned booking if it is okey or not
 - [ ] Make functions for rewards page (generateRedeemCode, getMyRedeemCodes)
-- [ ] Make A table for redeem codes on schema
-- [ ] Add some values in bookings table for offline bookings
+- [x] Make A table for redeem codes on schema
+- [x] Add some values in bookings table for offline bookings
 - [ ] Make controller functions for admin to register walk in bookings
 - [ ] Wire up redeemRewards in book page
+- [ ] Update BookingTypes
 
 ## Importent on 09/11/2026
 
@@ -110,6 +111,7 @@
 - [ ] Add retry booking feature in frontend
 - [ ] Wire up rewards page
 - [ ] Add a input for redeem code on book page
+- [ ] Dont open razorpay popup when razorpay order id not recieved and show success screen if it has redeemcodeid
 
 ## Run this checklist after deployement
 
