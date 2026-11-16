@@ -1,6 +1,6 @@
 "use server";
 import { db } from "@/src/index";
-import { bookingItems, bookings, bookingStations, devices, foodItems, gameStations, profiles } from "@/src/db/schema";
+import { bookingItems, bookings, bookingStations, devices, foodItems, gameStations, profiles, redeemCode } from "@/src/db/schema";
 import { eq, and, gte, lt, asc, desc, inArray, gt, ne, or, sql } from "drizzle-orm";
 import { resolveAuthenticatedUser } from "@/lib/utils/helperFunctions";
 import { BookSeatInput, bookSeatSchema, getBookingDetailsInput, getBookingDetailsSchema, SeatHoldeInput, seatHoldSchema, verifyPaymentSchema, VerifySignatureInput } from "@/lib/validations/bookingValidation";
@@ -509,13 +509,65 @@ export const bookSeat = async (input: BookSeatInput): Promise<{
                 qty: item.qty,
             }
         });
+        let discount = 0;
+        let codeId: string | null = null;
+        let codeToDeduct: typeof redeemCode.$inferSelect | null = null;
+
+        if (parsedinput.redeemCode) {
+            const [foundcode] = await db.select().from(redeemCode).where(and(
+                eq(redeemCode.code, parsedinput.redeemCode),
+                eq(redeemCode.codeStatus, "active"),
+                gt(redeemCode.validTill, now)
+            ));
+
+            if (foundcode && foundcode.balance > 0) {
+                const deviceCost = Number(booking.totalAmount);
+                discount = Math.min(deviceCost, foundcode.balance);
+                codeId = foundcode.id;
+                codeToDeduct = foundcode;
+            }
+        }
         //Calculating total amount
-        const totalAmount = parsedinput.foodItems.reduce((sum, item) => {
+        const totalFoodAmount = parsedinput.foodItems.reduce((sum, item) => {
             const singleItem = foodsMapped.get(item.foodItemId);
             return sum + Number(singleItem?.price) * item.qty
         }, 0);
         //The amount to send in frontend for review screen
-        const finalBookingAmount = (Number(totalAmount) + Number(booking.totalAmount)).toFixed(2);
+        const deviceCostAfterDiscount = Math.max(0, (Number(booking.totalAmount) - discount));
+        const finalBookingAmount = (deviceCostAfterDiscount + totalFoodAmount).toFixed(2);
+        const isFreebooking = Number(finalBookingAmount) === 0;
+        if (isFreebooking) {
+            const result = await db.transaction(async (tx) => {
+                if (foodsForJunctionTable.length > 0) {
+                    await tx.insert(bookingItems).values(foodsForJunctionTable);
+                };
+
+                if (codeId && codeToDeduct) {
+                    const remainingBalance = codeToDeduct.balance - discount;
+                    await tx.update(redeemCode).set({
+                        balance: remainingBalance,
+                        codeStatus: remainingBalance === 0 ? "used" : "active"
+                    }).where(eq(redeemCode.id, codeId));
+                };
+
+                const [updatedBooking] = await tx.update(bookings).set({
+                    bookingStatus: "confirmed",
+                    totalAmount: finalBookingAmount,
+                    paidAmount: "0.00",
+                    redeemCodeId: codeId,
+                    paymentMethod: "coupon_code"
+                }).where(eq(bookings.id, booking.id)).returning();
+                return { updatedBooking };
+            });
+
+            return {
+                success: true,
+                data: {
+                    razorpay_orderId: "", // Empty string signals no Razorpay popup needed
+                    updatedBooking: result.updatedBooking
+                }
+            };
+        }
         //Converted that amount in paise because razorpay takes it in paise
         const totalAmountInPaise = rupeesToPaise(finalBookingAmount);
         //Creating Razropay order
@@ -524,7 +576,8 @@ export const bookSeat = async (input: BookSeatInput): Promise<{
             currency: "INR",
             receipt: booking.id,
             notes: {
-                bookingId: booking.id
+                bookingId: booking.id,
+                redeemCodeId: codeId ?? ""
             }
         });
         //Transection for foodItems insertion and updating booking
@@ -536,6 +589,9 @@ export const bookSeat = async (input: BookSeatInput): Promise<{
             const [updatedBooking] = await tx.update(bookings).set({
                 bookingStatus: "pending",
                 totalAmount: finalBookingAmount,
+                discountAmount: discount.toFixed(2),
+                redeemCodeId: codeId,
+                paymentMethod: "razorpay",
                 razorpayOrderId: razorOrder.id
             }).where(eq(bookings.id, booking.id)).returning();
 
@@ -772,14 +828,29 @@ export const verifyPayment = async (input: VerifySignatureInput): Promise<{
             }
         };
 
-        const [updatedBooking] = await db.update(bookings).set({
-            bookingStatus: "confirmed",
-            paidAmount: bookingresponse.booking.totalAmount,
-            razorpayPaymentId: parsedInput.razorpay_payment_id
-        }).where(and(
-            eq(bookings.id, bookingresponse.booking.id),
-            eq(bookings.userId, dbuser.userId)
-        )).returning();
+        const updatedBooking = await db.transaction(async (tx) => {
+            const [confirmed] = await tx.update(bookings).set({
+                bookingStatus: "confirmed",
+                paidAmount: bookingresponse.booking.totalAmount,
+                razorpayPaymentId: parsedInput.razorpay_payment_id
+            }).where(and(
+                eq(bookings.id, bookingresponse.booking.id),
+                eq(bookings.userId, dbuser.userId)
+            )).returning();
+
+            if (bookingresponse.booking.redeemCodeId) {
+                const discount = Number(bookingresponse.booking.discountAmount || 0);
+                if (discount > 0) {
+                    await tx.update(redeemCode).set({
+                        // Dynamic: subtracts exact discount (e.g., 59, leaving 31!)
+                        balance: sql`GREATEST(0, ${redeemCode.balance} - ${discount})`,
+                        codeStatus: sql`CASE WHEN ${redeemCode.balance} <= ${discount} THEN 'used'::coupon_status_enum ELSE 'active'::coupon_status_enum END`
+                    }).where(eq(redeemCode.id, bookingresponse.booking.redeemCodeId));
+                }
+            }
+
+            return confirmed;
+        })
 
         const { currentPoints, success: addpointSuccess, message: addpointMessage } = await addPoints(dbuser.userId, updatedBooking.id);
         const pointsToSendInResponse = addpointSuccess ? currentPoints : bookingresponse.userPoints;
