@@ -18,7 +18,15 @@ const bookingFooditemsSchema = z.array(z.object({
 
 export const bookSeatSchema = z.object({
     bookingId: z.uuid(),
-    foodItems: bookingFooditemsSchema.default([])
+    foodItems: bookingFooditemsSchema.default([]),
+    redeemCode: z.string().trim().optional()
+});
+
+export const offlineBookingSchema = seatHoldSchema.extend({
+    guestName: z.string().min(1, "Guest name is required"),
+    guestPhone: z.string().min(10, "Valid phone number required"),
+    paymentMethod: z.enum(["cash", "counter_upi", "coupon_code"]),
+    redeemCode: z.string().trim().optional()
 });
 
 export const verifyPaymentSchema = z.object({
@@ -36,3 +44,4 @@ export type SeatHoldeInput = z.infer<typeof seatHoldSchema>;
 export type BookSeatInput = z.infer<typeof bookSeatSchema>;
 export type VerifySignatureInput = z.infer<typeof verifyPaymentSchema>;
 export type getBookingDetailsInput = z.infer<typeof getBookingDetailsSchema>;
+export type offlineBookingInput = z.infer<typeof offlineBookingSchema>;
