@@ -369,7 +369,6 @@ export const bookings = pgTable("bookings", {
     guestName: text("guest_name"),
     guestPhone: text("guest_phone"),
     bookedByAdminId: uuid("booked_by_admin_id").references(() => profiles.id),
-    redeemCodeUsed: boolean("redeem_code_used").notNull().default(false),
     redeemCodeId: uuid("redeem_code_id").references(() => redeemCode.id),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -709,5 +708,12 @@ export const redeemCode = pgTable("redeem_code", {
             WHERE id = ${authUid}
             AND account_type = 'admin'
         )`
-    })
+    }),
+
+    //Indexes
+    index("redeem_code_generator_idx").on(table.generatedById),
+    index("redeem_code_status_idx").on(table.codeStatus),
+
+    //Checks
+    check("negetive_balance_check_on_redeem_code", sql`${table.balance} >= 0`)
 ]);

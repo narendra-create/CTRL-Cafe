@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" DROP COLUMN "redeem_code_used";
