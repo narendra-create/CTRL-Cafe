@@ -1,6 +1,7 @@
 import { db } from "@/src/index";
-import { bookings, profiles } from "@/src/db/schema";
+import { bookings, profiles, redeemCode } from "@/src/db/schema";
 import { and, eq, sql } from "drizzle-orm";
+import { generateRedeemCode } from "@/lib/utils/tools";
 
 //Helping Functions
 export const addPoints = async (userId: string, bookingId: string): Promise<{
@@ -40,6 +41,8 @@ export const addPoints = async (userId: string, bookingId: string): Promise<{
 
 export const redeemPoints = async (userId: string): Promise<{
     success: boolean;
+    code?: string;
+    validtill?: Date;
     currentPoints?: string;
     message?: string;
 }> => {
@@ -53,11 +56,36 @@ export const redeemPoints = async (userId: string): Promise<{
     };
 
     try {
-        const [profile] = await db.update(profiles).set({ rewardPoints: sql`${profiles.rewardPoints} - 65` }).where(eq(profiles.id, findUser.id)).returning({ pointsLeft: profiles.rewardPoints });
+        const sixMonthsFromNow = new Date();
+        sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+        const generatedCode = generateRedeemCode();
+
+        const result = await db.transaction(async (tx) => {
+            const [updatedProfile] = await tx.update(profiles)
+                .set({ rewardPoints: sql`${profiles.rewardPoints} - 65` })
+                .where(eq(profiles.id, findUser.id))
+                .returning({ pointsLeft: profiles.rewardPoints });
+
+            const [newcode] = await tx.insert(redeemCode).values({
+                code: generatedCode,
+                generatedById: findUser.id,
+                validTill: sixMonthsFromNow,
+                balance: 90,
+                codeStatus: "active",
+            }).returning();
+
+            return {
+                pointsLeft: updatedProfile.pointsLeft,
+                redeemCode: newcode
+            }
+        });
+
         return {
             success: true,
-            currentPoints: profile.pointsLeft.toString()
-        }
+            code: result.redeemCode.code,
+            validtill: result.redeemCode.validTill,
+            currentPoints: result.pointsLeft.toString()
+        };
     }
     catch (err) {
         console.error("[redeemPoints server action]: ", err);
