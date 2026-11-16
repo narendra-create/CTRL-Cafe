@@ -50,6 +50,23 @@ export const bookingStatusEnum = pgEnum("booking_status", [
     "cancelled",
     "completed",
 ]);
+export const bookingSourceEnum = pgEnum("booking_source", [
+    "online",
+    "offline"
+]);
+
+export const bookingPaymentMethod = pgEnum("booking_payment_method", [
+    "razorpay",
+    "cash",
+    "counter_upi",
+    "coupon_code"
+]);
+
+export const codeStatusEnum = pgEnum("coupon_status_enum", [
+    "expired",
+    "active",
+    "used"
+]);
 
 export const profiles = pgTable("profiles", {
     /* Same UUID as Supabase auth.users.id */
@@ -333,7 +350,7 @@ export const timeSlots = pgTable("time_slots", {
 
 export const bookings = pgTable("bookings", {
     id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("userId").notNull().references(() => profiles.id),
+    userId: uuid("userId").references(() => profiles.id),
     totalAmount: numeric("total_amount", {
         precision: 10,
         scale: 2
@@ -346,6 +363,14 @@ export const bookings = pgTable("bookings", {
     bookingStatus: bookingStatusEnum("booking_status").notNull().default("pending"),
     isArchived: boolean("is_archived").notNull().default(false),
     rewardGranted: boolean("reward_granted").notNull().default(false), //changing the name from reward redeemed to reward granted to end the confusion
+
+    bookingSource: bookingSourceEnum("booking_source").notNull().default("online"),
+    paymentMethod: bookingPaymentMethod("payment_method").notNull().default("razorpay"),
+    guestName: text("guest_name"),
+    guestPhone: text("guest_phone"),
+    bookedByAdminId: uuid("booked_by_admin_id").references(() => profiles.id),
+    redeemCodeUsed: boolean("redeem_code_used").notNull().default(false),
+    redeemCodeId: uuid("redeem_code_id").references(() => redeemCode.id),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull().$onUpdate(() => new Date()),
@@ -394,6 +419,16 @@ export const bookings = pgTable("bookings", {
             WHERE id = ${authUid}
             AND account_type = 'admin'
         )`,
+            withCheck: sql`
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+        }),
+        pgPolicy("admins_can_create_new_bookings", {
+            for: "insert",
+            to: authenticatedRole,
             withCheck: sql`
         EXISTS (
             SELECT 1 FROM profiles
@@ -594,5 +629,85 @@ export const bookingItems = pgTable("booking_items", {
         scale: 2
     }).notNull()
 }, (table) => [
-    check("negetive_price_check", sql`${table.unitPrice} >= 0`)
+    check("negetive_price_check", sql`${table.unitPrice} >= 0`),
+    pgPolicy("users_can_see_their_booking_items", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`
+            EXISTS (
+                SELECT 1 FROM bookings
+                WHERE bookings.id = ${table.bookingId}
+                AND (bookings."userId" = ${authUid} OR EXISTS (
+                    SELECT 1 FROM profiles WHERE id = ${authUid} AND account_type = 'admin'
+                ))
+            )
+        `
+    }),
+    pgPolicy("users_and_admins_can_insert_booking_items", {
+        for: "insert",
+        to: authenticatedRole,
+        withCheck: sql`
+            EXISTS (
+                SELECT 1 FROM bookings
+                WHERE bookings.id = ${table.bookingId}
+                AND (bookings."userId" = ${authUid} OR EXISTS (
+                    SELECT 1 FROM profiles WHERE id = ${authUid} AND account_type = 'admin'
+                ))
+            )
+        `
+    })
+]);
+
+export const redeemCode = pgTable("redeem_code", {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    code: text("code").notNull().unique(),
+    validTill: timestamp("valid_till", { withTimezone: true }).notNull(),
+    balance: integer("balance").notNull().default(0),
+    codeStatus: codeStatusEnum("code_status").notNull().default("active"),
+    generatedById: uuid("generated_by_id").notNull().references(() => profiles.id),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+    pgPolicy("users_can_see_their_codes", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`${authUid} = ${table.generatedById}`
+    }),
+    pgPolicy("admins_can_see_all_codes", {
+        for: "select",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS(
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_generate_code", {
+        for: "insert",
+        to: authenticatedRole,
+        withCheck: sql`
+        EXISTS(
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    }),
+    pgPolicy("only_admins_can_update_codes", {
+        for: "update",
+        to: authenticatedRole,
+        using: sql`
+        EXISTS(
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`,
+        withCheck: sql`
+        EXISTS(
+            SELECT 1 FROM profiles
+            WHERE id = ${authUid}
+            AND account_type = 'admin'
+        )`
+    })
 ]);
