@@ -404,3 +404,18 @@ export function downloadBookingCalendar(
         URL.revokeObjectURL(url);
     }, 1000);
 }
+
+const PREFIX = "CTRL-";
+const CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const CODE_LENGTH = 8;
+
+export function generateRedeemCode(): string {
+    let code = "";
+
+    for (let i = 0; i < CODE_LENGTH; i++) {
+        const index = randomInt(CHARACTERS.length);
+        code += CHARACTERS[index];
+    }
+
+    return `${PREFIX}${code}`;
+}
