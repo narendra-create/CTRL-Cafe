@@ -35,6 +35,15 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
             from: r.profiles.id,
             to: r.authUsers.id,
             optional: true
+        }),
+        generatedRedeemCodes: r.many.redeemCode({
+            from: r.profiles.id,
+            to: r.redeemCode.generatedById
+        }),
+
+        adminBookings: r.many.bookings({
+            from: r.profiles.id,
+            to: r.bookings.bookedByAdminId
         })
     },
 
@@ -48,7 +57,7 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
         profile: r.one.profiles({
             from: r.bookings.userId,
             to: r.profiles.id,
-            optional: false
+            optional: true
         }),
         // One booking has many booked stations
         stations: r.many.bookingStations({
@@ -58,6 +67,18 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
         items: r.many.bookingItems({
             from: r.bookings.id,
             to: r.bookingItems.bookingId
+        }),
+
+        bookedByAdmin: r.one.profiles({
+            from: r.bookings.bookedByAdminId,
+            to: r.profiles.id,
+            optional: true
+        }),
+
+        redeemCode: r.one.redeemCode({
+            from: r.bookings.redeemCodeId,
+            to: r.redeemCode.id,
+            optional: true
         })
     },
 
@@ -102,6 +123,18 @@ export const relations = defineRelations({ ...schema, authUsers }, (r) => ({
             from: r.bookingStations.gameStationId,
             to: r.gameStations.id,
             optional: false
+        })
+    },
+
+    redeemCode: {
+        generatedBy: r.one.profiles({
+            from: r.redeemCode.generatedById,
+            to: r.profiles.id,
+            optional: false
+        }),
+        bookings: r.many.bookings({
+            from: r.redeemCode.id,
+            to: r.bookings.redeemCodeId
         })
     }
 }))
