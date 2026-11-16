@@ -1,0 +1,1 @@
+ALTER TYPE "coupon_status_enum" RENAME TO "code_status_enum";

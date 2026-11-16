@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" ADD COLUMN "discount_amount" numeric(10,2) DEFAULT '0.00';

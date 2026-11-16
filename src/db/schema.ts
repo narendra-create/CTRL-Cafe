@@ -62,7 +62,7 @@ export const bookingPaymentMethod = pgEnum("booking_payment_method", [
     "coupon_code"
 ]);
 
-export const codeStatusEnum = pgEnum("coupon_status_enum", [
+export const codeStatusEnum = pgEnum("code_status_enum", [
     "expired",
     "active",
     "used"
@@ -370,6 +370,7 @@ export const bookings = pgTable("bookings", {
     guestPhone: text("guest_phone"),
     bookedByAdminId: uuid("booked_by_admin_id").references(() => profiles.id),
     redeemCodeId: uuid("redeem_code_id").references(() => redeemCode.id),
+    discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }).default("0.00"),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull().$onUpdate(() => new Date()),
